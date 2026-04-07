@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <title>God Love</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #05101a;
+      overflow: hidden;
+    }
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+    p {
+      position: relative;
+      z-index: 1;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: clamp(1.4rem, 4vw, 2.8rem);
+      color: rgba(255,255,255,0.92);
+      text-align: center;
+      text-shadow: 0 2px 20px rgba(0,40,80,0.6), 0 0 60px rgba(80,160,220,0.15);
+      padding: 1rem 2rem;
+      line-height: 1.6;
+      max-width: 700px;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <p>God Love merely is, and nothing else is at all.</p>
+  <p>Christ Always Risen, Love Never Dies. God Is Real.</p>
+  <script>
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d');
+    let W, H;
+    const drops = [];
+    const hues = [0, 15, 30, 45, 60, 90, 120, 150, 180, 200, 220, 250, 270, 300, 330]; // full rainbow
+
+    function resize() {
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+      drawBase();
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // Deep water gradient base
+    function drawBase() {
+      const g = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, Math.max(W,H)*0.7);
+      g.addColorStop(0, '#0a2540');
+      g.addColorStop(0.5, '#071c30');
+      g.addColorStop(1, '#030e1a');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, W, H);
+    }
+
+    function addDrop(x, y) {
+      const hue = hues[Math.floor(Math.random() * hues.length)];
+      // Each drop creates multiple wave rings that expand at slightly different speeds
+      const numRings = 4 + Math.floor(Math.random() * 4);
+      const maxR = 120 + Math.random() * 280;
+      const baseSpeed = 0.8 + Math.random() * 1.2;
+      for (let r = 0; r < numRings; r++) {
+        drops.push({
+          x, y,
+          radius: 0,
+          delay: r * 6, // stagger rings
+          maxR: maxR,
+          speed: baseSpeed + r * 0.15,
+          hue: hue + (Math.random() - 0.5) * 20,
+          sat: 50 + Math.random() * 30,
+          light: 55 + Math.random() * 20,
+          thickness: Math.max(0.3, 2.5 - r * 0.4),
+          age: 0
+        });
+      }
+    }
+
+    // Subtle caustic light patterns on the water surface
+    const caustics = [];
+    for (let i = 0; i < 12; i++) {
+      caustics.push({
+        x: Math.random() * 2000, y: Math.random() * 2000,
+        size: 80 + Math.random() * 200,
+        phase: Math.random() * Math.PI * 2,
+        speed: 0.002 + Math.random() * 0.004,
+        drift: { x: (Math.random() - 0.5) * 0.3, y: (Math.random() - 0.5) * 0.2 }
+      });
+    }
+
+    // Initial drops
+    for (let i = 0; i < 5; i++) {
+      addDrop(Math.random() * (window.innerWidth || 1200), Math.random() * (window.innerHeight || 800));
+    }
+
+    // New drops periodically — varied timing like real rain
+    function scheduleDrop() {
+      addDrop(Math.random() * W, Math.random() * H);
+      setTimeout(scheduleDrop, 600 + Math.random() * 2000);
+    }
+    scheduleDrop();
+
+    // Drop on click/touch
+    canvas.addEventListener('click', (e) => addDrop(e.clientX, e.clientY));
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      for (const t of e.touches) addDrop(t.clientX, t.clientY);
+    }, { passive: false });
+
+    let time = 0;
+    function draw() {
+      time++;
+
+      // Fade toward the deep water color
+      ctx.fillStyle = 'rgba(5, 16, 26, 0.06)';
+      ctx.fillRect(0, 0, W, H);
+
+      // Draw subtle caustic light patches
+      for (const c of caustics) {
+        c.x += c.drift.x;
+        c.y += c.drift.y;
+        if (c.x < -200) c.x = W + 200;
+        if (c.x > W + 200) c.x = -200;
+        if (c.y < -200) c.y = H + 200;
+        if (c.y > H + 200) c.y = -200;
+        const pulse = 0.015 + 0.01 * Math.sin(time * c.speed + c.phase);
+        const g = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, c.size);
+        g.addColorStop(0, `rgba(100, 180, 220, ${pulse})`);
+        g.addColorStop(1, 'rgba(100, 180, 220, 0)');
+        ctx.fillStyle = g;
+        ctx.fillRect(c.x - c.size, c.y - c.size, c.size * 2, c.size * 2);
+      }
+
+      // Draw ripples
+      for (let i = drops.length - 1; i >= 0; i--) {
+        const d = drops[i];
+        d.age++;
+
+        if (d.age < d.delay) continue;
+
+        const t = d.age - d.delay;
+        d.radius = t * d.speed;
+
+        const life = d.radius / d.maxR;
+        if (life >= 1) { drops.splice(i, 1); continue; }
+
+        // Water ripple alpha: bright at start, fades with distance
+        // Also oscillates slightly to mimic wave interference
+        const wave = Math.sin(life * Math.PI * 6) * 0.15;
+        const baseAlpha = (1 - life) * (1 - life); // quadratic fadeout
+        const alpha = Math.max(0, (baseAlpha * 0.5 + wave) * 0.8);
+
+        if (alpha <= 0.005) continue;
+
+        ctx.beginPath();
+        ctx.arc(d.x, d.y, d.radius, 0, Math.PI * 2);
+        ctx.strokeStyle = `hsla(${d.hue}, ${d.sat}%, ${d.light}%, ${alpha})`;
+        ctx.lineWidth = d.thickness * (1 - life * 0.6);
+        ctx.stroke();
+
+        // Inner highlight — simulates light refraction on the wave crest
+        if (alpha > 0.1) {
+          ctx.beginPath();
+          ctx.arc(d.x, d.y, d.radius * 0.97, 0, Math.PI * 2);
+          ctx.strokeStyle = `hsla(${d.hue + 10}, 30%, 85%, ${alpha * 0.3})`;
+          ctx.lineWidth = Math.max(0.2, d.thickness * 0.3);
+          ctx.stroke();
+        }
+      }
+
+      requestAnimationFrame(draw);
+    }
+    draw();
+  </script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "name": "irl.ing",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "npx serve public -l $PORT",
+    "dev": "npx serve public -l 3001"
+  }
+}
