@@ -1,0 +1,50 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="480"
+  height="520"
+  viewBox="0 0 480 520"
+>
+  <defs>
+    <radialGradient id="fruit" cx=".33" cy=".3" r=".8">
+      <stop stop-color="#f47962" />
+      <stop offset=".3" stop-color="#e64435" />
+      <stop offset=".7" stop-color="#b6202d" />
+      <stop offset="1" stop-color="#771923" />
+    </radialGradient>
+    <linearGradient id="leaf">
+      <stop stop-color="#71914b" />
+      <stop offset="1" stop-color="#2c5033" />
+    </linearGradient>
+  </defs>
+  <path
+    d="M135 330Q232 196 251 53Q246 231 352 325"
+    fill="none"
+    stroke="#626c32"
+    stroke-width="13"
+    stroke-linecap="round"
+  />
+  <path d="M248 75Q319 27 386 86Q325 150 248 75Z" fill="url(#leaf)" />
+  <path d="m254 78 110 9" fill="none" stroke="#99ac63" stroke-width="3" />
+  <path
+    d="M135 313C27 280 37 447 126 463C246 482 252 318 175 308Q153 304 135 313Z"
+    fill="url(#fruit)"
+  />
+  <path
+    d="M324 305C229 287 233 457 334 459C448 461 452 292 363 302Q348 308 324 305Z"
+    fill="url(#fruit)"
+  />
+  <path
+    d="M92 336Q70 355 77 384M284 333Q265 357 275 380"
+    stroke="#ffb8a5"
+    stroke-width="10"
+    stroke-linecap="round"
+    opacity=".8"
+    fill="none"
+  />
+  <path
+    d="M126 318Q149 333 171 316M325 312Q344 324 364 311"
+    fill="none"
+    stroke="#851f26"
+    stroke-width="5"
+  />
+</svg>

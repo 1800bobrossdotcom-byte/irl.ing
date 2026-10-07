@@ -1,0 +1,54 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="480"
+  height="520"
+  viewBox="0 0 480 520"
+>
+  <defs>
+    <linearGradient id="stem">
+      <stop stop-color="#dbceb3" />
+      <stop offset=".4" stop-color="#fff0d3" />
+      <stop offset="1" stop-color="#c4b18d" />
+    </linearGradient>
+    <radialGradient id="cap" cx=".4" cy=".2">
+      <stop stop-color="#ed956b" />
+      <stop offset=".7" stop-color="#d25c3d" />
+      <stop offset="1" stop-color="#aa412f" />
+    </radialGradient>
+  </defs>
+  <path
+    d="M209 231Q217 331 173 444Q223 498 306 453Q261 346 273 233Z"
+    fill="url(#stem)"
+  />
+  <path
+    d="M233 286Q243 375 217 447M251 305Q247 380 273 449"
+    stroke="#d7c59f"
+    stroke-width="3"
+    fill="none"
+  />
+  <ellipse cx="241" cy="249" rx="195" ry="45" fill="#d4bb91" />
+  <path
+    d="m71 251 162 2m-127 12 128-10m-78 22 80-20m5 27v-28m56 21-46-22m100 16-100-17m148 9-147-11"
+    stroke="#af8c63"
+    stroke-width="2"
+  />
+  <path
+    d="M44 244Q59 77 228 59Q389 48 437 236Q379 277 247 247Q132 286 44 244Z"
+    fill="url(#cap)"
+  />
+  <g fill="#ffe9c7">
+    <ellipse
+      cx="171"
+      cy="131"
+      rx="23"
+      ry="17"
+      transform="rotate(-22 171 131)"
+    />
+    <ellipse cx="286" cy="97" rx="20" ry="12" transform="rotate(16 286 97)" />
+    <ellipse cx="333" cy="184" rx="30" ry="20" transform="rotate(18 333 184)" />
+    <ellipse cx="238" cy="218" rx="24" ry="13" />
+    <ellipse cx="101" cy="213" rx="15" ry="21" transform="rotate(25 101 213)" />
+    <ellipse cx="387" cy="220" rx="10" ry="15" />
+    <ellipse cx="246" cy="151" rx="9" ry="8" />
+  </g>
+</svg>

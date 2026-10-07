@@ -1,189 +1,505 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <title>God Love</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: #05101a;
-      overflow: hidden;
-    }
-    canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-    }
-    p {
-      position: relative;
-      z-index: 1;
-      font-family: Georgia, 'Times New Roman', serif;
-      font-size: clamp(1.4rem, 4vw, 2.8rem);
-      color: rgba(255,255,255,0.92);
-      text-align: center;
-      text-shadow: 0 2px 20px rgba(0,40,80,0.6), 0 0 60px rgba(80,160,220,0.15);
-      padding: 1rem 2rem;
-      line-height: 1.6;
-      max-width: 700px;
-    }
-  </style>
-</head>
-<body>
-  <canvas id="c"></canvas>
-  <p>God Love merely is, and nothing else is at all.</p>
-  <p>Christ Always Risen, Love Never Dies. God Is Real.</p>
-  <script>
-    const canvas = document.getElementById('c');
-    const ctx = canvas.getContext('2d');
-    let W, H;
-    const drops = [];
-    const hues = [0, 15, 30, 45, 60, 90, 120, 150, 180, 200, 220, 250, 270, 300, 330]; // full rainbow
-
-    function resize() {
-      W = canvas.width = window.innerWidth;
-      H = canvas.height = window.innerHeight;
-      drawBase();
-    }
-    window.addEventListener('resize', resize);
-    resize();
-
-    // Deep water gradient base
-    function drawBase() {
-      const g = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, Math.max(W,H)*0.7);
-      g.addColorStop(0, '#0a2540');
-      g.addColorStop(0.5, '#071c30');
-      g.addColorStop(1, '#030e1a');
-      ctx.fillStyle = g;
-      ctx.fillRect(0, 0, W, H);
-    }
-
-    function addDrop(x, y) {
-      const hue = hues[Math.floor(Math.random() * hues.length)];
-      // Each drop creates multiple wave rings that expand at slightly different speeds
-      const numRings = 4 + Math.floor(Math.random() * 4);
-      const maxR = 120 + Math.random() * 280;
-      const baseSpeed = 0.8 + Math.random() * 1.2;
-      for (let r = 0; r < numRings; r++) {
-        drops.push({
-          x, y,
-          radius: 0,
-          delay: r * 6, // stagger rings
-          maxR: maxR,
-          speed: baseSpeed + r * 0.15,
-          hue: hue + (Math.random() - 0.5) * 20,
-          sat: 50 + Math.random() * 30,
-          light: 55 + Math.random() * 20,
-          thickness: Math.max(0.3, 2.5 - r * 0.4),
-          age: 0
-        });
-      }
-    }
-
-    // Subtle caustic light patterns on the water surface
-    const caustics = [];
-    for (let i = 0; i < 12; i++) {
-      caustics.push({
-        x: Math.random() * 2000, y: Math.random() * 2000,
-        size: 80 + Math.random() * 200,
-        phase: Math.random() * Math.PI * 2,
-        speed: 0.002 + Math.random() * 0.004,
-        drift: { x: (Math.random() - 0.5) * 0.3, y: (Math.random() - 0.5) * 0.2 }
-      });
-    }
-
-    // Initial drops
-    for (let i = 0; i < 5; i++) {
-      addDrop(Math.random() * (window.innerWidth || 1200), Math.random() * (window.innerHeight || 800));
-    }
-
-    // New drops periodically — varied timing like real rain
-    function scheduleDrop() {
-      addDrop(Math.random() * W, Math.random() * H);
-      setTimeout(scheduleDrop, 600 + Math.random() * 2000);
-    }
-    scheduleDrop();
-
-    // Drop on click/touch
-    canvas.addEventListener('click', (e) => addDrop(e.clientX, e.clientY));
-    canvas.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      for (const t of e.touches) addDrop(t.clientX, t.clientY);
-    }, { passive: false });
-
-    let time = 0;
-    function draw() {
-      time++;
-
-      // Fade toward the deep water color
-      ctx.fillStyle = 'rgba(5, 16, 26, 0.06)';
-      ctx.fillRect(0, 0, W, H);
-
-      // Draw subtle caustic light patches
-      for (const c of caustics) {
-        c.x += c.drift.x;
-        c.y += c.drift.y;
-        if (c.x < -200) c.x = W + 200;
-        if (c.x > W + 200) c.x = -200;
-        if (c.y < -200) c.y = H + 200;
-        if (c.y > H + 200) c.y = -200;
-        const pulse = 0.015 + 0.01 * Math.sin(time * c.speed + c.phase);
-        const g = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, c.size);
-        g.addColorStop(0, `rgba(100, 180, 220, ${pulse})`);
-        g.addColorStop(1, 'rgba(100, 180, 220, 0)');
-        ctx.fillStyle = g;
-        ctx.fillRect(c.x - c.size, c.y - c.size, c.size * 2, c.size * 2);
-      }
-
-      // Draw ripples
-      for (let i = drops.length - 1; i >= 0; i--) {
-        const d = drops[i];
-        d.age++;
-
-        if (d.age < d.delay) continue;
-
-        const t = d.age - d.delay;
-        d.radius = t * d.speed;
-
-        const life = d.radius / d.maxR;
-        if (life >= 1) { drops.splice(i, 1); continue; }
-
-        // Water ripple alpha: bright at start, fades with distance
-        // Also oscillates slightly to mimic wave interference
-        const wave = Math.sin(life * Math.PI * 6) * 0.15;
-        const baseAlpha = (1 - life) * (1 - life); // quadratic fadeout
-        const alpha = Math.max(0, (baseAlpha * 0.5 + wave) * 0.8);
-
-        if (alpha <= 0.005) continue;
-
-        ctx.beginPath();
-        ctx.arc(d.x, d.y, d.radius, 0, Math.PI * 2);
-        ctx.strokeStyle = `hsla(${d.hue}, ${d.sat}%, ${d.light}%, ${alpha})`;
-        ctx.lineWidth = d.thickness * (1 - life * 0.6);
-        ctx.stroke();
-
-        // Inner highlight — simulates light refraction on the wave crest
-        if (alpha > 0.1) {
-          ctx.beginPath();
-          ctx.arc(d.x, d.y, d.radius * 0.97, 0, Math.PI * 2);
-          ctx.strokeStyle = `hsla(${d.hue + 10}, 30%, 85%, ${alpha * 0.3})`;
-          ctx.lineWidth = Math.max(0.2, d.thickness * 0.3);
-          ctx.stroke();
-        }
-      }
-
-      requestAnimationFrame(draw);
-    }
-    draw();
-  </script>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f6f5ef" />
+    <meta
+      name="description"
+      content="Irl’ing. Being here. Seeing things. Making something of it. Turn a little piece of your world into a sticker."
+    />
+    <title>irl.ing — Less scrolling. More irl’ing.</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <svg
+      class="icon-library"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <symbol id="i-arrow" viewBox="0 0 24 24">
+        <path d="M5 19 19 5M5 5h14v14" />
+      </symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24">
+        <path d="M12 5v14M5 12h14" />
+      </symbol>
+      <symbol id="i-camera" viewBox="0 0 24 24">
+        <path d="M8 5 6 8H3v12h18V8h-3l-2-3Z" />
+        <circle cx="12" cy="13" r="4" />
+      </symbol>
+      <symbol id="i-check" viewBox="0 0 24 24">
+        <path d="m5 12 4 4L19 6" />
+      </symbol>
+      <symbol id="i-close" viewBox="0 0 24 24">
+        <path d="m6 6 12 12M6 18 18 6" />
+      </symbol>
+      <symbol id="i-heart" viewBox="0 0 24 24">
+        <path
+          d="M20.8 4.6c-2-2-5.2-1.6-6.8.5L12 7.5l-2-2.4c-1.6-2.1-4.8-2.5-6.8-.5-2.2 2.2-1.8 5.5.3 7.6L12 21l8.5-8.8c2.1-2.1 2.5-5.4.3-7.6Z"
+        />
+      </symbol>
+      <symbol id="i-download" viewBox="0 0 24 24">
+        <path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5" />
+      </symbol>
+      <symbol id="i-spark" viewBox="0 0 24 24">
+        <path d="m12 2 2.7 7.3L22 12l-7.3 2.7L12 22l-2.7-7.3L2 12l7.3-2.7Z" />
+      </symbol>
+    </svg>
+    <header class="site-header">
+      <a class="wordmark" href="/" aria-label="irl.ing home"
+        >irl.ing<span class="brand-star"
+          ><svg viewBox="0 0 40 40" aria-hidden="true">
+            <ellipse cx="20" cy="20" rx="5" ry="19" />
+            <ellipse
+              cx="20"
+              cy="20"
+              rx="5"
+              ry="19"
+              transform="rotate(45 20 20)"
+            />
+            <ellipse
+              cx="20"
+              cy="20"
+              rx="5"
+              ry="19"
+              transform="rotate(90 20 20)"
+            />
+            <ellipse
+              cx="20"
+              cy="20"
+              rx="5"
+              ry="19"
+              transform="rotate(135 20 20)"
+            /></svg></span
+      ></a>
+      <nav aria-label="Main navigation">
+        <button class="nav-link active" id="studio-nav">The studio</button
+        ><button class="nav-link" id="collection-nav">
+          My moments <span class="count" id="collection-count">0</span>
+        </button>
+      </nav>
+      <button class="how-link" id="how-button">
+        A little about irl’ing <svg class="icon"><use href="#i-arrow" /></svg>
+      </button>
+    </header>
+    <main>
+      <section class="intro" aria-labelledby="main-title">
+        <div>
+          <div class="eyebrow">
+            <span class="live-dot"></span> BEING HERE. SEEING THINGS. MAKING
+            SOMETHING OF IT.
+          </div>
+          <h1 id="main-title">Less scrolling. <span>More irl’ing.</span></h1>
+          <p>
+            Your dog. That flower. A really good afternoon. Take a little of it
+            with you.
+          </p>
+        </div>
+        <div class="intro-stamp" aria-hidden="true">
+          <span>IN REAL LIFE</span
+          ><svg class="icon"><use href="#i-spark" /></svg
+          ><span>IN THE MAKING</span>
+        </div>
+      </section>
+      <section class="studio" aria-label="Sticker studio">
+        <div class="workspace">
+          <div class="workspace-top">
+            <span class="section-index">01 — A LITTLE PIECE OF YOUR WORLD</span
+            ><span class="sample-tag" id="asset-status">Sample object</span>
+          </div>
+          <div class="preview-stage" id="preview-stage">
+            <div class="stage-grid" aria-hidden="true"></div>
+            <div class="preview-note" aria-hidden="true">
+              you stopped.<br /><em>you noticed.</em
+              ><svg viewBox="0 0 70 55">
+                <path
+                  d="M3 4c38-12 59 23 36 33-12 5-24-12-15-17 14-8 43 7 39 29m-8-6 8 7 5-10"
+                />
+              </svg>
+            </div>
+            <div class="sticker-wrap" id="sticker-wrap">
+              <canvas
+                id="sticker-canvas"
+                width="1000"
+                height="1000"
+                aria-label="Live sticker preview"
+              ></canvas>
+              <div class="holo-overlay"></div>
+            </div>
+            <span class="measurement" id="measurement">3″ × 3″</span>
+            <div class="preview-tools">
+              <button
+                class="icon-button"
+                id="save-object"
+                aria-label="Save moment"
+                title="Save to My moments"
+              >
+                <svg class="icon"><use href="#i-heart" /></svg></button
+              ><button
+                class="icon-button"
+                id="download-art"
+                aria-label="Download preview PNG"
+                title="Download preview PNG"
+              >
+                <svg class="icon"><use href="#i-download" /></svg>
+              </button>
+            </div>
+            <span class="preview-caption"
+              >A MOMENT, WITH A LITTLE STICKING POWER.</span
+            >
+          </div>
+          <div class="object-tray">
+            <div class="tray-label">
+              A little inspiration<span>Pick a sample. Or find your own.</span>
+            </div>
+            <div
+              class="sample-list"
+              id="sample-list"
+              aria-label="Sample objects"
+            ></div>
+            <button class="upload-button" id="upload-button">
+              <svg class="icon"><use href="#i-plus" /></svg
+              ><span>Your photo</span>
+            </button>
+          </div>
+          <input
+            id="photo-input"
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/gif"
+            hidden
+          /><input
+            id="camera-input"
+            type="file"
+            accept="image/*"
+            capture="environment"
+            hidden
+          />
+          <div class="workspace-bottom">
+            <span
+              ><svg class="icon"><use href="#i-check" /></svg> Photos stay on
+              your device</span
+            ><button id="edit-object">Adjust cutout <span>↗</span></button>
+          </div>
+        </div>
+        <aside class="configurator" aria-labelledby="config-title">
+          <div class="section-index">02 — MAKE SOMETHING OF IT</div>
+          <h2 id="config-title">
+            Good moments.<br />
+            Great little stickers.
+          </h2>
+          <p class="config-description">
+            Your first act of irl’ing. A little thing to take anywhere.
+          </p>
+          <fieldset>
+            <legend>Shape <span>Follow your own outline.</span></legend>
+            <div class="shape-options options" id="shape-options">
+              <button
+                class="option selected"
+                data-value="die-cut"
+                aria-pressed="true"
+              >
+                <span class="shape-icon die-cut"></span>Die-cut</button
+              ><button class="option" data-value="circle" aria-pressed="false">
+                <span class="shape-icon circle"></span>Circle</button
+              ><button class="option" data-value="oval" aria-pressed="false">
+                <span class="shape-icon oval"></span>Oval
+              </button>
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>
+              Finish <span id="finish-description">Soft feel. Zero glare.</span>
+            </legend>
+            <div class="finish-options options" id="finish-options">
+              <button
+                class="finish-option selected"
+                data-value="matte"
+                aria-pressed="true"
+              >
+                <span class="finish-swatch matte"></span>Matte</button
+              ><button
+                class="finish-option"
+                data-value="glossy"
+                aria-pressed="false"
+              >
+                <span class="finish-swatch glossy"></span>Glossy</button
+              ><button
+                class="finish-option"
+                data-value="holographic"
+                aria-pressed="false"
+              >
+                <span class="finish-swatch holographic"></span>Holographic
+              </button>
+            </div>
+          </fieldset>
+          <div class="size-border-row">
+            <fieldset>
+              <legend>Size <span>Longest edge</span></legend>
+              <div class="size-options options" id="size-options">
+                <button class="option" data-value="2" aria-pressed="false">
+                  2″</button
+                ><button
+                  class="option selected"
+                  data-value="3"
+                  aria-pressed="true"
+                >
+                  3″</button
+                ><button class="option" data-value="4" aria-pressed="false">
+                  4″
+                </button>
+              </div>
+            </fieldset>
+            <fieldset class="border-field">
+              <legend>
+                <label for="border-input">White border</label>
+                <output id="border-value">8%</output>
+              </legend>
+              <input
+                id="border-input"
+                type="range"
+                min="0"
+                max="15"
+                value="8"
+                aria-label="White border percentage"
+              />
+            </fieldset>
+          </div>
+          <fieldset>
+            <legend>
+              How many? <span>One for you. Some for your people.</span>
+            </legend>
+            <div class="quantity-options options" id="quantity-options">
+              <button class="option" data-value="10" aria-pressed="false">
+                10</button
+              ><button
+                class="option selected"
+                data-value="25"
+                aria-pressed="true"
+              >
+                25</button
+              ><button class="option" data-value="50" aria-pressed="false">
+                50</button
+              ><button class="option" data-value="100" aria-pressed="false">
+                100
+              </button>
+            </div>
+          </fieldset>
+          <div class="order-block">
+            <div class="price-line">
+              <div>
+                <strong id="total-price">$18.00</strong
+                ><span id="per-sticker">$0.72 / sticker</span>
+              </div>
+              <span class="shipping-note"
+                >Shipping included<br /><span
+                  >Illustrative US pricing</span
+                ></span
+              >
+            </div>
+            <button class="primary-button" id="checkout-button">
+              Start irl’ing <svg class="icon"><use href="#i-arrow" /></svg>
+            </button>
+            <div class="checkout-caption">
+              <span class="tiny-dot"></span> Demo checkout · no payment required
+            </div>
+          </div>
+        </aside>
+      </section>
+      <section class="bottom-strip" aria-label="The idea">
+        <div class="bottom-copy">
+          <span class="little-flower" aria-hidden="true"
+            ><svg viewBox="0 0 40 40" aria-hidden="true">
+              <ellipse cx="20" cy="20" rx="5" ry="19" />
+              <ellipse
+                cx="20"
+                cy="20"
+                rx="5"
+                ry="19"
+                transform="rotate(45 20 20)"
+              />
+              <ellipse
+                cx="20"
+                cy="20"
+                rx="5"
+                ry="19"
+                transform="rotate(90 20 20)"
+              />
+              <ellipse
+                cx="20"
+                cy="20"
+                rx="5"
+                ry="19"
+                transform="rotate(135 20 20)"
+              /></svg
+          ></span>
+          <p>
+            <strong>irl’ing</strong> <em>/ər-ling/ · verb</em><br />Being,
+            seeing, doing. In real life.
+          </p>
+        </div>
+        <div class="mini-step">
+          <span>01</span>
+          <p>Be here.<small>The good stuff is all around you.</small></p>
+        </div>
+        <div class="mini-step">
+          <span>02</span>
+          <p>Notice something.<small>A small thing worth keeping.</small></p>
+        </div>
+        <div class="mini-step">
+          <span>03</span>
+          <p>
+            Make it a real thing.<small>A moment you can hold on to.</small>
+          </p>
+        </div>
+      </section>
+    </main>
+    <footer>
+      <span>irl.ing © 2026</span
+      ><span>Life has good material. Make something of it.</span
+      ><span class="prototype-label"
+        >INTERACTIVE PROTOTYPE <span>↗</span></span
+      >
+    </footer>
+    <dialog id="upload-dialog" class="small-dialog">
+      <form method="dialog">
+        <button class="dialog-close icon-button" aria-label="Close">
+          <svg class="icon"><use href="#i-close" /></svg>
+        </button>
+      </form>
+      <span class="section-index">IT STARTS WITH NOTICING</span>
+      <h2>What's caught<br />your eye?</h2>
+      <p>
+        Your photos stay in this browser. Pick a moment you’d love to take with
+        you.
+      </p>
+      <button class="upload-drop" id="choose-photo">
+        <svg class="icon"><use href="#i-plus" /></svg
+        ><strong>Choose a photo</strong
+        ><span>JPG, PNG, WebP or GIF · up to 20 MB</span></button
+      ><button class="secondary-button" id="take-photo">
+        <svg class="icon"><use href="#i-camera" /></svg> Take a photo
+      </button>
+      <p class="quiet-note">Transparent artwork works, too.</p>
+    </dialog>
+    <dialog id="editor-dialog" class="editor-dialog">
+      <form method="dialog">
+        <button class="dialog-close icon-button" aria-label="Close editor">
+          <svg class="icon"><use href="#i-close" /></svg>
+        </button>
+      </form>
+      <div class="section-index">THAT’S THE THING</div>
+      <h2>A little less background.</h2>
+      <p id="editor-instructions">
+        Keep the whole image, or tap around an object to trace its outline.
+      </p>
+      <div class="editor-modes">
+        <button id="whole-image" class="pill selected" aria-pressed="true">
+          Whole image</button
+        ><button id="trace-image" class="pill" aria-pressed="false">
+          Trace an object</button
+        ><button id="undo-point" class="text-button" disabled>Undo point</button
+        ><button id="clear-points" class="text-button" disabled>Clear</button>
+      </div>
+      <div class="editor-canvas-container">
+        <canvas
+          id="editor-canvas"
+          tabindex="0"
+          aria-label="Image cutout editor. In trace mode, tap around your object to select its outline. Use whole image to skip tracing."
+        ></canvas>
+      </div>
+      <div class="editor-footer">
+        <span id="point-count">Whole image selected</span
+        ><button class="primary-button" id="use-cutout">
+          Keep this bit <svg class="icon"><use href="#i-arrow" /></svg>
+        </button>
+      </div>
+      <p class="quiet-note">
+        Manual cutout in this prototype. Automatic object detection comes next.
+      </p>
+    </dialog>
+    <dialog id="collection-dialog" class="collection-dialog">
+      <form method="dialog">
+        <button class="dialog-close icon-button" aria-label="Close collection">
+          <svg class="icon"><use href="#i-close" /></svg>
+        </button>
+      </form>
+      <span class="section-index">LITTLE THINGS, HELD ON TO</span>
+      <h2>
+        My moments<span class="heading-flower"
+          ><svg viewBox="0 0 40 40" aria-hidden="true">
+            <ellipse cx="20" cy="20" rx="5" ry="19" />
+            <ellipse
+              cx="20"
+              cy="20"
+              rx="5"
+              ry="19"
+              transform="rotate(45 20 20)"
+            />
+            <ellipse
+              cx="20"
+              cy="20"
+              rx="5"
+              ry="19"
+              transform="rotate(90 20 20)"
+            />
+            <ellipse
+              cx="20"
+              cy="20"
+              rx="5"
+              ry="19"
+              transform="rotate(135 20 20)"
+            /></svg
+        ></span>
+      </h2>
+      <p>Things you stopped to notice. Saved in this browser.</p>
+      <div id="collection-grid" class="collection-grid"></div>
+    </dialog>
+    <dialog id="checkout-dialog" class="checkout-dialog">
+      <form method="dialog">
+        <button class="dialog-close icon-button" aria-label="Close checkout">
+          <svg class="icon"><use href="#i-close" /></svg>
+        </button>
+      </form>
+      <div id="checkout-content"></div>
+    </dialog>
+    <dialog id="how-dialog" class="small-dialog">
+      <form method="dialog">
+        <button class="dialog-close icon-button" aria-label="Close">
+          <svg class="icon"><use href="#i-close" /></svg>
+        </button>
+      </form>
+      <span class="section-index">IRL’ING · VERB</span>
+      <h2>Life is happening.<br />Get a little into it.</h2>
+      <p>
+        Being present. Seeing what’s around you. Doing something with it. That’s
+        irl’ing.
+      </p>
+      <ol class="how-steps">
+        <li>
+          <strong>Notice a little thing.</strong>
+          <p>Choose a sample, upload a photo, or use your camera.</p>
+        </li>
+        <li>
+          <strong>Make something of it.</strong>
+          <p>
+            Trace your object and try a few shapes, finishes and sizes. Stickers
+            are just the beginning.
+          </p>
+        </li>
+        <li>
+          <strong>Take it into real life.</strong>
+          <p>
+            Try a demo order. This prototype doesn’t charge you or manufacture
+            anything.
+          </p>
+        </li>
+      </ol>
+      <button class="primary-button" id="lets-make">
+        Let’s go irl’ing <svg class="icon"><use href="#i-arrow" /></svg>
+      </button>
+    </dialog>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </body>
 </html>
