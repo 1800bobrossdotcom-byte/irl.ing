@@ -336,42 +336,133 @@ for (const sample of samples) {
   button.setAttribute("aria-pressed", "false");
   button.title = sample.name;
   button.innerHTML = `<img src="${sample.data}" alt="">`;
-  button.addEventListener("click", () => selectAsset(sample));
+  button.addEventListener("click", async () => {
+    await selectAsset(sample);
+    setFlowStep("sticker");
+    $("#customize-sticker").hidden = false;
+  });
   $("#sample-list").append(button);
 }
 
-// Photos and inference stay on-device; the editor produces a reusable mask.
+// Keep the phone entry points synchronous: mobile browsers require a direct
+// user gesture to open their photo library or camera picker.
+let importVersion = 0;
+let appliedInEditor = false;
+function setFlowStep(step) {
+  document.querySelectorAll(".flow-steps li").forEach((item) => {
+    if (item.dataset.step === step) item.setAttribute("aria-current", "step");
+    else item.removeAttribute("aria-current");
+  });
+}
+function importMessage(message, error = false) {
+  $("#import-status").textContent = message;
+  $("#import-status").classList.toggle("error", error);
+  $("#upload-error").hidden = !error;
+  $("#upload-error").textContent = error ? message : "";
+  $("#upload-progress").textContent = error
+    ? "Your photo has not been changed."
+    : message;
+}
+function setImportBusy(busy) {
+  $(".capture-panel").setAttribute("aria-busy", String(busy));
+  for (const id of [
+    "start-photo",
+    "start-camera",
+    "try-example",
+    "choose-photo",
+    "take-photo",
+  ])
+    $(`#${id}`).disabled = busy;
+}
+function goToPreview() {
+  if (matchMedia("(max-width: 650px)").matches)
+    $(".workspace").scrollIntoView({
+      behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "instant"
+        : "smooth",
+      block: "start",
+    });
+}
 const editor = createEditor({
   onApply: async (asset) => {
     if (!(await selectAsset(asset)))
       throw new Error(
         "That cutout could not be opened. Please try another outline.",
       );
+    appliedInEditor = true;
+    $("#customize-sticker").hidden = false;
+    setFlowStep("sticker");
+    importMessage(
+      "Your sticker is ready. Check the preview, then choose its size and finish.",
+    );
   },
   notify: toast,
   loadImage,
   makeCanvas,
   trimCanvas,
 });
-$("#upload-button").onclick = () => openDialog("#upload-dialog");
+$("#editor-dialog").addEventListener("close", () => {
+  if (appliedInEditor) {
+    appliedInEditor = false;
+    goToPreview();
+  } else setFlowStep(state.asset?.sample ? "photo" : "sticker");
+});
+$("#start-photo").onclick = () => $("#photo-input").click();
+$("#start-camera").onclick = () => $("#camera-input").click();
+$("#upload-button").onclick = () => {
+  $("#upload-error").hidden = true;
+  openDialog("#upload-dialog");
+};
 $("#choose-photo").onclick = () => $("#photo-input").click();
 $("#take-photo").onclick = () => $("#camera-input").click();
+$("#customize-sticker").onclick = () => {
+  $(".configurator").scrollIntoView({
+    behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
+      ? "instant"
+      : "smooth",
+    block: "start",
+  });
+  $("#config-title").focus({ preventScroll: true });
+};
 for (const id of ["photo-input", "camera-input"]) {
   $(`#${id}`).addEventListener("change", async (event) => {
     const file = event.target.files[0];
     event.target.value = "";
     if (!file) return;
     if (file.size > 20 * 1024 * 1024) {
+      importMessage("Choose a photo smaller than 20 MB.", true);
       toast("Choose a photo smaller than 20 MB.");
       return;
     }
-    if (!/^image\/(png|jpeg|webp|gif)$/.test(file.type)) {
+    const standard = /^image\/(png|jpeg|webp|gif)$/.test(file.type);
+    const heic =
+      /^image\/(heic|heif)(-sequence)?$/.test(file.type) ||
+      /\.hei[cf]$/i.test(file.name);
+    const untyped = !file.type && /\.(png|jpe?g|webp|gif)$/i.test(file.name);
+    if (!standard && !heic && !untyped) {
+      importMessage(
+        "Try a JPG, PNG, WebP, GIF or a photo from your camera.",
+        true,
+      );
       toast("Try a JPG, PNG, WebP or GIF photo.");
       return;
     }
-    const objectUrl = URL.createObjectURL(file);
+    const version = ++importVersion;
+    setImportBusy(true);
+    importMessage("Opening your photo…");
+    const url = URL.createObjectURL(file);
     try {
-      const image = await loadImage(objectUrl);
+      let image;
+      try {
+        image = await loadImage(url);
+      } catch (error) {
+        if (heic)
+          throw new Error(
+            "This browser can’t open this HEIC photo. Try taking a photo here, or choose a JPG or PNG version.",
+          );
+        throw error;
+      }
+      if (version !== importVersion) return;
       const scale = Math.min(
         1,
         1600 / Math.max(image.naturalWidth, image.naturalHeight),
@@ -385,6 +476,8 @@ for (const id of ["photo-input", "camera-input"]) {
         .drawImage(image, 0, 0, resized.width, resized.height);
       const data = resized.toDataURL("image/png");
       $("#upload-dialog").close();
+      setFlowStep("cutout");
+      appliedInEditor = false;
       await editor.open(
         {
           id: crypto.randomUUID(),
@@ -396,14 +489,62 @@ for (const id of ["photo-input", "camera-input"]) {
         },
         { automatic: true },
       );
+      importMessage(
+        "Keep the bit you love. You can refine the outline before continuing.",
+      );
     } catch (error) {
+      importMessage(error.message, true);
       toast(error.message);
     } finally {
-      URL.revokeObjectURL(objectUrl);
+      URL.revokeObjectURL(url);
+      if (version === importVersion) setImportBusy(false);
     }
   });
 }
-$("#edit-object").onclick = () => state.asset && editor.open(state.asset);
+$("#try-example").onclick = async () => {
+  const version = ++importVersion;
+  setImportBusy(true);
+  importMessage("Opening a sample scene…");
+  try {
+    const flower = await loadImage("/assets/flower.svg");
+    if (version !== importVersion) return;
+    const scene = makeCanvas(800, 900),
+      ctx = scene.getContext("2d");
+    const background = ctx.createLinearGradient(0, 0, 800, 900);
+    background.addColorStop(0, "#e0e5d5");
+    background.addColorStop(1, "#b4c7aa");
+    ctx.fillStyle = background;
+    ctx.fillRect(0, 0, 800, 900);
+    ctx.drawImage(flower, 140, 120, 520, 607);
+    const data = scene.toDataURL("image/png");
+    setFlowStep("cutout");
+    appliedInEditor = false;
+    await editor.open(
+      {
+        id: crypto.randomUUID(),
+        name: "An afternoon find",
+        data,
+        source: data,
+        sample: true,
+      },
+      { automatic: true },
+    );
+    importMessage(
+      "This example is an illustration. Try your own photo whenever you’re ready.",
+    );
+  } catch (error) {
+    importMessage(error.message, true);
+  } finally {
+    if (version === importVersion) setImportBusy(false);
+  }
+};
+$("#edit-object").onclick = () => {
+  if (state.asset) {
+    setFlowStep("cutout");
+    appliedInEditor = false;
+    editor.open(state.asset);
+  }
+};
 
 function updateSavedStatus() {
   $("#collection-count").textContent = collection.length;
@@ -488,6 +629,9 @@ function renderCollection() {
       restoreConfiguration(item.configuration);
       await selectAsset(item);
       $("#collection-dialog").close();
+      setFlowStep("sticker");
+      $("#customize-sticker").hidden = false;
+      goToPreview();
     };
     const remove = document.createElement("button");
     remove.className = "collection-delete icon-button";

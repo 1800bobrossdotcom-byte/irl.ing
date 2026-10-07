@@ -23,6 +23,12 @@ PORT=3003 npm start
 
 Vercel deploys `master`. `vercel.json` selects Vite, `npm run build`, and `dist/`. Commit the lockfile with dependency changes. No provider credentials, paid APIs or external photo storage are needed for the current release.
 
+## On a phone
+
+Open irl.ing and tap **Use a photo** or **Take a photo** at the top of the page. **Try an example** runs the same automatic-cutout flow using a sample illustration, without requiring a file. After **Keep this bit**, review the sticker and tap **Choose size & finish**. Photo import errors appear in the photo dialog as well as on the page.
+
+HEIC/HEIF inputs are accepted when the browser can decode them natively; otherwise an explicit message asks for a JPG/PNG or a new camera photo. No HEIC conversion service is used. These workflows have been exercised with mobile Chromium emulation, not a physical phone. Safari/WebKit verification is pending because the cloud network blocked the test-browser download.
+
 ## What works
 
 - Local photo/camera import, with an automatic U²-Net background-removal model running in a Web Worker through ONNX Runtime Web. First use loads roughly 17 MB of uncompressed model/runtime resources from this same site. Photos do not leave the device.
@@ -42,7 +48,7 @@ npm run build
 STUDIO_URL=http://127.0.0.1:3003 python3 tests/test_studio.py
 ```
 
-Five numerical/storage-validation tests and eight Chromium browser workflows cover real model inference, brush/undo, saved masks/settings, migration, model-loading failure, invalid images, unavailable storage, tracing/export, responsive layouts and demo checkout. Python Playwright and Chromium are provided by the cloud environment; use `CHROMIUM_PATH` to override `/usr/bin/chromium`.
+Five numerical/storage-validation tests and eleven Chromium browser workflows cover real model inference, brush/undo, saved masks/settings, migration, model-loading failure, invalid images, unavailable storage, tracing/export, responsive layouts and demo checkout. Python Playwright and Chromium are provided by the cloud environment; use `CHROMIUM_PATH` to override `/usr/bin/chromium`.
 
 The production build checks the bundled model's SHA-256. The worker verifies it again before inference. Model provenance and licenses are in [the third-party notices](public/third-party-notices.txt).
 

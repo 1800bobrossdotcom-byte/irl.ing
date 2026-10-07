@@ -217,6 +217,53 @@ class StudioTests(unittest.TestCase):
         page.locator('#collection-nav').click()
         self.assertTrue(page.get_by_role('button',name='An old moment',exact=True).is_visible())
 
+    def test_phone_entry_opens_photo_picker_without_scrolling(self):
+        page=self.page
+        for width,height in [(320,568),(390,844),(430,932)]:
+            page.set_viewport_size({'width':width,'height':height})
+            page.evaluate('scrollTo(0,0)')
+            for selector in ['#start-photo','#start-camera']:
+                bounds=page.locator(selector).bounding_box()
+                self.assertGreaterEqual(bounds['y'],0)
+                self.assertLessEqual(bounds['y']+bounds['height'],height)
+                self.assertGreaterEqual(bounds['height'],44)
+        page.set_viewport_size({'width':390,'height':844})
+        with page.expect_file_chooser() as picker:
+            page.locator('#start-photo').tap()
+        picker.value.set_files({'name':'phone-photo.png','mimeType':'image/png','buffer':self.photo})
+        page.wait_for_selector('#editor-dialog[open]')
+        page.locator('#whole-image').click()
+        page.locator('#use-cutout').click()
+        page.wait_for_selector('#editor-dialog',state='hidden')
+        self.assertEqual(page.locator('.flow-steps [aria-current=step]').get_attribute('data-step'),'sticker')
+        page.locator('#customize-sticker').tap()
+        page.wait_for_function("document.activeElement.id === 'config-title'")
+        self.assertTrue(page.locator('#shape-options').is_visible())
+
+    def test_phone_example_runs_real_cutout_without_a_file_upload(self):
+        page=self.page
+        page.set_viewport_size({'width':390,'height':844})
+        page.locator('#try-example').tap()
+        page.wait_for_selector('#editor-dialog[open]')
+        page.wait_for_function("document.querySelector('#auto-cutout').getAttribute('aria-busy') === 'false'",timeout=100000)
+        self.assertIn('Your subject is ready',page.locator('#cutout-status').inner_text())
+        page.locator('#use-cutout').tap()
+        page.wait_for_selector('#editor-dialog',state='hidden')
+        self.assertIn('An afternoon find',page.locator('#sticker-canvas').get_attribute('aria-label'))
+        self.assertTrue(page.locator('#customize-sticker').is_visible())
+
+    def test_import_error_is_visible_inside_photo_dialog(self):
+        page=self.page
+        page.locator('#upload-button').click()
+        with page.expect_file_chooser() as picker:
+            page.locator('#choose-photo').click()
+        picker.value.set_files({'name':'broken.heic','mimeType':'image/heic','buffer':b'not a valid HEIC'})
+        page.wait_for_selector('#upload-error:not([hidden])')
+        self.assertIn('HEIC',page.locator('#upload-error').inner_text())
+        self.assertTrue(page.locator('#upload-error').is_visible())
+        self.assertTrue(page.locator('#choose-photo').is_enabled())
+        self.assertTrue(page.locator('#upload-dialog').is_visible())
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

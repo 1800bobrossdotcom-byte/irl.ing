@@ -1823,3 +1823,212 @@ dialog .section-index {
     font-size: 31px;
   }
 }
+/* Put the actual creation flow before the sample on small screens. */
+.capture-panel {
+  display: grid;
+  grid-template-columns: 1fr minmax(300px, 420px);
+  gap: 12px 28px;
+  background: #e9eedc;
+  border: 1px solid #d4dec2;
+  padding: 23px 26px;
+  border-radius: 12px;
+  margin-bottom: 21px;
+}
+.capture-copy h2 {
+  font-size: 24px;
+  margin: 8px 0;
+  letter-spacing: -0.7px;
+}
+.capture-copy p {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #647251;
+  margin: 0;
+}
+.capture-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  align-content: center;
+}
+.capture-actions .primary-button,
+.capture-actions .secondary-button {
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 12px;
+  font-size: 13px;
+}
+.example-button {
+  grid-column: 1/-1;
+  background: none;
+  text-align: center;
+  padding: 5px;
+  font-size: 11px;
+  color: #546343;
+  min-height: 30px;
+}
+.example-button span {
+  margin-left: 5px;
+}
+.import-status {
+  grid-column: 1/-1;
+  margin: 0;
+  font-size: 10px;
+  color: #718064;
+  line-height: 1.5;
+}
+.import-status.error,
+.upload-error {
+  color: #933f2b;
+}
+.upload-error {
+  font-size: 12px !important;
+  background: #f6e9df;
+  padding: 12px;
+  border-radius: 8px;
+  line-height: 1.5;
+}
+.upload-error[hidden] {
+  display: none;
+}
+.flow-steps {
+  display: flex;
+  gap: 25px;
+  align-items: center;
+  list-style: none;
+  margin: 0 0 17px;
+  padding: 0;
+  font-size: 11px;
+  color: #89927c;
+}
+.flow-steps li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.flow-steps li > span {
+  border: 1px solid #ced6c0;
+  border-radius: 50%;
+  height: 21px;
+  width: 21px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+}
+.flow-steps li[aria-current="step"] {
+  color: #3e512b;
+}
+.flow-steps li[aria-current="step"] > span {
+  background: #d7ef71;
+  border-color: #bcd050;
+}
+.mobile-continue {
+  display: none;
+}
+.capture-panel[aria-busy="true"] .primary-button {
+  opacity: 0.65;
+}
+.capture-panel[aria-busy="true"] {
+  cursor: progress;
+}
+@media (max-width: 650px) {
+  .intro {
+    padding: 25px 0 20px;
+  }
+  .intro h1 {
+    font-size: 32px;
+    margin: 13px 0 10px;
+  }
+  .intro p {
+    display: none;
+  }
+  .capture-panel {
+    grid-template-columns: 1fr;
+    padding: 20px 18px;
+    gap: 14px;
+    margin-bottom: 17px;
+  }
+  .capture-copy h2 {
+    font-size: 24px;
+  }
+  .capture-copy .section-index {
+    font-size: 8px;
+  }
+  .capture-copy p {
+    font-size: 12px;
+  }
+  .capture-actions {
+    gap: 9px;
+  }
+  .capture-actions .primary-button,
+  .capture-actions .secondary-button {
+    font-size: 13px;
+    min-height: 49px;
+  }
+  .example-button {
+    min-height: 35px;
+    font-size: 12px;
+  }
+  .import-status {
+    font-size: 10px;
+  }
+  .flow-steps {
+    gap: 0;
+    justify-content: space-between;
+    font-size: 9px;
+    margin-bottom: 17px;
+  }
+  .flow-steps li {
+    gap: 5px;
+  }
+  .flow-steps li > span {
+    width: 18px;
+    height: 18px;
+    font-size: 9px;
+  }
+  .preview-stage {
+    min-height: 280px;
+    height: 280px;
+  }
+  .sticker-wrap {
+    width: 250px;
+    height: 250px;
+  }
+  .preview-note {
+    font-size: 12px;
+  }
+  .preview-note em {
+    font-size: 12px;
+  }
+  .mobile-continue:not([hidden]) {
+    display: flex;
+    width: calc(100% - 36px);
+    margin: 0 18px 20px;
+    min-height: 48px;
+    font-size: 12px;
+  }
+  .workspace-bottom button {
+    min-height: 38px;
+  }
+  .upload-button {
+    min-width: 48px;
+    min-height: 48px;
+  }
+  .preview-tools .icon-button {
+    width: 42px;
+    height: 42px;
+  }
+  .preview-caption {
+    bottom: 19px;
+    max-width: 160px;
+    line-height: 1.5;
+  }
+  .preview-tools {
+    bottom: 12px;
+  }
+  .configurator {
+    scroll-margin-top: 20px;
+  }
+}

@@ -92,6 +92,37 @@
           ><span>IN THE MAKING</span>
         </div>
       </section>
+      <section class="capture-panel" aria-labelledby="capture-title">
+        <div class="capture-copy">
+          <span class="section-index">START HERE</span>
+          <h2 id="capture-title">Your photo. Your sticker.</h2>
+          <p>Choose a photo. We’ll find the subject.</p>
+        </div>
+        <div class="capture-actions">
+          <button class="primary-button" id="start-photo">
+            <svg class="icon"><use href="#i-plus" /></svg>Use a photo</button
+          ><button class="secondary-button" id="start-camera">
+            <svg class="icon"><use href="#i-camera" /></svg>Take a photo</button
+          ><button class="example-button" id="try-example">
+            Just looking? Try an example <span aria-hidden="true">→</span>
+          </button>
+        </div>
+        <p
+          id="import-status"
+          class="import-status"
+          role="status"
+          aria-live="polite"
+        >
+          Private by design. Your photo stays on your phone.
+        </p>
+      </section>
+      <ol class="flow-steps" aria-label="Make a sticker">
+        <li data-step="photo" aria-current="step">
+          <span>1</span>Choose a photo
+        </li>
+        <li data-step="cutout"><span>2</span>Keep your subject</li>
+        <li data-step="sticker"><span>3</span>Make it yours</li>
+      </ol>
       <section class="studio" aria-label="Sticker studio">
         <div class="workspace">
           <div class="workspace-top">
@@ -156,7 +187,7 @@
           <input
             id="photo-input"
             type="file"
-            accept="image/png,image/jpeg,image/webp,image/gif"
+            accept="image/png,image/jpeg,image/webp,image/gif,image/heic,image/heif"
             hidden
           /><input
             id="camera-input"
@@ -171,10 +202,18 @@
               your device</span
             ><button id="edit-object">Adjust cutout <span>↗</span></button>
           </div>
+          <button
+            class="primary-button mobile-continue"
+            id="customize-sticker"
+            hidden
+          >
+            Choose size &amp; finish
+            <svg class="icon"><use href="#i-arrow" /></svg>
+          </button>
         </div>
         <aside class="configurator" aria-labelledby="config-title">
           <div class="section-index">02 — MAKE SOMETHING OF IT</div>
-          <h2 id="config-title">
+          <h2 id="config-title" tabindex="-1">
             Good moments.<br />
             Great little stickers.
           </h2>
@@ -353,7 +392,10 @@
       ><button class="secondary-button" id="take-photo">
         <svg class="icon"><use href="#i-camera" /></svg> Take a photo
       </button>
-      <p class="quiet-note">Transparent artwork works, too.</p>
+      <p id="upload-error" class="upload-error" role="alert" hidden></p>
+      <p id="upload-progress" class="quiet-note" role="status">
+        Transparent artwork works, too.
+      </p>
     </dialog>
     <dialog
       id="editor-dialog"
