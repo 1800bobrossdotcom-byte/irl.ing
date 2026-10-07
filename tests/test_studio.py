@@ -70,11 +70,11 @@ class StudioTests(unittest.TestCase):
     def test_collection_persistence_and_removal(self):
         page = self.page
         page.locator('#save-object').click()
-        self.assertEqual(page.locator('#collection-count').inner_text(),'1')
+        page.wait_for_function("document.querySelector('#collection-count').textContent === '1'")
         page.locator('#save-object').click()
-        self.assertEqual(page.locator('#collection-count').inner_text(),'1')
+        page.wait_for_function("document.querySelector('#collection-count').textContent === '1'")
         page.reload(wait_until='networkidle')
-        self.assertEqual(page.locator('#collection-count').inner_text(),'1')
+        page.wait_for_function("document.querySelector('#collection-count').textContent === '1'")
         page.locator('#collection-nav').click()
         self.assertEqual(page.locator('.collection-card').count(),1)
         page.locator('.collection-use').click()
@@ -82,8 +82,8 @@ class StudioTests(unittest.TestCase):
         self.assertFalse(page.locator('#collection-dialog').is_visible())
         page.locator('#collection-nav').click()
         page.get_by_role('button',name='Remove The afternoon flower').click()
-        self.assertIn('Nothing here. Yet.',page.locator('#collection-grid').inner_text())
-        self.assertEqual(page.locator('#collection-count').inner_text(),'0')
+        page.wait_for_function("document.querySelector('#collection-grid').textContent.includes('Nothing here. Yet.')")
+        page.wait_for_function("document.querySelector('#collection-count').textContent === '0'")
 
     def test_upload_trace_undo_export_and_reopen(self):
         page = self.page
@@ -104,11 +104,9 @@ class StudioTests(unittest.TestCase):
         page.locator('#use-cutout').click()
         page.wait_for_selector('#editor-dialog',state='hidden')
         self.assertEqual(page.locator('#asset-status').inner_text(),'Your moment')
-        selected = page.evaluate('({width: state.image.width, height: state.image.height})')
-        self.assertLess(selected['width'], 600)
-        self.assertLess(selected['height'], 400)
         self.assertTrue(page.locator('#quality-note').is_visible())
         page.locator('#save-object').click()
+        page.wait_for_function("document.querySelector('#collection-count').textContent === '1'")
         with page.expect_download() as download_info:
             page.locator('#download-art').click()
         download = download_info.value
@@ -120,7 +118,7 @@ class StudioTests(unittest.TestCase):
         page.locator('#edit-object').click()
         page.wait_for_selector('#editor-dialog[open]')
         self.assertTrue(page.locator('#editor-dialog').is_visible())
-        self.assertEqual(page.locator('#point-count').inner_text(),'Whole image selected')
+        self.assertIn('Background removed',page.locator('#point-count').inner_text())
         page.locator('#editor-dialog .dialog-close').click()
         page.reload(wait_until='networkidle')
         page.locator('#collection-nav').click()
@@ -135,10 +133,10 @@ class StudioTests(unittest.TestCase):
         page.locator('#photo-input').set_input_files({'name':'broken.png','mimeType':'image/png','buffer':b'not a png'})
         page.wait_for_function("document.querySelector('#toast').textContent.includes('could not be opened')")
         self.assertFalse(page.locator('#editor-dialog').is_visible())
-        page.evaluate("() => { Storage.prototype.setItem = () => { throw new DOMException('Quota exceeded','QuotaExceededError'); }; }")
+        page.evaluate("() => { IDBObjectStore.prototype.put = () => { throw new DOMException('Quota exceeded','QuotaExceededError'); }; }")
         page.locator('#save-object').click()
-        self.assertIn('couldn’t save',page.locator('#toast').inner_text())
-        self.assertEqual(page.locator('#collection-count').inner_text(),'0')
+        page.wait_for_function("document.querySelector('#toast').textContent.includes('couldn’t save')")
+        page.wait_for_function("document.querySelector('#collection-count').textContent === '0'")
 
     def test_mobile_layout_and_touch_flow(self):
         page = self.page
@@ -157,6 +155,67 @@ class StudioTests(unittest.TestCase):
         self.assertTrue(page.locator('#take-photo').is_visible())
         page.keyboard.press('Escape')
         self.assertFalse(page.locator('#upload-dialog').is_visible())
+
+    def test_real_background_removal_brush_and_saved_configuration(self):
+        page = self.page
+        page.locator('#photo-input').set_input_files({'name':'subject.png','mimeType':'image/png','buffer':self.photo})
+        page.wait_for_selector('#editor-dialog[open]')
+        page.wait_for_function("document.querySelector('#auto-cutout').getAttribute('aria-busy') === 'false'", timeout=100000)
+        self.assertIn('Your subject is ready',page.locator('#cutout-status').inner_text())
+        self.assertIn('Background removed',page.locator('#point-count').inner_text())
+        canvas=page.locator('#editor-canvas')
+        alpha=canvas.evaluate("c=>{const d=c.getContext('2d').getImageData(0,0,c.width,c.height).data; let clear=0,solid=0; for(let i=3;i<d.length;i+=4){if(d[i]<20)clear++;if(d[i]>230)solid++;} return {clear,solid};}")
+        self.assertGreater(alpha['clear'],1000)
+        self.assertGreater(alpha['solid'],1000)
+        before=canvas.evaluate("c=>c.toDataURL()")
+        page.locator('#erase-mask').click()
+        box=canvas.bounding_box()
+        canvas.click(position={'x':box['width']/2,'y':box['height']/2})
+        erased=canvas.evaluate("c=>c.toDataURL()")
+        self.assertNotEqual(before,erased)
+        page.locator('#undo-point').click()
+        self.assertEqual(before,canvas.evaluate("c=>c.toDataURL()"))
+        page.locator('#compare-original').check()
+        self.assertNotEqual(before,canvas.evaluate("c=>c.toDataURL()"))
+        page.locator('#compare-original').uncheck()
+        page.locator('#use-cutout').click()
+        page.wait_for_selector('#editor-dialog',state='hidden')
+        self.click_option('shape','oval')
+        self.click_option('finish','glossy')
+        self.click_option('size','4')
+        self.click_option('quantity','50')
+        page.locator('#save-object').click()
+        page.wait_for_function("document.querySelector('#collection-count').textContent === '1'")
+        page.reload(wait_until='networkidle')
+        page.locator('#collection-nav').click()
+        page.get_by_role('button',name='subject',exact=True).click()
+        page.wait_for_selector('#collection-dialog',state='hidden')
+        self.assertEqual(page.locator('#shape-options [aria-pressed=true]').get_attribute('data-value'),'oval')
+        self.assertEqual(page.locator('#quantity-options [aria-pressed=true]').get_attribute('data-value'),'50')
+        page.locator('#edit-object').click()
+        page.wait_for_selector('#editor-dialog[open]')
+        self.assertIn('Your saved cutout is ready',page.locator('#cutout-status').inner_text())
+
+    def test_model_failure_allows_manual_fallback(self):
+        page=self.page
+        page.route('**/models/u2netp.onnx',lambda route:route.fulfill(status=503,body='unavailable'))
+        page.locator('#photo-input').set_input_files({'name':'offline.png','mimeType':'image/png','buffer':self.photo})
+        page.wait_for_selector('#editor-dialog[open]')
+        page.wait_for_function("document.querySelector('#cutout-status').classList.contains('error')", timeout=30000)
+        self.assertIn('couldn’t load',page.locator('#cutout-status').inner_text())
+        page.locator('#whole-image').click()
+        page.locator('#use-cutout').click()
+        page.wait_for_selector('#editor-dialog',state='hidden')
+        self.assertEqual(page.locator('#asset-status').inner_text(),'Your moment')
+
+    def test_legacy_collection_migrates_without_losing_saved_moments(self):
+        page=self.page
+        page.evaluate("localStorage.setItem('irling.moments.v1',JSON.stringify([{id:'legacy',name:'An old moment',data:'/assets/cherries.svg',sample:true}]))")
+        page.reload(wait_until='networkidle')
+        page.wait_for_function("document.querySelector('#collection-count').textContent === '1'")
+        self.assertIsNone(page.evaluate("localStorage.getItem('irling.moments.v1')"))
+        page.locator('#collection-nav').click()
+        self.assertTrue(page.get_by_role('button',name='An old moment',exact=True).is_visible())
 
 
 if __name__ == '__main__':

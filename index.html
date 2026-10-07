@@ -10,8 +10,8 @@
     />
     <title>irl.ing — Less scrolling. More irl’ing.</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/styles.css" />
-    <script src="/app.js" defer></script>
+    <link rel="stylesheet" href="/src/styles.css" />
+    <script type="module" src="/src/app.js"></script>
   </head>
   <body>
     <svg
@@ -43,37 +43,26 @@
       <symbol id="i-download" viewBox="0 0 24 24">
         <path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5" />
       </symbol>
+      <symbol id="i-presence" viewBox="0 0 48 48">
+        <path
+          d="M18 7H9a2 2 0 0 0-2 2v9m0 12v9a2 2 0 0 0 2 2h9m12 0h9a2 2 0 0 0 2-2v-9M22 26 41 7M28 7h13v13"
+        />
+      </symbol>
       <symbol id="i-spark" viewBox="0 0 24 24">
         <path d="m12 2 2.7 7.3L22 12l-7.3 2.7L12 22l-2.7-7.3L2 12l7.3-2.7Z" />
       </symbol>
     </svg>
     <header class="site-header">
       <a class="wordmark" href="/" aria-label="irl.ing home"
-        >irl.ing<span class="brand-star"
-          ><svg viewBox="0 0 40 40" aria-hidden="true">
-            <ellipse cx="20" cy="20" rx="5" ry="19" />
-            <ellipse
-              cx="20"
-              cy="20"
-              rx="5"
-              ry="19"
-              transform="rotate(45 20 20)"
+        ><span class="brand-mark"
+          ><svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+            <path
+              class="mark-frame"
+              d="M18 7H9a2 2 0 0 0-2 2v9m0 12v9a2 2 0 0 0 2 2h9m12 0h9a2 2 0 0 0 2-2v-9"
             />
-            <ellipse
-              cx="20"
-              cy="20"
-              rx="5"
-              ry="19"
-              transform="rotate(90 20 20)"
-            />
-            <ellipse
-              cx="20"
-              cy="20"
-              rx="5"
-              ry="19"
-              transform="rotate(135 20 20)"
-            /></svg></span
-      ></a>
+            <path class="mark-arrow" d="M22 26 41 7M28 7h13v13" /></svg></span
+        >irl.ing</a
+      >
       <nav aria-label="Main navigation">
         <button class="nav-link active" id="studio-nav">The studio</button
         ><button class="nav-link" id="collection-nav">
@@ -99,7 +88,7 @@
         </div>
         <div class="intro-stamp" aria-hidden="true">
           <span>IN REAL LIFE</span
-          ><svg class="icon"><use href="#i-spark" /></svg
+          ><svg class="icon"><use href="#i-presence" /></svg
           ><span>IN THE MAKING</span>
         </div>
       </section>
@@ -309,30 +298,13 @@
       </section>
       <section class="bottom-strip" aria-label="The idea">
         <div class="bottom-copy">
-          <span class="little-flower" aria-hidden="true"
-            ><svg viewBox="0 0 40 40" aria-hidden="true">
-              <ellipse cx="20" cy="20" rx="5" ry="19" />
-              <ellipse
-                cx="20"
-                cy="20"
-                rx="5"
-                ry="19"
-                transform="rotate(45 20 20)"
+          <span class="brand-emblem" aria-hidden="true"
+            ><svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+              <path
+                class="mark-frame"
+                d="M18 7H9a2 2 0 0 0-2 2v9m0 12v9a2 2 0 0 0 2 2h9m12 0h9a2 2 0 0 0 2-2v-9"
               />
-              <ellipse
-                cx="20"
-                cy="20"
-                rx="5"
-                ry="19"
-                transform="rotate(90 20 20)"
-              />
-              <ellipse
-                cx="20"
-                cy="20"
-                rx="5"
-                ry="19"
-                transform="rotate(135 20 20)"
-              /></svg
+              <path class="mark-arrow" d="M22 26 41 7M28 7h13v13" /></svg
           ></span>
           <p>
             <strong>irl’ing</strong> <em>/ər-ling/ · verb</em><br />Being,
@@ -359,7 +331,7 @@
       <span>irl.ing © 2026</span
       ><span>Life has good material. Make something of it.</span
       ><span class="prototype-label"
-        >INTERACTIVE PROTOTYPE <span>↗</span></span
+        >THE STUDIO · EARLY ACCESS <span>↗</span></span
       >
     </footer>
     <dialog id="upload-dialog" class="small-dialog">
@@ -383,24 +355,59 @@
       </button>
       <p class="quiet-note">Transparent artwork works, too.</p>
     </dialog>
-    <dialog id="editor-dialog" class="editor-dialog">
+    <dialog
+      id="editor-dialog"
+      class="editor-dialog"
+      aria-labelledby="editor-title"
+    >
       <form method="dialog">
         <button class="dialog-close icon-button" aria-label="Close editor">
           <svg class="icon"><use href="#i-close" /></svg>
         </button>
       </form>
       <div class="section-index">THAT’S THE THING</div>
-      <h2>A little less background.</h2>
+      <h2 id="editor-title">A little less background.</h2>
       <p id="editor-instructions">
         Keep the whole image, or tap around an object to trace its outline.
+      </p>
+      <div class="auto-cutout-row">
+        <button id="auto-cutout" class="auto-button">
+          <svg class="icon"><use href="#i-spark" /></svg
+          ><span id="auto-cutout-label">Remove background</span></button
+        ><button id="cancel-cutout" class="text-button" hidden>Cancel</button
+        ><label class="compare-control"
+          ><input id="compare-original" type="checkbox" /> Show original</label
+        >
+      </div>
+      <p id="cutout-status" role="status" aria-live="polite">
+        Automatic cutouts run on your device.
       </p>
       <div class="editor-modes">
         <button id="whole-image" class="pill selected" aria-pressed="true">
           Whole image</button
         ><button id="trace-image" class="pill" aria-pressed="false">
           Trace an object</button
-        ><button id="undo-point" class="text-button" disabled>Undo point</button
-        ><button id="clear-points" class="text-button" disabled>Clear</button>
+        ><button id="undo-point" class="text-button" disabled>Undo</button
+        ><button id="clear-points" class="text-button" disabled hidden>
+          Clear
+        </button>
+      </div>
+      <div id="refine-tools" class="refine-tools" hidden>
+        <button id="select-subject" class="pill" aria-pressed="false">
+          Pick one object</button
+        ><button id="erase-mask" class="pill" aria-pressed="false">Erase</button
+        ><button id="restore-mask" class="pill" aria-pressed="false">
+          Restore</button
+        ><label id="brush-control" hidden
+          >Brush
+          <input
+            id="brush-size"
+            type="range"
+            min="5"
+            max="70"
+            value="25"
+          /><output id="brush-value">25 px</output></label
+        >
       </div>
       <div class="editor-canvas-container">
         <canvas
@@ -416,7 +423,7 @@
         </button>
       </div>
       <p class="quiet-note">
-        Manual cutout in this prototype. Automatic object detection comes next.
+        For the best cutout, use a clear subject against a simple background.
       </p>
     </dialog>
     <dialog id="collection-dialog" class="collection-dialog">
@@ -427,30 +434,13 @@
       </form>
       <span class="section-index">LITTLE THINGS, HELD ON TO</span>
       <h2>
-        My moments<span class="heading-flower"
-          ><svg viewBox="0 0 40 40" aria-hidden="true">
-            <ellipse cx="20" cy="20" rx="5" ry="19" />
-            <ellipse
-              cx="20"
-              cy="20"
-              rx="5"
-              ry="19"
-              transform="rotate(45 20 20)"
+        My moments<span class="heading-mark"
+          ><svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+            <path
+              class="mark-frame"
+              d="M18 7H9a2 2 0 0 0-2 2v9m0 12v9a2 2 0 0 0 2 2h9m12 0h9a2 2 0 0 0 2-2v-9"
             />
-            <ellipse
-              cx="20"
-              cy="20"
-              rx="5"
-              ry="19"
-              transform="rotate(90 20 20)"
-            />
-            <ellipse
-              cx="20"
-              cy="20"
-              rx="5"
-              ry="19"
-              transform="rotate(135 20 20)"
-            /></svg
+            <path class="mark-arrow" d="M22 26 41 7M28 7h13v13" /></svg
         ></span>
       </h2>
       <p>Things you stopped to notice. Saved in this browser.</p>
@@ -484,8 +474,8 @@
         <li>
           <strong>Make something of it.</strong>
           <p>
-            Trace your object and try a few shapes, finishes and sizes. Stickers
-            are just the beginning.
+            Find your subject automatically, refine its edges, and try a few
+            shapes and finishes. Stickers are just the beginning.
           </p>
         </li>
         <li>

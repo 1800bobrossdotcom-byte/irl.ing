@@ -1621,3 +1621,205 @@ dialog .section-index {
 .brand-star {
   color: var(--orange);
 }
+/* Local cutout tools */
+.auto-cutout-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+}
+.auto-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--green);
+  border: 1px solid #c6df59;
+  border-radius: 8px;
+  padding: 12px 15px;
+  font-size: 12px;
+  font-weight: 600;
+  min-height: 44px;
+}
+.auto-button[aria-busy="true"] .icon {
+  animation: cutout-pulse 1.2s ease-in-out infinite;
+}
+.compare-control {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-left: auto;
+  font-size: 11px;
+  color: #687458;
+}
+.compare-control input {
+  accent-color: #536d30;
+}
+#cutout-status {
+  font-size: 11px;
+  margin: 10px 0 0;
+  min-height: 18px;
+  color: #6f7c5a;
+}
+#cutout-status.error {
+  color: #955333;
+}
+.refine-tools {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 0 0 12px;
+}
+.refine-tools[hidden],
+#brush-control[hidden],
+#cancel-cutout[hidden],
+#clear-points[hidden] {
+  display: none;
+}
+#brush-control {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  font-size: 10px;
+  margin-left: auto;
+}
+#brush-size {
+  width: 85px;
+  accent-color: #596c3b;
+}
+#brush-value {
+  min-width: 28px;
+}
+.editor-canvas-container {
+  background-color: #f8f8f0;
+  background-image:
+    linear-gradient(45deg, #e4e8da 25%, transparent 25%),
+    linear-gradient(-45deg, #e4e8da 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #e4e8da 75%),
+    linear-gradient(-45deg, transparent 75%, #e4e8da 75%);
+  background-size: 20px 20px;
+  background-position:
+    0 0,
+    0 10px,
+    10px -10px,
+    -10px 0;
+}
+#editor-canvas {
+  max-height: 40dvh;
+}
+.editor-canvas-container {
+  max-height: 40dvh;
+}
+.editor-dialog {
+  max-height: calc(100dvh - 24px);
+}
+@keyframes cutout-pulse {
+  50% {
+    transform: scale(0.8);
+    opacity: 0.4;
+  }
+}
+@media (max-width: 650px) {
+  .editor-dialog {
+    padding: 25px 18px;
+  }
+  .editor-dialog h2 {
+    font-size: 25px;
+  }
+  .auto-cutout-row {
+    gap: 8px;
+  }
+  .auto-button {
+    font-size: 11px;
+    padding: 11px 12px;
+  }
+  .compare-control {
+    font-size: 10px;
+  }
+  .refine-tools {
+    gap: 5px;
+  }
+  #brush-control {
+    width: 100%;
+    margin: 7px 0 0;
+  }
+  #brush-size {
+    flex: 1;
+  }
+  #editor-canvas,
+  .editor-canvas-container {
+    max-height: 34dvh;
+  }
+  .editor-modes {
+    margin: 12px 0;
+  }
+  .editor-footer {
+    margin-top: 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .auto-button[aria-busy="true"] .icon {
+    animation: none;
+  }
+}
+/* Presence → action: an open viewfinder, moving into the real world. */
+.wordmark {
+  gap: 12px;
+  letter-spacing: -2.5px;
+}
+.brand-mark {
+  display: inline-flex;
+  width: 35px;
+  height: 35px;
+  color: var(--orange);
+  margin-right: 2px;
+}
+.brand-mark svg,
+.brand-emblem svg,
+.heading-mark svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 4.5;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+}
+.mark-arrow {
+  transition: transform 0.25s ease;
+}
+.wordmark:hover .mark-arrow {
+  transform: translate(1.5px, -1.5px);
+}
+.wordmark:hover .mark-frame {
+  opacity: 0.7;
+}
+.brand-emblem {
+  display: inline-flex;
+  width: 39px;
+  height: 39px;
+  color: var(--orange);
+  flex-shrink: 0;
+}
+.heading-mark {
+  display: inline-flex;
+  width: 27px;
+  height: 27px;
+  margin-left: 14px;
+  color: var(--orange);
+}
+.intro-stamp .icon {
+  stroke-width: 2.5;
+}
+@media (max-width: 650px) {
+  .brand-mark {
+    width: 29px;
+    height: 29px;
+  }
+  .wordmark {
+    gap: 9px;
+    font-size: 31px;
+  }
+}

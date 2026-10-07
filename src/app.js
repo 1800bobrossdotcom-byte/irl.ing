@@ -1,4 +1,6 @@
-"use strict";
+import { createEditor } from "./editor.js";
+import { loadMoments, saveMoment, deleteMoment } from "./moments.js";
+("use strict");
 
 const $ = (selector) => document.querySelector(selector);
 const icon = (name) =>
@@ -48,27 +50,6 @@ const state = {
 let selectionVersion = 0;
 let toastTimer;
 let collection = [];
-const storageKey = "irling.moments.v1";
-const safeImage = (value) =>
-  typeof value === "string" &&
-  (/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(value) ||
-    samples.some((s) => s.data === value));
-try {
-  const saved = JSON.parse(localStorage.getItem(storageKey) || "[]");
-  if (Array.isArray(saved))
-    collection = saved
-      .filter(
-        (item) =>
-          item &&
-          typeof item.id === "string" &&
-          typeof item.name === "string" &&
-          safeImage(item.data) &&
-          (!item.source || safeImage(item.source)),
-      )
-      .slice(0, 12);
-} catch {
-  /* A fresh or restricted browser can still use the studio. */
-}
 
 function toast(message) {
   clearTimeout(toastTimer);
@@ -173,8 +154,10 @@ async function selectAsset(asset) {
     });
     renderPreview();
     updateSavedStatus();
+    return true;
   } catch (error) {
     toast(error.message);
+    return false;
   }
 }
 
@@ -357,12 +340,19 @@ for (const sample of samples) {
   $("#sample-list").append(button);
 }
 
-// Local photo import and a touch/mouse polygon editor. No photo is sent to a server.
-let editing = null;
-let editorImage = null;
-let points = [];
-let traceMode = false;
-let pointerActive = false;
+// Photos and inference stay on-device; the editor produces a reusable mask.
+const editor = createEditor({
+  onApply: async (asset) => {
+    if (!(await selectAsset(asset)))
+      throw new Error(
+        "That cutout could not be opened. Please try another outline.",
+      );
+  },
+  notify: toast,
+  loadImage,
+  makeCanvas,
+  trimCanvas,
+});
 $("#upload-button").onclick = () => openDialog("#upload-dialog");
 $("#choose-photo").onclick = () => $("#photo-input").click();
 $("#take-photo").onclick = () => $("#camera-input").click();
@@ -395,14 +385,17 @@ for (const id of ["photo-input", "camera-input"]) {
         .drawImage(image, 0, 0, resized.width, resized.height);
       const data = resized.toDataURL("image/png");
       $("#upload-dialog").close();
-      await openEditor({
-        id: crypto.randomUUID(),
-        name:
-          file.name.replace(/\.[^.]+$/, "").slice(0, 60) || "A little moment",
-        data,
-        source: data,
-        sample: false,
-      });
+      await editor.open(
+        {
+          id: crypto.randomUUID(),
+          name:
+            file.name.replace(/\.[^.]+$/, "").slice(0, 60) || "A little moment",
+          data,
+          source: data,
+          sample: false,
+        },
+        { automatic: true },
+      );
     } catch (error) {
       toast(error.message);
     } finally {
@@ -410,171 +403,7 @@ for (const id of ["photo-input", "camera-input"]) {
     }
   });
 }
-$("#edit-object").onclick = () => state.asset && openEditor(state.asset);
-async function openEditor(asset) {
-  try {
-    editorImage = await loadImage(asset.source || asset.data);
-    editing = { ...asset };
-    points = [];
-    traceMode = false;
-    const scale = Math.min(
-      700 / editorImage.naturalWidth,
-      420 / editorImage.naturalHeight,
-      1,
-    );
-    $("#editor-canvas").width = Math.round(editorImage.naturalWidth * scale);
-    $("#editor-canvas").height = Math.round(editorImage.naturalHeight * scale);
-    drawEditor();
-    openDialog("#editor-dialog");
-  } catch (error) {
-    toast(error.message);
-  }
-}
-function polygonArea() {
-  return (
-    Math.abs(
-      points.reduce((area, point, i) => {
-        const next = points[(i + 1) % points.length];
-        return area + point.x * next.y - next.x * point.y;
-      }, 0),
-    ) / 2
-  );
-}
-function drawEditor() {
-  const canvas = $("#editor-canvas");
-  const ctx = canvas.getContext("2d");
-  const { width, height } = canvas;
-  ctx.clearRect(0, 0, width, height);
-  ctx.drawImage(editorImage, 0, 0, width, height);
-  if (traceMode && points.length) {
-    ctx.fillStyle = "rgba(31,40,25,.45)";
-    ctx.beginPath();
-    ctx.rect(0, 0, width, height);
-    ctx.moveTo(points[0].x, points[0].y);
-    points.forEach((p) => ctx.lineTo(p.x, p.y));
-    ctx.closePath();
-    ctx.fill("evenodd");
-    ctx.beginPath();
-    ctx.moveTo(points[0].x, points[0].y);
-    points.forEach((p) => ctx.lineTo(p.x, p.y));
-    if (points.length > 2) ctx.closePath();
-    ctx.strokeStyle = "#d7ef71";
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    for (const point of points) {
-      ctx.beginPath();
-      ctx.arc(point.x, point.y, 3.5, 0, Math.PI * 2);
-      ctx.fillStyle = "#d7ef71";
-      ctx.fill();
-      ctx.strokeStyle = "#354026";
-      ctx.lineWidth = 1;
-      ctx.stroke();
-    }
-  }
-  $("#whole-image").classList.toggle("selected", !traceMode);
-  $("#whole-image").setAttribute("aria-pressed", String(!traceMode));
-  $("#trace-image").classList.toggle("selected", traceMode);
-  $("#trace-image").setAttribute("aria-pressed", String(traceMode));
-  $("#undo-point").disabled = !traceMode || !points.length;
-  $("#clear-points").disabled = !traceMode || !points.length;
-  $("#use-cutout").disabled =
-    traceMode && (points.length < 3 || polygonArea() < 20);
-  $("#point-count").textContent = traceMode
-    ? `${points.length} outline points${points.length < 3 ? " · add at least 3" : ""}`
-    : "Whole image selected";
-  $("#editor-instructions").textContent = traceMode
-    ? "Tap around your object, or draw around it. The green outline is the part you’ll keep."
-    : "Keep the whole image, or tap around an object to trace its outline.";
-}
-$("#whole-image").onclick = () => {
-  traceMode = false;
-  drawEditor();
-};
-$("#trace-image").onclick = () => {
-  traceMode = true;
-  drawEditor();
-};
-$("#undo-point").onclick = () => {
-  points.pop();
-  drawEditor();
-};
-$("#clear-points").onclick = () => {
-  points = [];
-  drawEditor();
-};
-function addPoint(event, dragging = false) {
-  const canvas = $("#editor-canvas");
-  const rect = canvas.getBoundingClientRect();
-  const point = {
-    x: Math.max(
-      0,
-      Math.min(
-        canvas.width,
-        ((event.clientX - rect.left) * canvas.width) / rect.width,
-      ),
-    ),
-    y: Math.max(
-      0,
-      Math.min(
-        canvas.height,
-        ((event.clientY - rect.top) * canvas.height) / rect.height,
-      ),
-    ),
-  };
-  const last = points[points.length - 1];
-  if (dragging && last && Math.hypot(point.x - last.x, point.y - last.y) < 7)
-    return;
-  points.push(point);
-  drawEditor();
-}
-$("#editor-canvas").addEventListener("pointerdown", (event) => {
-  if (!traceMode || event.button > 0) return;
-  pointerActive = true;
-  event.currentTarget.setPointerCapture(event.pointerId);
-  addPoint(event);
-});
-$("#editor-canvas").addEventListener("pointermove", (event) => {
-  if (traceMode && pointerActive) addPoint(event, true);
-});
-for (const name of ["pointerup", "pointercancel", "lostpointercapture"])
-  $("#editor-canvas").addEventListener(name, () => {
-    pointerActive = false;
-  });
-$("#use-cutout").onclick = async () => {
-  if (!editing || (traceMode && (points.length < 3 || polygonArea() < 20)))
-    return;
-  try {
-    const source = makeCanvas(
-      editorImage.naturalWidth,
-      editorImage.naturalHeight,
-    );
-    const ctx = source.getContext("2d");
-    if (traceMode) {
-      const sx = source.width / $("#editor-canvas").width,
-        sy = source.height / $("#editor-canvas").height;
-      ctx.beginPath();
-      points.forEach((point, i) =>
-        ctx[i ? "lineTo" : "moveTo"](point.x * sx, point.y * sy),
-      );
-      ctx.closePath();
-      ctx.clip();
-    }
-    ctx.drawImage(editorImage, 0, 0);
-    const cutout = trimCanvas(source);
-    const asset = {
-      ...editing,
-      id: crypto.randomUUID(),
-      source: editing.source || editing.data,
-      data: cutout.toDataURL("image/png"),
-      sample: editing.sample && !traceMode,
-    };
-    await selectAsset(asset);
-    $("#editor-dialog").close();
-    toast("There it is. A little piece of your world.");
-  } catch (error) {
-    toast(error.message);
-  }
-};
+$("#edit-object").onclick = () => state.asset && editor.open(state.asset);
 
 function updateSavedStatus() {
   $("#collection-count").textContent = collection.length;
@@ -588,31 +417,49 @@ function updateSavedStatus() {
     saved ? "Moment saved" : "Save moment",
   );
 }
-function persistCollection(next) {
-  try {
-    localStorage.setItem(storageKey, JSON.stringify(next));
-    collection = next;
-    updateSavedStatus();
-    return true;
-  } catch {
-    toast(
-      "Your browser couldn’t save this. Free up a saved moment, or download your preview.",
-    );
-    return false;
+function configurationSnapshot() {
+  const { shape, finish, size, quantity, border } = state;
+  return { shape, finish, size, quantity, border };
+}
+function restoreConfiguration(config) {
+  if (!config) return;
+  for (const [key, values] of Object.entries({
+    shape: ["die-cut", "circle", "oval"],
+    finish: ["matte", "glossy", "holographic"],
+    size: [2, 3, 4],
+    quantity: [10, 25, 50, 100],
+  })) {
+    if (values.includes(config[key]))
+      document
+        .querySelector(`#${key}-options [data-value="${config[key]}"]`)
+        ?.click();
+  }
+  if (
+    Number.isInteger(config.border) &&
+    config.border >= 0 &&
+    config.border <= 15
+  ) {
+    $("#border-input").value = config.border;
+    $("#border-input").dispatchEvent(new Event("input"));
   }
 }
-$("#save-object").onclick = () => {
+$("#save-object").onclick = async () => {
   if (!state.asset) return;
-  if (collection.some((item) => item.id === state.asset.id)) {
-    toast("Already in My moments. A good thing to keep.");
-    return;
+  const item = { ...state.asset, configuration: configurationSnapshot() };
+  const button = $("#save-object");
+  button.disabled = true;
+  try {
+    await saveMoment(item);
+    collection = await loadMoments();
+    updateSavedStatus();
+    toast("A moment, kept. Your sticker choices are saved with it.");
+  } catch {
+    toast(
+      "Your browser couldn’t save this. Free up device storage, or download your preview.",
+    );
+  } finally {
+    button.disabled = false;
   }
-  if (collection.length >= 12) {
-    toast("Your collection is full. Remove a moment to make room.");
-    return;
-  }
-  if (persistCollection([...collection, { ...state.asset }]))
-    toast("A moment, kept. Find it in My moments.");
 };
 $("#collection-nav").onclick = () => {
   renderCollection();
@@ -638,6 +485,7 @@ function renderCollection() {
     name.textContent = item.name;
     use.append(img, name);
     use.onclick = async () => {
+      restoreConfiguration(item.configuration);
       await selectAsset(item);
       $("#collection-dialog").close();
     };
@@ -645,9 +493,17 @@ function renderCollection() {
     remove.className = "collection-delete icon-button";
     remove.setAttribute("aria-label", `Remove ${item.name}`);
     remove.innerHTML = icon("close");
-    remove.onclick = () => {
-      if (persistCollection(collection.filter((saved) => saved.id !== item.id)))
+    remove.onclick = async () => {
+      remove.disabled = true;
+      try {
+        await deleteMoment(item.id);
+        collection = await loadMoments();
+        updateSavedStatus();
         renderCollection();
+      } catch {
+        toast("That moment could not be removed. Please try again.");
+        remove.disabled = false;
+      }
     };
     card.append(use, remove);
     grid.append(card);
@@ -715,5 +571,21 @@ $("#studio-nav").onclick = () => {
     block: "start",
   });
 };
+$("#save-object").disabled = true;
+$("#collection-nav").disabled = true;
+loadMoments()
+  .then((saved) => {
+    collection = saved;
+    updateSavedStatus();
+  })
+  .catch(() => {
+    toast(
+      "Saved moments are unavailable in this browser. You can still create and download a sticker.",
+    );
+  })
+  .finally(() => {
+    $("#save-object").disabled = false;
+    $("#collection-nav").disabled = false;
+  });
 updateSavedStatus();
 selectAsset(samples[0]);

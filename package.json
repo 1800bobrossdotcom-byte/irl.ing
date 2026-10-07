@@ -3,7 +3,16 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "npx serve public -l $PORT",
-    "dev": "npx serve public -l 3001"
-  }
+    "dev": "vite --host 0.0.0.0 --port 3001 --strictPort",
+    "build": "node scripts/verify-model.mjs && vite build",
+    "start": "vite preview --host 0.0.0.0 --port ${PORT:-3001} --strictPort",
+    "test": "node --test tests/*.test.js"
+  },
+  "dependencies": {
+    "onnxruntime-web": "1.24.3"
+  },
+  "devDependencies": {
+    "vite": "8.3.3"
+  },
+  "type": "module"
 }
