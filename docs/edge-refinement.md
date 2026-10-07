@@ -1,6 +1,6 @@
 # Edge refinement and roto editing
 
-The editor uses a local segmentation model for the first mask, then an optional source-guided refinement pass for fine boundaries. This is custom application engineering built on established matting methods, not a claim of a new mathematical invention or Photoshop parity.
+The editor uses a local segmentation model for the first mask, then automatically finishes fine boundaries in a separate worker. Further source-guided refinement is available under More tools. This is custom application engineering built on established matting methods, not a claim of a new mathematical invention or Photoshop parity.
 
 ## Processing
 
@@ -18,7 +18,9 @@ Brush sizes are original-image pixels, with a smooth hardness falloff and spaced
 
 Zoom buttons, anchored wheel zoom, hand panning, and two-finger pinch support detailed inspection. A second finger rolls back provisional edits before starting a pinch; Undo/Redo history is also preserved. Selection uses the full-resolution alpha array, retaining fractional coverage rather than resizing a selected mask through the viewport. A traced outline can become a brush-editable mask without closing the editor.
 
-Alpha-only snapshots reduce the basic undo cost fourfold compared with RGBA snapshots. History uses an approximately 24 MB budget, counting retained color canvases. Workers are cancellable and released after completion. Refinement is an explicit action, not something that silently reinterprets manual brush strokes.
+Alpha-only snapshots reduce the basic undo cost fourfold compared with RGBA snapshots. History uses an approximately 24 MB budget, counting retained color canvases. Edge workers are cancellable and released after completion. Fresh segmentation results receive one automatic finishing pass; Keep or Touch up immediately cancels an unfinished pass, and stale callbacks cannot overwrite saved results or brush edits. Further refinement is explicit, so manual strokes remain authoritative.
+
+The default editor shows a large preview, Keep, and Touch up. Touch up reveals Erase/Restore, undo/redo and brush size; More tools holds tracing, selection, refinement settings and inspection controls. A photo can proceed as is even if segmentation fails. Cutout-engine warmup begins only after capture intent and respects save-data/hidden-page state. A verified session stays available for repeat photos, bounded by a 45-second idle timeout (15 seconds on devices reporting at most 2 GB memory), and releases immediately on hiding/cancellation.
 
 ## Evidence and limits
 

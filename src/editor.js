@@ -1,13 +1,16 @@
 import { keepConnectedSubject } from "./mask.js";
+import { createCutoutEngine } from "./cutout-engine.js";
 import { viewportTransform, viewToSource, sourceToView, strokeDabs, brushCoverage } from "./editor-math.js";
 
 export function createEditor({ onApply, notify, loadImage, makeCanvas, trimCanvas }) {
   const $ = (selector) => document.querySelector(selector);
   const canvas = $("#editor-canvas"), dialog = $("#editor-dialog");
   const cutout = makeCanvas(1), maskCanvas = makeCanvas(1), focusCanvas = makeCanvas(1);
+  const engine = createCutoutEngine();
   let asset, image, colors = null, alpha, focus = null, width, height;
   let mode = "whole", points = [], history = [], future = [];
   let worker, timeout, generation = 0, busy = false, applying = false, compare = false;
+  let touchUp = false, finishing = false, failed = false, segmenting = false;
   let zoom = 1, pan = { x: 0, y: 0 }, hand = false, dirty = true, focusDirty = true, frame;
   const pointers = new Map();
   let gesture = null, previousPoint = null, strokeBefore = null, traceBefore = 0;
@@ -24,7 +27,16 @@ export function createEditor({ onApply, notify, loadImage, makeCanvas, trimCanva
     worker?.terminate();
     worker = null;
     busy = false;
+    finishing = false;
+    if (segmenting) engine.cancel();
+    segmenting = false;
     if (message) setStatus(message);
+  }
+  function cancelFinishing() {
+    if (!finishing) return;
+    generation++;
+    clearTimeout(timeout);
+    worker?.terminate(); worker = null; finishing = false;
   }
   function stateCopy() { return { alpha: alpha.slice(), focus: focus?.slice() || null, colors }; }
   function restoreState(state) {
@@ -116,6 +128,13 @@ export function createEditor({ onApply, notify, loadImage, makeCanvas, trimCanva
       focus: "Paint the edges you want to refine, then tap Refine hair & edges. Unpainted areas stay unchanged.",
     };
     $("#editor-instructions").textContent = hand ? "Drag to move the photo. Pinch with two fingers to zoom." : labels[mode];
+    $("#touchup-panel").hidden = !touchUp;
+    $("#touch-up").disabled = busy || applying;
+    $("#touch-up").textContent = touchUp ? "Done touching up" : "Touch up";
+    $("#touch-up").setAttribute("aria-expanded", String(touchUp));
+    $("#keep-photo").hidden = !busy && !failed;
+    $("#keep-photo").disabled = applying;
+    $("#editor-dialog").classList.toggle("touching-up", touchUp);
     for (const [id, target] of [["whole-image","whole"],["trace-image","trace"],["erase-mask","erase"],["restore-mask","restore"],["select-subject","select"],["focus-edges","focus"]]) {
       const b = $(`#${id}`); b.classList.toggle("selected", mode === target); b.setAttribute("aria-pressed", String(mode === target)); b.disabled = busy || applying;
     }
@@ -149,6 +168,7 @@ export function createEditor({ onApply, notify, loadImage, makeCanvas, trimCanva
   function scheduleDraw() { if (!frame) frame = requestAnimationFrame(() => { frame = null; draw(); }); }
   function chooseMode(next) {
     if (busy) return;
+    cancelFinishing();
     compare = false; $("#compare-original").checked = false;
     mode = next; hand = false; draw();
   }
@@ -222,7 +242,7 @@ export function createEditor({ onApply, notify, loadImage, makeCanvas, trimCanva
     if (pointers.size === 2) { startPinch(); return; }
     if (pointers.size > 2 || gesture?.type === "frozen") return;
     traceBefore = points.length;
-    if (hand || compare) { gesture = { type: "pan", start: v, pan: { ...pan } }; return; }
+    if (!touchUp || hand || compare) { gesture = { type: "pan", start: v, pan: { ...pan } }; return; }
     gesture = { type: "edit", id: event.pointerId };
     const p = viewToSource(v, transform(), width, height);
     if (!p) return;
@@ -268,42 +288,50 @@ export function createEditor({ onApply, notify, loadImage, makeCanvas, trimCanva
 
   async function runAutomatic() {
     if (!image || busy) return;
-    cancelInference(); const version = generation; busy = true; setStatus("Preparing your photo…"); draw();
+    cancelInference(); const version = generation;
+    busy = segmenting = true; failed = false;
+    touchUp = false; $("#more-tools").open = false;
+    setStatus("Finding your subject…"); draw();
     const input = makeCanvas(320), ctx = input.getContext("2d");
     ctx.fillStyle = "white"; ctx.fillRect(0, 0, 320, 320); ctx.drawImage(image, 0, 0, 320, 320);
     const pixels = ctx.getImageData(0, 0, 320, 320).data;
-    const fail = message => { if (version !== generation) return; cancelInference(); setStatus(message, true); draw(); };
     try {
-      worker = new Worker(new URL("./cutout.worker.js", import.meta.url), { type: "module" });
-      worker.onerror = () => fail("The cutout tool couldn’t start on this browser. You can still trace your object.");
-      worker.onmessage = ({ data }) => {
-        if (version !== generation) return;
-        if (data.type === "status") { setStatus(data.message); return; }
-        if (data.type === "error") { fail(data.message); return; }
-        if (data.type !== "result") return;
-        const small = makeCanvas(320), sctx = small.getContext("2d"), rgba = sctx.createImageData(320, 320);
-        for (let i = 0; i < data.mask.length; i++) { rgba.data[i * 4] = rgba.data[i * 4 + 1] = rgba.data[i * 4 + 2] = 255; rgba.data[i * 4 + 3] = data.mask[i]; }
-        sctx.putImageData(rgba, 0, 0); snapshot();
-        maskCanvas.width = width; maskCanvas.height = height;
-        const mctx = maskCanvas.getContext("2d"); mctx.imageSmoothingQuality = "high"; mctx.drawImage(small, 0, 0, width, height);
-        const enlarged = mctx.getImageData(0, 0, width, height).data;
-        alpha = Uint8ClampedArray.from({ length: width * height }, (_, i) => enlarged[i * 4 + 3]);
-        colors = null; focus = null; dirty = focusDirty = true; mode = "cutout";
-        cancelInference();
-        setStatus("Your subject is ready. Zoom in, refine fine edges, then keep your favorite bit."); draw();
-      };
-      timeout = setTimeout(() => fail("That took too long on this device. Try again, or trace the outline yourself."), 90000);
-      worker.postMessage({ pixels }, [pixels.buffer]);
-    } catch { fail("Automatic cutout is unavailable here. You can still trace your object."); }
+      const result = await engine.run(pixels, { onStatus: message => {
+        if (version === generation) setStatus(message);
+      } });
+      if (version !== generation) return;
+      segmenting = false;
+      const small = makeCanvas(320), sctx = small.getContext("2d"), rgba = sctx.createImageData(320, 320);
+      for (let i = 0; i < result.length; i++) {
+        rgba.data[i * 4] = rgba.data[i * 4 + 1] = rgba.data[i * 4 + 2] = 255;
+        rgba.data[i * 4 + 3] = result[i];
+      }
+      sctx.putImageData(rgba, 0, 0); snapshot();
+      maskCanvas.width = width; maskCanvas.height = height;
+      const mctx = maskCanvas.getContext("2d"); mctx.imageSmoothingQuality = "high"; mctx.drawImage(small, 0, 0, width, height);
+      const enlarged = mctx.getImageData(0, 0, width, height).data;
+      alpha = Uint8ClampedArray.from({ length: width * height }, (_, i) => enlarged[i * 4 + 3]);
+      colors = null; focus = null; dirty = focusDirty = true; mode = "cutout"; busy = false;
+      setStatus("Your subject is ready. Keep it, or touch up a little."); draw();
+      // Show the first usable result immediately. Edge finishing never blocks
+      // Keep or Touch up, and either action cancels it before changing the mask.
+      runRefinement({ automatic: true });
+    } catch (error) {
+      if (version !== generation) return;
+      cancelInference(); failed = true;
+      setStatus(error.message || "We couldn’t cut out this photo. Keep it as is, or touch it up.", true); draw();
+    }
   }
-  async function runRefinement() {
+  async function runRefinement({ automatic = false } = {}) {
     if (!image || busy || ["whole","trace"].includes(mode)) return;
-    cancelInference(); const version = generation, before = stateCopy(); busy = true;
-    setStatus(focus ? "Refining the painted edges on your device…" : "Refining fine edges on your device…"); draw();
+    cancelInference(); const version = generation, before = stateCopy();
+    if (automatic) finishing = true;
+    else { busy = true; setStatus(focus ? "Refining the painted edges…" : "Refining fine edges…"); }
+    draw();
     const input = makeCanvas(width, height); input.getContext("2d").drawImage(image, 0, 0);
     const rgba = input.getContext("2d").getImageData(0, 0, width, height).data, mask = alpha.slice(), region = focus?.slice();
-    const settings = { radius: Number($("#edge-radius").value), strength: Number($("#edge-strength").value) / 100, cleanup: Number($("#edge-cleanup").value) / 100 };
-    const fail = message => { if (version !== generation) return; cancelInference(); setStatus(message, true); draw(); };
+    const settings = automatic ? { radius: 6, strength: .8, cleanup: 0 } : { radius: Number($("#edge-radius").value), strength: Number($("#edge-strength").value) / 100, cleanup: Number($("#edge-cleanup").value) / 100 };
+    const fail = message => { if (version !== generation) return; cancelInference(); if (!automatic) setStatus(message, true); draw(); };
     try {
       worker = new Worker(new URL("./refine.worker.js", import.meta.url), { type: "module" });
       worker.onerror = () => fail("Edge refinement couldn’t finish. Your current mask is unchanged; try a smaller photo.");
@@ -330,7 +358,7 @@ export function createEditor({ onApply, notify, loadImage, makeCanvas, trimCanva
           colors = makeCanvas(width, height); colors.getContext("2d").putImageData(new ImageData(data.rgba, width, height), 0, 0);
         } else colors = before.colors;
         dirty = true; mode = "cutout"; cancelInference();
-        setStatus("Edges refined. Check on light and dark backgrounds; Undo restores the previous result."); draw();
+        setStatus(automatic ? "Your subject is ready. Keep it, or touch up a little." : "Edges refined. Undo restores the previous result."); draw();
       };
       timeout = setTimeout(() => fail("Refinement took too long. Your mask is unchanged; try again or use the brushes."), 60000);
       const payload = { rgba, alpha: mask, width, height, ...settings, region };
@@ -338,16 +366,37 @@ export function createEditor({ onApply, notify, loadImage, makeCanvas, trimCanva
     } catch { fail("Edge refinement is unavailable here. Your current mask is unchanged."); }
   }
   $("#auto-cutout").onclick = runAutomatic;
-  $("#refine-edges").onclick = runRefinement;
+  $("#refine-edges").onclick = () => runRefinement();
+  $("#touch-up").onclick = () => {
+    if (busy || applying) return;
+    cancelFinishing(); failed = false;
+    touchUp = !touchUp; hand = false; compare = false;
+    $("#compare-original").checked = false;
+    if (touchUp) {
+      mode = "erase";
+      setStatus("Make a small correction, then keep your moment.");
+    } else {
+      if (mode === "trace" && validTrace()) { snapshot(); rasterizeOutline(); }
+      mode = "cutout";
+      $("#more-tools").open = false;
+      setStatus("Your subject is ready. Keep it, or touch up a little.");
+    }
+    draw();
+  };
+  $("#keep-photo").onclick = () => {
+    cancelInference(); failed = false; mode = "whole"; touchUp = false;
+    draw(); $("#use-cutout").click();
+  };
   $("#cancel-cutout").onclick = () => { cancelInference("Cancelled. Your previous mask is still here."); draw(); };
   for (const [id, next] of [["whole-image","whole"],["trace-image","trace"],["erase-mask","erase"],["restore-mask","restore"],["select-subject","select"],["focus-edges","focus"]]) $(`#${id}`).onclick = () => chooseMode(next);
   $("#undo-point").onclick = () => {
     if (busy) return;
+    cancelFinishing();
     if (mode === "trace") points.pop();
     else if (history.length) { future.push(stateCopy()); restoreState(history.pop()); }
     draw();
   };
-  $("#redo-mask").onclick = () => { if (busy || !future.length) return; history.push(stateCopy()); restoreState(future.pop()); boundHistory(); draw(); };
+  $("#redo-mask").onclick = () => { if (busy || !future.length) return; cancelFinishing(); history.push(stateCopy()); restoreState(future.pop()); boundHistory(); draw(); };
   $("#clear-points").onclick = () => { points = []; draw(); };
   $("#apply-outline").onclick = () => { if (!validTrace()) return; snapshot(); rasterizeOutline(); mode = "cutout"; setStatus("Outline ready. Refine or brush the edges before keeping it."); draw(); };
   $("#clear-focus").onclick = () => { if (busy) return; snapshot(); focus = null; focusDirty = true; draw(); };
@@ -377,6 +426,7 @@ export function createEditor({ onApply, notify, loadImage, makeCanvas, trimCanva
   dialog.addEventListener("close", () => { cancelInference(); pointers.clear(); gesture = null; resetStroke(); $("#brush-cursor").hidden = true; });
   $("#use-cutout").onclick = async () => {
     if (!asset || busy || applying || (mode === "trace" && !validTrace())) return;
+    cancelFinishing();
     applying = true; draw();
     try {
       if (mode === "whole") { alpha.fill(255); colors = null; dirty = true; }
@@ -388,6 +438,7 @@ export function createEditor({ onApply, notify, loadImage, makeCanvas, trimCanva
     finally { applying = false; draw(); }
   };
   return {
+    warmup() { engine.warmup(); },
     async open(next, { automatic = false } = {}) {
       cancelInference(); const version = generation;
       try {
@@ -395,6 +446,7 @@ export function createEditor({ onApply, notify, loadImage, makeCanvas, trimCanva
         if (version !== generation) return;
         image = loaded; asset = { ...next }; width = image.naturalWidth; height = image.naturalHeight;
         points = []; history = []; future = []; focus = null; colors = null; hand = false; zoom = 1; pan = { x: 0, y: 0 };
+        touchUp = false; failed = false; $("#more-tools").open = false;
         pointers.clear(); gesture = null; resetStroke(); mode = next.mask ? "cutout" : "whole";
         compare = false; $("#compare-original").checked = false;
         maskCanvas.width = width; maskCanvas.height = height;
@@ -408,7 +460,7 @@ export function createEditor({ onApply, notify, loadImage, makeCanvas, trimCanva
         dirty = focusDirty = true;
         const scale = Math.min(700 / width, 420 / height, 1);
         canvas.width = Math.round(width * scale); canvas.height = Math.round(height * scale);
-        setStatus(next.mask ? "Your saved cutout is ready to refine." : "Automatic cutouts run on your device. No photo upload needed.");
+        setStatus(next.mask ? "Your saved cutout is ready." : "Your photo is ready.");
         draw(); if (!dialog.open) dialog.showModal();
         if (automatic && !next.mask) runAutomatic();
       } catch (error) { notify(error.message); }

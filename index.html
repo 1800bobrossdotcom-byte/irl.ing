@@ -408,73 +408,13 @@
         </button>
       </form>
       <div class="section-index">THAT’S THE THING</div>
-      <h2 id="editor-title">A little less background.</h2>
-      <p id="editor-instructions">
-        Keep the whole image, or tap around an object to trace its outline.
-      </p>
-      <div class="auto-cutout-row">
-        <button id="auto-cutout" class="auto-button">
-          <svg class="icon"><use href="#i-spark" /></svg
-          ><span id="auto-cutout-label">Remove background</span></button
-        ><button id="cancel-cutout" class="text-button" hidden>Cancel</button
-        ><label class="compare-control"
-          ><input id="compare-original" type="checkbox" /> Show original</label
-        >
-      </div>
+      <h2 id="editor-title">Your moment, cut out.</h2>
       <p id="cutout-status" role="status" aria-live="polite">
-        Automatic cutouts run on your device.
+        Finding the bit that matters…
       </p>
-      <div class="editor-modes">
-        <button id="whole-image" class="pill selected" aria-pressed="true">
-          Whole image</button
-        ><button id="trace-image" class="pill" aria-pressed="false">
-          Trace an object</button
-        ><button id="undo-point" class="text-button" disabled>Undo</button
-        ><button id="redo-mask" class="text-button" disabled>Redo</button
-        ><button id="clear-points" class="text-button" disabled hidden>
-          Clear
-        </button><button id="apply-outline" class="pill" hidden>
-          Use outline
-        </button>
-      </div>
-      <div id="refine-tools" class="refine-tools" hidden>
-        <button id="select-subject" class="pill" aria-pressed="false">
-          Pick one object</button
-        ><button id="erase-mask" class="pill" aria-pressed="false">Erase</button
-        ><button id="restore-mask" class="pill" aria-pressed="false">
-          Restore</button
-        ><button id="focus-edges" class="pill" aria-pressed="false">
-          Refine area</button
-        ><button id="clear-focus" class="text-button" hidden>Clear area</button
-        ><button id="refine-edges" class="edge-refine-button">
-          <svg class="icon" aria-hidden="true"><use href="#i-spark" /></svg>
-          Refine hair &amp; edges
-        </button>
-        <div id="brush-control" hidden>
-          <label for="brush-size">Brush
-            <input id="brush-size" type="range" min="1" max="150" value="25" />
-            <output id="brush-value" for="brush-size">25 px</output>
-          </label>
-          <label for="brush-hardness">Hardness
-            <input id="brush-hardness" type="range" min="0" max="100" value="70" />
-            <output id="hardness-value" for="brush-hardness">70%</output>
-          </label>
-        </div>
-      </div>
-      <div class="editor-view-controls" aria-label="Image view">
-        <div class="editor-zoom-controls" role="group" aria-label="Zoom">
-          <button id="zoom-out" class="view-button" aria-label="Zoom out">−</button>
-          <button id="zoom-fit" class="view-button">Fit</button>
-          <button id="zoom-in" class="view-button" aria-label="Zoom in">+</button>
-        </div>
-        <button id="pan-image" class="pill" aria-pressed="false">Hand</button>
-        <label class="editor-background-control" for="editor-background">Check edges
-          <select id="editor-background">
-            <option value="checker">Checker</option>
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
-          </select>
-        </label>
+      <div class="editor-progress-actions">
+        <button id="cancel-cutout" class="text-button" hidden>Cancel</button>
+        <button id="keep-photo" class="text-button" hidden>Use photo as is</button>
       </div>
       <div id="editor-viewport" class="editor-canvas-container">
         <canvas
@@ -484,34 +424,98 @@
         ></canvas>
         <span id="brush-cursor" class="brush-cursor" aria-hidden="true" hidden></span>
       </div>
-      <details id="edge-settings" class="edge-settings" hidden>
-        <summary>Fine-tune edges</summary>
-        <div class="edge-settings-controls">
-          <label for="edge-radius">Edge reach
-            <input id="edge-radius" type="range" min="2" max="16" value="6" />
-            <span>Closer <span aria-hidden="true">↔</span> Wider</span>
-          </label>
-          <label for="edge-strength">Detail
-            <input id="edge-strength" type="range" min="0" max="100" value="80" />
-            <span>Gentle <span aria-hidden="true">↔</span> Stronger</span>
-          </label>
-          <label for="edge-cleanup">Color cleanup
-            <input id="edge-cleanup" type="range" min="0" max="80" value="0" />
-            <span>Off <span aria-hidden="true">↔</span> Reduce halos</span>
-          </label>
-        </div>
-      </details>
       <div class="editor-footer">
-        <span id="point-count">Whole image selected</span>
-        <button id="download-cutout" class="text-button">Download clean PNG</button>
         <button class="primary-button" id="use-cutout">
           Keep this bit <svg class="icon"><use href="#i-arrow" /></svg>
         </button>
+        <button id="touch-up" class="secondary-button" aria-expanded="false" aria-controls="touchup-panel">Touch up</button>
       </div>
-      <p class="quiet-note">
-        Pinch to zoom, or use + and −. Brush size follows your photo’s pixels,
-        so zoom in for fine strands. Light and dark views help you check the edges.
-      </p>
+      <div id="touchup-panel" class="touchup-panel" hidden>
+        <p id="editor-instructions">Erase a little, or bring detail back.</p>
+        <div class="touchup-tools" aria-label="Touch up your cutout">
+          <button id="erase-mask" class="pill" aria-pressed="false">Erase</button>
+          <button id="restore-mask" class="pill" aria-pressed="false">Restore</button>
+          <button id="undo-point" class="text-button" disabled>Undo</button>
+          <button id="redo-mask" class="text-button" disabled>Redo</button>
+        </div>
+        <div id="brush-control" hidden>
+          <label for="brush-size">Brush size
+            <input id="brush-size" type="range" min="1" max="150" value="25" />
+            <output id="brush-value" for="brush-size">25 px</output>
+          </label>
+        </div>
+        <details id="more-tools" class="more-tools">
+          <summary>More tools</summary>
+          <div class="editor-modes">
+            <button id="whole-image" class="pill selected" aria-pressed="true">Whole image</button>
+            <button id="trace-image" class="pill" aria-pressed="false">Trace an object</button>
+            <button id="clear-points" class="text-button" disabled hidden>Clear</button>
+            <button id="apply-outline" class="pill" hidden>Use outline</button>
+          </div>
+          <div id="refine-tools" class="refine-tools" hidden>
+            <button id="select-subject" class="pill" aria-pressed="false">Pick one object</button>
+            <button id="focus-edges" class="pill" aria-pressed="false">Refine area</button>
+            <button id="clear-focus" class="text-button" hidden>Clear area</button>
+            <button id="refine-edges" class="edge-refine-button">
+              <svg class="icon" aria-hidden="true"><use href="#i-spark" /></svg>
+              Refine hair &amp; edges
+            </button>
+          </div>
+          <div class="auto-cutout-row">
+            <button id="auto-cutout" class="auto-button">
+              <svg class="icon"><use href="#i-spark" /></svg>
+              <span id="auto-cutout-label">Remove background</span>
+            </button>
+            <label class="compare-control"><input id="compare-original" type="checkbox" /> Show original</label>
+          </div>
+          <div class="hardness-control">
+            <label for="brush-hardness">Brush hardness
+              <input id="brush-hardness" type="range" min="0" max="100" value="70" />
+              <output id="hardness-value" for="brush-hardness">70%</output>
+            </label>
+          </div>
+          <div class="editor-view-controls" aria-label="Image view">
+            <div class="editor-zoom-controls" role="group" aria-label="Zoom">
+              <button id="zoom-out" class="view-button" aria-label="Zoom out">−</button>
+              <button id="zoom-fit" class="view-button">Fit</button>
+              <button id="zoom-in" class="view-button" aria-label="Zoom in">+</button>
+            </div>
+            <button id="pan-image" class="pill" aria-pressed="false">Hand</button>
+            <label class="editor-background-control" for="editor-background">Check edges
+              <select id="editor-background">
+                <option value="checker">Checker</option>
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+              </select>
+            </label>
+          </div>
+          <details id="edge-settings" class="edge-settings" hidden>
+            <summary>Fine-tune edges</summary>
+            <div class="edge-settings-controls">
+              <label for="edge-radius">Edge reach
+                <input id="edge-radius" type="range" min="2" max="16" value="6" />
+                <span>Closer <span aria-hidden="true">↔</span> Wider</span>
+              </label>
+              <label for="edge-strength">Detail
+                <input id="edge-strength" type="range" min="0" max="100" value="80" />
+                <span>Gentle <span aria-hidden="true">↔</span> Stronger</span>
+              </label>
+              <label for="edge-cleanup">Color cleanup
+                <input id="edge-cleanup" type="range" min="0" max="80" value="0" />
+                <span>Off <span aria-hidden="true">↔</span> Reduce halos</span>
+              </label>
+            </div>
+          </details>
+          <div class="editor-extra-actions">
+            <span id="point-count">Whole image selected</span>
+            <button id="download-cutout" class="text-button">Download clean PNG</button>
+          </div>
+          <p id="editor-note" class="quiet-note">
+            Pinch to zoom. Brush size follows your photo’s pixels, so zoom in for fine detail.
+            Light and dark views help you check the edges.
+          </p>
+        </details>
+      </div>
     </dialog>
     <dialog id="collection-dialog" class="collection-dialog">
       <form method="dialog">

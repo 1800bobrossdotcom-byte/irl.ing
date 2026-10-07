@@ -2382,3 +2382,194 @@ dialog .section-index {
     padding: 8px 4px;
   }
 }
+
+/* The cutout comes first; adjustment tools are there when they are needed. */
+.editor-dialog {
+  padding: 28px;
+}
+.editor-dialog h2 {
+  margin: 8px 38px 10px 0;
+  line-height: 1.15;
+}
+.editor-dialog #cutout-status {
+  margin: 0 0 12px;
+  min-height: 22px;
+  line-height: 1.6;
+}
+.editor-progress-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.editor-progress-actions:has(button:not([hidden])) {
+  margin: -6px 0 8px;
+}
+.editor-progress-actions .text-button {
+  padding: 8px 0;
+  color: #647054;
+}
+.editor-dialog #editor-viewport {
+  height: min(44dvh, 420px);
+  max-height: none;
+}
+.editor-dialog #editor-canvas {
+  max-height: 100%;
+}
+.editor-dialog .editor-footer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  margin-top: 14px;
+}
+.editor-dialog .editor-footer .primary-button {
+  grid-column: auto;
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+}
+#touch-up {
+  width: auto;
+  min-height: 48px;
+  padding: 12px 20px;
+  font-size: 12px;
+}
+#touch-up[aria-expanded="true"] {
+  background: #eeeee4;
+}
+.touchup-panel {
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.editor-dialog #editor-instructions {
+  margin: 0 0 8px;
+  font-size: 11px;
+}
+.touchup-tools {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+.touchup-tools #undo-point {
+  margin-left: auto;
+}
+.editor-dialog #brush-control {
+  grid-template-columns: 1fr;
+  margin-top: 8px;
+  padding: 2px 12px;
+}
+.editor-dialog #brush-control label {
+  flex-wrap: nowrap;
+}
+.editor-dialog #brush-control label > input[type="range"] {
+  flex: 1;
+  width: auto;
+  order: 0;
+}
+.more-tools > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  margin-top: 5px;
+  color: #647054;
+  font-size: 11px;
+  cursor: pointer;
+  list-style: none;
+}
+.more-tools > summary::-webkit-details-marker {
+  display: none;
+}
+.more-tools > summary::before {
+  content: "+";
+  font-size: 17px;
+}
+.more-tools[open] > summary::before {
+  content: "−";
+}
+.more-tools > summary:focus-visible {
+  outline: 2px solid #7b8e43;
+  outline-offset: 3px;
+}
+.more-tools .editor-modes {
+  display: flex;
+  margin: 6px 0 12px;
+  flex-wrap: wrap;
+}
+.more-tools .auto-cutout-row {
+  margin: 3px 0 10px;
+}
+.hardness-control {
+  margin: 8px 0;
+  padding: 2px 12px;
+  background: #eeeee4;
+  border-radius: 9px;
+}
+.hardness-control label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 10px;
+  color: #647054;
+}
+.hardness-control input {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  accent-color: #596c3b;
+}
+.hardness-control output {
+  min-width: 34px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.editor-extra-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.editor-extra-actions > span {
+  flex: 1;
+  font-size: 10px;
+  color: #7b826d;
+}
+.editor-extra-actions #download-cutout {
+  max-width: none;
+  padding: 8px;
+}
+@media (max-width: 650px) {
+  .editor-dialog {
+    padding: 20px 18px;
+    max-width: calc(100vw - 24px);
+  }
+  .editor-dialog h2 {
+    margin: 8px 36px 8px 0;
+    font-size: 24px;
+    letter-spacing: -0.9px;
+  }
+  .editor-dialog #editor-viewport {
+    height: 40dvh;
+  }
+  .editor-dialog:has(#touchup-panel:not([hidden])) #editor-viewport {
+    height: 32dvh;
+  }
+  .editor-dialog .editor-footer {
+    gap: 8px;
+    margin-top: 12px;
+  }
+  #touch-up {
+    padding: 12px 15px;
+    font-size: 11px;
+  }
+  .touchup-panel {
+    margin-top: 12px;
+    padding-top: 10px;
+  }
+  .touchup-tools {
+    gap: 5px;
+  }
+}

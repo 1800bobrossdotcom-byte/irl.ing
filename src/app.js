@@ -407,14 +407,19 @@ $("#editor-dialog").addEventListener("close", () => {
     goToPreview();
   } else setFlowStep(state.asset?.sample ? "photo" : "sticker");
 });
-$("#start-photo").onclick = () => $("#photo-input").click();
-$("#start-camera").onclick = () => $("#camera-input").click();
+function choosePhoto(input) {
+  $(input).click();
+  editor.warmup();
+}
+$("#start-photo").onclick = () => choosePhoto("#photo-input");
+$("#start-camera").onclick = () => choosePhoto("#camera-input");
 $("#upload-button").onclick = () => {
   $("#upload-error").hidden = true;
   openDialog("#upload-dialog");
+  editor.warmup();
 };
-$("#choose-photo").onclick = () => $("#photo-input").click();
-$("#take-photo").onclick = () => $("#camera-input").click();
+$("#choose-photo").onclick = () => choosePhoto("#photo-input");
+$("#take-photo").onclick = () => choosePhoto("#camera-input");
 $("#customize-sticker").onclick = () => {
   $(".configurator").scrollIntoView({
     behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
@@ -490,7 +495,7 @@ for (const id of ["photo-input", "camera-input"]) {
         { automatic: true },
       );
       importMessage(
-        "Keep the bit you love. You can refine the outline before continuing.",
+        "We’ll find your subject. Keep it when it looks right.",
       );
     } catch (error) {
       importMessage(error.message, true);
@@ -502,6 +507,7 @@ for (const id of ["photo-input", "camera-input"]) {
   });
 }
 $("#try-example").onclick = async () => {
+  editor.warmup();
   const version = ++importVersion;
   setImportBusy(true);
   importMessage("Opening a sample scene…");

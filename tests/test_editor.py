@@ -94,6 +94,7 @@ class EditorTests(unittest.TestCase):
         self.page.wait_for_selector("#collection-dialog", state="hidden")
         self.page.locator("#edit-object").click()
         self.page.wait_for_selector("#editor-dialog[open]")
+        self.open_tools()
         self.zoom, self.pan = 1, {"x": 0, "y": 0}
 
     def tearDown(self):
@@ -104,6 +105,12 @@ class EditorTests(unittest.TestCase):
         self.page.locator(selector).evaluate("""(input, value) => {
             input.value = value; input.dispatchEvent(new Event('input', {bubbles:true}));
         }""", str(value))
+
+    def open_tools(self):
+        if self.page.locator("#touchup-panel").is_hidden():
+            self.page.locator("#touch-up").click()
+        if not self.page.locator("#more-tools").evaluate("details => details.open"):
+            self.page.locator("#more-tools > summary").click()
 
     def clean_png(self):
         with self.page.expect_download() as event:
@@ -137,6 +144,38 @@ class EditorTests(unittest.TestCase):
     def refine(self):
         self.page.locator("#refine-edges").click()
         self.page.wait_for_function("document.querySelector('#cutout-status').textContent.includes('Edges refined')")
+
+    def test_default_result_has_two_actions_and_fits_small_phone(self):
+        self.page.locator("#touch-up").click()
+        self.assertTrue(self.page.locator("#touchup-panel").is_hidden())
+        self.assertEqual(self.page.locator("#touch-up").get_attribute("aria-expanded"), "false")
+        for selector in ["#erase-mask", "#trace-image", "#auto-cutout", "#refine-edges",
+                         "#zoom-in", "#editor-background", "#download-cutout"]:
+            self.assertFalse(self.page.locator(selector).is_visible(), selector)
+        for width, height in [(320, 568), (390, 844)]:
+            self.page.set_viewport_size({"width": width, "height": height})
+            self.assertTrue(self.page.evaluate("document.documentElement.scrollWidth <= innerWidth"))
+            for selector in ["#editor-canvas", "#use-cutout", "#touch-up"]:
+                bounds = self.page.locator(selector).bounding_box()
+                self.assertGreaterEqual(bounds["y"], 0, selector)
+                self.assertLessEqual(bounds["y"] + bounds["height"], height, selector)
+            self.assertTrue(self.page.locator("#use-cutout").is_enabled())
+        self.page.locator("#use-cutout").tap()
+        self.page.wait_for_selector("#editor-dialog", state="hidden")
+        self.assertEqual(self.page.locator("#asset-status").inner_text(), "Your moment")
+
+    def test_touch_up_reveals_brushes_before_advanced_choices(self):
+        self.page.locator("#more-tools > summary").click()
+        self.page.locator("#touch-up").click()
+        self.page.locator("#touch-up").click()
+        self.assertEqual(self.page.locator("#touch-up").get_attribute("aria-expanded"), "true")
+        for selector in ["#erase-mask", "#restore-mask", "#undo-point", "#redo-mask", "#brush-size"]:
+            self.assertTrue(self.page.locator(selector).is_visible(), selector)
+        for selector in ["#trace-image", "#focus-edges", "#refine-edges", "#brush-hardness", "#zoom-in"]:
+            self.assertFalse(self.page.locator(selector).is_visible(), selector)
+        self.page.locator("#more-tools > summary").click()
+        for selector in ["#trace-image", "#focus-edges", "#refine-edges", "#brush-hardness", "#zoom-in"]:
+            self.assertTrue(self.page.locator(selector).is_visible(), selector)
 
     def test_zoom_pan_places_three_pixel_brush_at_exact_source_coordinate(self):
         baseline = self.clean_image().getchannel("A")
@@ -296,6 +335,7 @@ class EditorTests(unittest.TestCase):
         self.page.wait_for_selector("#collection-dialog", state="hidden")
         self.page.locator("#edit-object").click()
         self.page.wait_for_selector("#editor-dialog[open]")
+        self.open_tools()
         self.assertEqual(self.clean_png(), cleaned)
         self.page.locator("#focus-edges").click()
         self.range_value("#brush-size", 31)

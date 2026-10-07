@@ -42,6 +42,12 @@ class StudioTests(unittest.TestCase):
     def click_option(self, group, value):
         self.page.locator(f'#{group}-options button[data-value="{value}"]').click()
 
+    def open_tools(self):
+        if self.page.locator('#touchup-panel').is_hidden():
+            self.page.locator('#touch-up').click()
+        if not self.page.locator('#more-tools').evaluate('details => details.open'):
+            self.page.locator('#more-tools > summary').click()
+
     def test_configuration_and_demo_checkout(self):
         page = self.page
         self.assertEqual(page.locator('#total-price').inner_text(), '$18.00')
@@ -91,6 +97,9 @@ class StudioTests(unittest.TestCase):
         page.on('request',lambda request: requests.append(request) if request.method == 'POST' else None)
         page.locator('#photo-input').set_input_files({'name':'my-moment.png','mimeType':'image/png','buffer':self.photo})
         page.wait_for_selector('#editor-dialog[open]')
+        if page.locator('#cancel-cutout').is_visible():
+            page.locator('#cancel-cutout').click()
+        self.open_tools()
         page.locator('#trace-image').click()
         self.assertTrue(page.locator('#use-cutout').is_disabled())
         canvas = page.locator('#editor-canvas')
@@ -163,6 +172,7 @@ class StudioTests(unittest.TestCase):
         page.wait_for_function("document.querySelector('#auto-cutout').getAttribute('aria-busy') === 'false'", timeout=100000)
         self.assertIn('Your subject is ready',page.locator('#cutout-status').inner_text())
         self.assertIn('Background removed',page.locator('#point-count').inner_text())
+        self.open_tools()
         canvas=page.locator('#editor-canvas')
         alpha=canvas.evaluate("c=>{const d=c.getContext('2d').getImageData(0,0,c.width,c.height).data; let clear=0,solid=0; for(let i=3;i<d.length;i+=4){if(d[i]<20)clear++;if(d[i]>230)solid++;} return {clear,solid};}")
         self.assertGreater(alpha['clear'],1000)
@@ -203,10 +213,64 @@ class StudioTests(unittest.TestCase):
         page.wait_for_selector('#editor-dialog[open]')
         page.wait_for_function("document.querySelector('#cutout-status').classList.contains('error')", timeout=30000)
         self.assertIn('couldn’t load',page.locator('#cutout-status').inner_text())
-        page.locator('#whole-image').click()
-        page.locator('#use-cutout').click()
+        page.locator('#keep-photo').click()
         page.wait_for_selector('#editor-dialog',state='hidden')
         self.assertEqual(page.locator('#asset-status').inner_text(),'Your moment')
+
+    def test_automatic_edge_finishing_is_nonblocking_and_warm_model_is_reused(self):
+        page = self.page
+        model_downloads = []
+        page.on('request', lambda request: model_downloads.append(request.url)
+                if '/models/u2netp.onnx' in request.url else None)
+        # Keep genuine segmentation, but hold edge finishing indefinitely so
+        # interaction cannot pass only because this machine is unusually fast.
+        page.evaluate("""() => {
+            const NativeWorker = window.Worker;
+            window.finishWorkers = [];
+            window.Worker = class {
+                constructor(url, options) {
+                    if (!String(url).includes('refine.worker')) return new NativeWorker(url, options);
+                    this.terminated = false;
+                    window.finishWorkers.push(this);
+                }
+                postMessage(payload) { this.payload = payload; }
+                terminate() { this.terminated = true; }
+                replyLate() {
+                    this.onmessage({data: {type:'result',
+                        alpha:new Uint8ClampedArray(this.payload.alpha.length),
+                        rgba:this.payload.rgba}});
+                }
+            };
+        }""")
+        page.locator('#photo-input').set_input_files({'name':'first.png','mimeType':'image/png','buffer':self.photo})
+        page.wait_for_function('window.finishWorkers.length === 1', timeout=100000)
+        self.assertTrue(page.locator('#use-cutout').is_enabled())
+        self.assertTrue(page.locator('#touch-up').is_enabled())
+        self.assertTrue(page.locator('#touchup-panel').is_hidden())
+        canvas = page.locator('#editor-canvas')
+        before = canvas.evaluate('canvas => canvas.toDataURL()')
+        page.locator('#touch-up').click()
+        self.assertTrue(page.evaluate('window.finishWorkers[0].terminated'))
+        page.locator('#erase-mask').click()
+        box = canvas.bounding_box()
+        canvas.click(position={'x':box['width']/2,'y':box['height']/2})
+        page.wait_for_function("before => document.querySelector('#editor-canvas').toDataURL() !== before", arg=before)
+        edited = canvas.evaluate('canvas => canvas.toDataURL()')
+        page.evaluate('window.finishWorkers[0].replyLate()')
+        self.assertEqual(canvas.evaluate('canvas => canvas.toDataURL()'), edited,
+                         'A cancelled edge pass must not overwrite a brush edit')
+        page.locator('#use-cutout').click()
+        page.wait_for_selector('#editor-dialog', state='hidden')
+
+        page.locator('#photo-input').set_input_files({'name':'second.png','mimeType':'image/png','buffer':self.photo})
+        page.wait_for_function('window.finishWorkers.length === 2', timeout=100000)
+        self.assertEqual(len(model_downloads), 1,
+                         'Successive photos should share the verified warm model')
+        self.assertTrue(page.locator('#use-cutout').is_enabled())
+        page.locator('#use-cutout').click()
+        page.wait_for_selector('#editor-dialog', state='hidden')
+        self.assertTrue(page.evaluate('window.finishWorkers[1].terminated'))
+        self.assertEqual(page.locator('#asset-status').inner_text(), 'Your moment')
 
     def test_legacy_collection_migrates_without_losing_saved_moments(self):
         page=self.page
@@ -232,8 +296,7 @@ class StudioTests(unittest.TestCase):
             page.locator('#start-photo').tap()
         picker.value.set_files({'name':'phone-photo.png','mimeType':'image/png','buffer':self.photo})
         page.wait_for_selector('#editor-dialog[open]')
-        page.locator('#whole-image').click()
-        page.locator('#use-cutout').click()
+        page.locator('#keep-photo').click()
         page.wait_for_selector('#editor-dialog',state='hidden')
         self.assertEqual(page.locator('.flow-steps [aria-current=step]').get_attribute('data-step'),'sticker')
         page.locator('#customize-sticker').tap()
@@ -247,6 +310,12 @@ class StudioTests(unittest.TestCase):
         page.wait_for_selector('#editor-dialog[open]')
         page.wait_for_function("document.querySelector('#auto-cutout').getAttribute('aria-busy') === 'false'",timeout=100000)
         self.assertIn('Your subject is ready',page.locator('#cutout-status').inner_text())
+        self.assertTrue(page.locator('#touchup-panel').is_hidden())
+        self.assertFalse(page.locator('#auto-cutout').is_visible())
+        for selector in ['#use-cutout', '#touch-up']:
+            bounds = page.locator(selector).bounding_box()
+            self.assertGreaterEqual(bounds['y'], 0)
+            self.assertLessEqual(bounds['y'] + bounds['height'], 844)
         page.locator('#use-cutout').tap()
         page.wait_for_selector('#editor-dialog',state='hidden')
         self.assertIn('An afternoon find',page.locator('#sticker-canvas').get_attribute('aria-label'))
