@@ -19,7 +19,8 @@ export function isValidMoment(item) {
       typeof item.name === "string" &&
       safeImage(item.data) &&
       (!item.source || safeImage(item.source)) &&
-      (!item.mask || safeImage(item.mask)),
+      (!item.mask || safeImage(item.mask)) &&
+      (!item.colors || safeImage(item.colors)),
   );
 }
 

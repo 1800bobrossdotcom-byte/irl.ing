@@ -57,5 +57,22 @@ export function keepConnectedSubject(alpha, width, height, x, y) {
         }
       }
   }
+  // Retain the faint feather around the selected component without letting
+  // near-transparent bridges merge two otherwise separate objects.
+  head = 0;
+  while (head < tail) {
+    const i = queue[head++], depth = visited[i];
+    if (depth >= 5) continue;
+    const px = i % width, py = Math.floor(i / width);
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+      const nx = px + dx, ny = py + dy;
+      if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
+      const next = ny * width + nx;
+      if (!visited[next] && alpha[next] > 0 && alpha[next] < 12) {
+        visited[next] = depth + 1;
+        queue[tail++] = next;
+      }
+    }
+  }
   return Uint8ClampedArray.from(alpha, (value, i) => (visited[i] ? value : 0));
 }

@@ -32,10 +32,11 @@ HEIC/HEIF inputs are accepted when the browser can decode them natively; otherwi
 ## What works
 
 - Local photo/camera import, with an automatic U²-Net background-removal model running in a Web Worker through ONNX Runtime Web. First use loads roughly 17 MB of uncompressed model/runtime resources from this same site. Photos do not leave the device.
-- Manual tracing, erase/restore brushes with undo, original-image comparison, and tap-to-keep selection for spatially separated subjects. Connected or overlapping objects need manual refinement.
+- Source-guided hair/edge refinement with optional halo color cleanup and painted-area locks. RGB detail from the imported photo improves uncertain mask boundaries; the pass is explicit and reversible.
+- Zoom/pinch/hand inspection, image-pixel soft brushes with hardness, undo/redo, light/dark/checker backgrounds, and full-resolution tap-to-keep selection. Traced outlines can become brush-editable masks without closing the editor. Connected or overlapping objects need manual refinement.
 - Die-cut/circle/oval previews, three finish previews, size, border and quantity controls, plus an explicitly illustrative price and demo checkout.
 - Browser-local IndexedDB storage for images, original sources, masks and sticker settings. Legacy localStorage moments migrate automatically, with the old copy retained until migration commits. There is no arbitrary 12-moment limit; device quotas still apply.
-- Reopening saved masks for further editing, responsive layouts and downloadable PNG previews.
+- Reopening saved masks and cleaned colors for further editing, responsive layouts, downloadable sticker previews, and a separate clean transparent cutout PNG at imported image resolution.
 
 Clear, distinct foreground subjects work best. The compact model is a useful first cut, not a guarantee of hair-perfect masks or arbitrary object recognition. The user can cancel inference, retry it, or use manual editing when loading or execution fails. Worker memory is released after inference; the undo history has a roughly 24 MB pixel budget.
 
@@ -45,10 +46,10 @@ Clear, distinct foreground subjects work best. The compact model is a useful fir
 npm test
 npm run build
 # With the production server running on port 3003:
-STUDIO_URL=http://127.0.0.1:3003 python3 tests/test_studio.py
+STUDIO_URL=http://127.0.0.1:3003 python3 -m unittest discover -s tests -p 'test_*.py' -v
 ```
 
-Five numerical/storage-validation tests and eleven Chromium browser workflows cover real model inference, brush/undo, saved masks/settings, migration, model-loading failure, invalid images, unavailable storage, tracing/export, responsive layouts and demo checkout. Python Playwright and Chromium are provided by the cloud environment; use `CHROMIUM_PATH` to override `/usr/bin/chromium`.
+Numerical tests cover known-alpha strands, chromatic boundaries, halo cleanup, region locks, source transparency, brush/viewport behavior and persistence validation. Chromium browser workflows cover real inference, editor gestures and history, saved edits, migration, import/model/storage failures, tracing/export, responsive layouts and demo checkout. Browser tests need Python Playwright, Pillow, and Chromium, available in this cloud environment; use `CHROMIUM_PATH` to override `/usr/bin/chromium`. See [edge refinement math and evidence](docs/edge-refinement.md) for methods, quantitative synthetic results, and limits.
 
 The production build checks the bundled model's SHA-256. The worker verifies it again before inference. Model provenance and licenses are in [the third-party notices](public/third-party-notices.txt).
 
@@ -56,4 +57,4 @@ The production build checks the bundled model's SHA-256. The worker verifies it 
 
 Saved moments stay in this browser, not a cloud account; browser-data clearing removes them. Imports are limited to 20 MB and resized to a 1600-pixel maximum edge. Mobile camera support depends on the device's native image picker.
 
-The downloaded PNG is a visual preview, not a manufacturing proof. Prices, delivery estimates and checkout are still demos. No payment is collected and no order reaches a printer. Real fulfillment requires provider selection, server-owned quotes, production artwork validation, payment integration and order reconciliation. See [the technical roadmap](docs/prototype.md).
+The sticker PNG is a visual preview; the clean cutout PNG retains imported image resolution and transparency. Neither is a manufacturing proof or a production cutting contour. Prices, delivery estimates and checkout are still demos. No payment is collected and no order reaches a printer. Real fulfillment requires provider selection, server-owned quotes, production artwork validation, payment integration and order reconciliation. See [the technical roadmap](docs/prototype.md).

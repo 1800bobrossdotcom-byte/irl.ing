@@ -2032,3 +2032,353 @@ dialog .section-index {
     scroll-margin-top: 20px;
   }
 }
+
+/* Close-up editing: compact controls, room to inspect every edge. */
+.editor-dialog h2 {
+  margin: 12px 0 8px;
+}
+#editor-instructions {
+  margin: 6px 0 14px;
+}
+.editor-dialog .dialog-close {
+  min-height: 44px;
+  min-width: 44px;
+}
+.editor-dialog .compare-control {
+  min-height: 44px;
+}
+.editor-dialog .editor-modes,
+.editor-dialog .refine-tools {
+  gap: 6px;
+}
+.editor-dialog .pill,
+.editor-dialog .text-button,
+.editor-dialog .view-button {
+  min-height: 44px;
+}
+.editor-dialog .text-button {
+  min-width: 44px;
+}
+.editor-dialog .pill {
+  padding: 10px 13px;
+}
+.editor-dialog button[aria-pressed="true"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+.editor-dialog button:disabled {
+  opacity: 0.42;
+  cursor: default;
+}
+.editor-dialog button:focus-visible,
+.editor-dialog select:focus-visible,
+.edge-settings summary:focus-visible,
+.editor-dialog input[type="range"]:focus-visible {
+  outline: 2px solid #7b8e43;
+  outline-offset: 3px;
+}
+.editor-dialog [hidden] {
+  display: none !important;
+}
+.edge-refine-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 44px;
+  margin-left: auto;
+  padding: 10px 14px;
+  border: 1px solid #b8c884;
+  border-radius: 22px;
+  background: #e6edce;
+  color: #405329;
+  font-size: 11px;
+  font-weight: 600;
+}
+.edge-refine-button .icon {
+  width: 15px;
+  height: 15px;
+}
+#brush-control {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 100%;
+  margin: 2px 0 0;
+  padding: 8px 12px;
+  gap: 8px 20px;
+  background: #eeeee4;
+  border-radius: 9px;
+}
+#brush-control label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: #647054;
+  font-size: 10px;
+}
+#brush-control input[type="range"] {
+  flex: 1;
+  width: 70px;
+  min-width: 0;
+  min-height: 44px;
+  margin: 0;
+  accent-color: #596c3b;
+}
+#brush-control output {
+  min-width: 38px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.edge-settings {
+  border-top: 1px solid #d9decd;
+  border-bottom: 1px solid #d9decd;
+  margin: 10px 0 0;
+}
+.edge-settings summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 11px;
+  color: #647054;
+  list-style: none;
+}
+.edge-settings summary::-webkit-details-marker {
+  display: none;
+}
+.edge-settings summary::before {
+  content: "+";
+  font-size: 17px;
+  line-height: 1;
+}
+.edge-settings[open] summary::before {
+  content: "−";
+}
+.edge-settings-controls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  padding-bottom: 15px;
+}
+.edge-settings-controls label {
+  display: grid;
+  font-size: 11px;
+  color: #536247;
+}
+.edge-settings-controls input {
+  width: 100%;
+  min-height: 44px;
+  margin: 0;
+  accent-color: #596c3b;
+}
+.edge-settings-controls label > span {
+  display: flex;
+  justify-content: space-between;
+  color: #7e886e;
+  font-size: 9px;
+}
+.editor-view-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 3px 0 10px;
+}
+.editor-zoom-controls {
+  display: flex;
+  align-items: center;
+  border: 1px solid #d3d9c5;
+  border-radius: 9px;
+  overflow: hidden;
+}
+.view-button {
+  min-width: 44px;
+  padding: 8px 12px;
+  background: transparent;
+  color: #536247;
+  font-size: 13px;
+}
+.view-button + .view-button {
+  border-left: 1px solid #d3d9c5;
+}
+#zoom-out,
+#zoom-in {
+  font-size: 20px;
+}
+#zoom-fit {
+  min-width: 58px;
+  width: 58px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.editor-background-control {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: auto;
+  color: #647054;
+  font-size: 10px;
+}
+.editor-background-control select {
+  min-height: 44px;
+  max-width: 105px;
+  padding: 8px 24px 8px 10px;
+  border: 1px solid #d3d9c5;
+  border-radius: 9px;
+  background: var(--paper);
+  color: #536247;
+  font: inherit;
+  font-size: 11px;
+}
+#editor-viewport {
+  position: relative;
+  isolation: isolate;
+}
+#editor-viewport[data-background="light"] {
+  background: #fffdf6;
+}
+#editor-viewport[data-background="dark"] {
+  background: #252924;
+}
+.brush-cursor {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+  border: 1px solid #fff;
+  box-shadow: 0 0 0 1px #252924;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+#download-cutout {
+  margin-left: auto;
+  color: #536247;
+  line-height: 1.35;
+}
+.editor-footer {
+  gap: 12px;
+}
+.editor-footer > span {
+  max-width: 190px;
+  line-height: 1.45;
+}
+@media (max-width: 650px) {
+  .editor-dialog h2 {
+    font-size: 23px;
+  }
+  #editor-instructions {
+    font-size: 11px;
+  }
+  .editor-dialog .pill {
+    padding: 10px 11px;
+  }
+  .edge-refine-button {
+    margin-left: 0;
+    flex: 1 1 auto;
+    font-size: 10px;
+    padding: 10px;
+  }
+  #brush-control {
+    padding: 4px 9px;
+    gap: 4px 12px;
+  }
+  #brush-control label {
+    gap: 0 6px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  #brush-control label > input[type="range"] {
+    flex: 1 0 100%;
+    width: 100%;
+    order: 2;
+  }
+  #brush-control label > output {
+    margin-left: auto;
+  }
+  .edge-settings-controls {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .edge-settings-controls label {
+    grid-template-columns: 87px minmax(0, 1fr);
+    align-items: center;
+    column-gap: 10px;
+  }
+  .edge-settings-controls label > span {
+    grid-column: 2;
+    margin-top: -4px;
+  }
+  .editor-view-controls {
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .editor-background-control {
+    gap: 0;
+    font-size: 0;
+  }
+  .editor-background-control > select {
+    padding: 8px;
+    max-width: 85px;
+  }
+  .editor-footer {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+  }
+  .editor-footer > span {
+    max-width: none;
+  }
+  #download-cutout {
+    max-width: 100px;
+    padding: 8px 0;
+  }
+  .editor-footer .primary-button {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-height: 48px;
+  }
+}
+@media (max-width: 370px) {
+  .editor-dialog .auto-button {
+    padding: 9px 8px;
+    font-size: 10px;
+  }
+  .editor-dialog .editor-modes {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.6fr) 44px 44px;
+    gap: 4px;
+  }
+  .editor-modes .pill,
+  .editor-modes .text-button {
+    padding: 8px 4px;
+    font-size: 10px;
+  }
+  #apply-outline {
+    grid-column: span 2;
+  }
+  .editor-background-control {
+    margin-left: auto;
+  }
+  .editor-view-controls {
+    gap: 4px;
+  }
+  .editor-zoom-controls .view-button {
+    padding: 8px;
+  }
+  #zoom-fit {
+    min-width: 44px;
+    width: 44px;
+  }
+  #pan-image {
+    width: 44px;
+    min-width: 44px;
+    padding: 8px 2px;
+  }
+  .editor-background-control > select {
+    width: 62px;
+    max-width: 62px;
+    padding: 8px 4px;
+  }
+}

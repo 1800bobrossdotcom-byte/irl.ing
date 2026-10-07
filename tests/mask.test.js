@@ -63,6 +63,10 @@ test("tap selection retains only the selected connected subject and its soft edg
   assert.equal(keepConnectedSubject(mask, 5, 4, 2, 0), null);
   assert.equal(keepConnectedSubject(mask, 5, 4, -1, 1), null);
 });
+test("selection keeps faint feather coverage without following it into another object", () => {
+  const alpha = Uint8Array.of(0, 255, 90, 9, 5, 2, 1, 220, 0);
+  assert.deepEqual([...keepConnectedSubject(alpha, 9, 1, 1, 0)], [0, 255, 90, 9, 5, 2, 1, 0, 0]);
+});
 test("saved moments accept local artwork and reject remote or script URLs", () => {
   assert.ok(
     isValidMoment({ id: "1", name: "Flower", data: "/assets/flower.svg" }),
@@ -82,6 +86,8 @@ test("saved moments accept local artwork and reject remote or script URLs", () =
     }),
     false,
   );
+  assert.ok(isValidMoment({ id: "2", name: "Cleaned", data: "/assets/flower.svg", colors: "data:image/png;base64,aGVsbG8=" }));
+  assert.equal(isValidMoment({ id: "2", name: "Bad colors", data: "/assets/flower.svg", colors: "https://example.com/photo.png" }), false);
   assert.equal(
     isValidMoment({
       id: "1",
