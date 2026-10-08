@@ -1,5 +1,8 @@
 import { createEditor } from "./editor.js";
 import { loadMoments, saveMoment, deleteMoment } from "./moments.js";
+import { renderArtwork, artworkLayout } from "./artwork.js";
+import { drawGarment } from "./garments.js";
+import { setPngDensity } from "./png-density.js";
 ("use strict");
 
 const $ = (selector) => document.querySelector(selector);
@@ -46,6 +49,8 @@ const state = {
   size: 3,
   quantity: 25,
   border: 8,
+  product: "sticker",
+  sizes: { sticker: 3, tshirt: 8, sweatshirt: 8 },
 };
 let selectionVersion = 0;
 let toastTimer;
@@ -138,8 +143,10 @@ async function selectAsset(asset) {
   try {
     const image = await loadImage(asset.data);
     if (version !== selectionVersion) return;
-    const canvas = makeCanvas(image.naturalWidth, image.naturalHeight);
-    canvas.getContext("2d").drawImage(image, 0, 0);
+    const vector = /^\/assets\/[a-z]+\.svg$/.test(asset.data);
+    const factor = vector ? Math.min(2400 / Math.max(image.naturalWidth, image.naturalHeight), Math.sqrt(4_000_000 / (image.naturalWidth * image.naturalHeight))) : 1;
+    const canvas = makeCanvas(image.naturalWidth * factor, image.naturalHeight * factor);
+    canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
     state.image = trimCanvas(canvas);
     state.asset = { ...asset };
     $("#asset-status").textContent = asset.sample
@@ -182,6 +189,7 @@ function getQuote() {
   return candidates.sort((a, b) => a.cents - b.cents)[0];
 }
 function updatePrice() {
+  if (state.product !== "sticker") return;
   const quote = getQuote();
   $("#total-price").textContent = money(quote.cents);
   $("#per-sticker").textContent =
@@ -193,58 +201,21 @@ function renderPreview() {
   const ctx = canvas.getContext("2d");
   const image = state.image;
   ctx.clearRect(0, 0, 1000, 1000);
-  const artwork = makeCanvas(1000);
-  const art = artwork.getContext("2d");
-  const border = state.border * 3.6;
-  let scale;
-  if (state.shape === "die-cut") {
-    scale = Math.min(760 / image.width, 760 / image.height);
-    art.drawImage(
-      image,
-      (1000 - image.width * scale) / 2,
-      (1000 - image.height * scale) / 2,
-      image.width * scale,
-      image.height * scale,
-    );
-    if (border > 0) {
-      for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 32)
-        ctx.drawImage(
-          artwork,
-          Math.cos(angle) * border,
-          Math.sin(angle) * border,
-        );
-      ctx.globalCompositeOperation = "source-in";
-      ctx.fillStyle = "#fffefb";
-      ctx.fillRect(0, 0, 1000, 1000);
-      ctx.globalCompositeOperation = "source-over";
-    }
-    ctx.drawImage(artwork, 0, 0);
-  } else {
-    const rx = 410,
-      ry = state.shape === "oval" ? 305 : 410;
-    ctx.beginPath();
-    ctx.ellipse(500, 500, rx, ry, 0, 0, Math.PI * 2);
-    ctx.fillStyle = "#fffefb";
-    ctx.fill();
-    ctx.save();
-    ctx.beginPath();
-    ctx.ellipse(500, 500, rx - border, ry - border, 0, 0, Math.PI * 2);
-    ctx.clip();
-    scale =
-      Math.min(
-        (rx * 2 - border * 2) / image.width,
-        (ry * 2 - border * 2) / image.height,
-      ) * 0.88;
-    ctx.drawImage(
-      image,
-      (1000 - image.width * scale) / 2,
-      (1000 - image.height * scale) / 2,
-      image.width * scale,
-      image.height * scale,
-    );
-    ctx.restore();
+  const shape = state.product === "sticker" ? state.shape : "die-cut";
+  const { canvas: artwork } = renderArtwork(image, { shape, border: state.border, size: state.size, preview: true });
+  const garment = state.product !== "sticker";
+  $("#preview-stage").classList.toggle("garment-preview", garment);
+  let longest = 820, centerX = 500, centerY = 500;
+  if (garment) {
+    const area = drawGarment(ctx, state.product, 1000, 1000);
+    longest = area.width * state.size / 12;
+    centerX = area.x + area.width / 2;
+    centerY = area.y + area.height / 2;
   }
-  if (state.finish !== "matte") {
+  const scale = longest / Math.max(artwork.width, artwork.height);
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(artwork, centerX - artwork.width * scale / 2, centerY - artwork.height * scale / 2, artwork.width * scale, artwork.height * scale);
+  if (!garment && state.finish !== "matte") {
     ctx.save();
     ctx.globalCompositeOperation = "source-atop";
     const gradient = ctx.createLinearGradient(100, 150, 850, 800);
@@ -271,30 +242,47 @@ function renderPreview() {
     ctx.fillRect(0, 0, 1000, 1000);
     ctx.restore();
   }
-  const bounds = alphaBounds(canvas);
-  const longest = Math.max(bounds.width, bounds.height);
-  const dimension = (px) => Number(((state.size * px) / longest).toFixed(1));
-  $("#measurement").textContent =
-    `${dimension(bounds.width)}″ × ${dimension(bounds.height)}″`;
-  $("#sticker-canvas").setAttribute(
-    "aria-label",
-    `${state.asset.name}, ${state.size} inch ${state.finish} ${state.shape} sticker preview`,
-  );
+  const layout = artworkLayout(image.width, image.height, { shape, border: state.border, size: state.size });
+  const physicalWidth = layout.width / layout.dpi, physicalHeight = layout.height / layout.dpi;
+  $("#measurement").textContent = `${Number(physicalWidth.toFixed(1))}″ × ${Number(physicalHeight.toFixed(1))}″`;
+  const productName = { sticker: "sticker", tshirt: "T-shirt", sweatshirt: "sweatshirt" }[state.product];
+  canvas.setAttribute("aria-label", `${state.asset.name}, ${state.size} inch ${garment ? productName + " centered front print" : state.finish + " " + state.shape + " sticker"} preview`);
+  $("#preview-caption").textContent = garment ? "YOUR MOMENT. FRONT AND CENTER." : "A MOMENT, WITH A LITTLE STICKING POWER.";
+  const density = Math.floor(layout.dpi);
+  const insufficient = density < 299;
   const quality = $("#quality-note");
-  const insufficient =
-    !state.asset.sample &&
-    Math.max(image.width, image.height) < state.size * 300;
   quality.hidden = !insufficient;
-  quality.textContent = insufficient
-    ? `This photo may look soft at ${state.size}″. A larger photo will print more clearly.`
-    : "";
+  quality.textContent = insufficient ? `About ${density} DPI at ${state.size}″. Try a larger photo or a smaller print for finer detail.` : "";
+  $("#output-note").textContent = `${layout.width} × ${layout.height} px artwork · ${density} DPI at ${state.size}″${garment ? " · centered front print" : " · even white outline"}`;
   updatePrice();
 }
 const qualityNote = document.createElement("p");
 qualityNote.id = "quality-note";
 qualityNote.className = "quality-note";
 qualityNote.hidden = true;
-$(".order-block").prepend(qualityNote);
+$("#output-note").after(qualityNote);
+function chooseProduct(product) {
+  if (!["sticker", "tshirt", "sweatshirt"].includes(product)) return;
+  state.sizes[state.product] = state.size;
+  state.product = product;
+  state.size = state.sizes[product];
+  const garment = product !== "sticker";
+  $("#sticker-settings").hidden = garment;
+  $("#sticker-order").hidden = garment;
+  $("#garment-note").hidden = !garment;
+  $("#size-label").innerHTML = garment ? "Print size <span>Longest edge</span>" : "Size <span>Longest edge</span>";
+  $("#size-options").innerHTML = (garment ? [8, 10, 12] : [2, 3, 4]).map(size => `<button class="option${size === state.size ? " selected" : ""}" data-value="${size}" aria-pressed="${size === state.size}">${size}″</button>`).join("");
+  $("#product-options").querySelectorAll("button").forEach(button => {
+    const selected = button.dataset.value === product;
+    button.classList.toggle("selected", selected);
+    button.setAttribute("aria-pressed", String(selected));
+  });
+  renderPreview();
+}
+$("#product-options").onclick = event => {
+  const button = event.target.closest("button[data-value]");
+  if (button) chooseProduct(button.dataset.value);
+};
 for (const [id, key] of [
   ["shape-options", "shape"],
   ["finish-options", "finish"],
@@ -308,6 +296,7 @@ for (const [id, key] of [
       key === "size" || key === "quantity"
         ? Number(button.dataset.value)
         : button.dataset.value;
+    if (key === "size") state.sizes[state.product] = state.size;
     $(`#${id}`)
       .querySelectorAll("button")
       .forEach((item) => {
@@ -393,7 +382,7 @@ const editor = createEditor({
     $("#customize-sticker").hidden = false;
     setFlowStep("sticker");
     importMessage(
-      "Your sticker is ready. Check the preview, then choose its size and finish.",
+      "Your cutout is ready. Check the preview, then choose your product and size.",
     );
   },
   notify: toast,
@@ -468,9 +457,10 @@ for (const id of ["photo-input", "camera-input"]) {
         throw error;
       }
       if (version !== importVersion) return;
-      const scale = Math.min(
-        1,
-        1600 / Math.max(image.naturalWidth, image.naturalHeight),
+      const lowMemory = navigator.deviceMemory <= 2;
+      const scale = Math.min(1,
+        (lowMemory ? 1600 : 2400) / Math.max(image.naturalWidth, image.naturalHeight),
+        Math.sqrt((lowMemory ? 2_000_000 : 4_000_000) / (image.naturalWidth * image.naturalHeight)),
       );
       const resized = makeCanvas(
         image.naturalWidth * scale,
@@ -565,15 +555,16 @@ function updateSavedStatus() {
   );
 }
 function configurationSnapshot() {
-  const { shape, finish, size, quantity, border } = state;
-  return { shape, finish, size, quantity, border };
+  const { product, shape, finish, size, quantity, border } = state;
+  return { product, shape, finish, size, quantity, border };
 }
 function restoreConfiguration(config) {
   if (!config) return;
+  chooseProduct(["sticker", "tshirt", "sweatshirt"].includes(config.product) ? config.product : "sticker");
   for (const [key, values] of Object.entries({
     shape: ["die-cut", "circle", "oval"],
     finish: ["matte", "glossy", "holographic"],
-    size: [2, 3, 4],
+    size: state.product === "sticker" ? [2, 3, 4] : [8, 10, 12],
     quantity: [10, 25, 50, 100],
   })) {
     if (values.includes(config[key]))
@@ -599,7 +590,7 @@ $("#save-object").onclick = async () => {
     await saveMoment(item);
     collection = await loadMoments();
     updateSavedStatus();
-    toast("A moment, kept. Your sticker choices are saved with it.");
+    toast("A moment, kept. Your product and placement choices are saved with it.");
   } catch {
     toast(
       "Your browser couldn’t save this. Free up device storage, or download your preview.",
@@ -659,26 +650,43 @@ function renderCollection() {
     grid.append(card);
   }
 }
-$("#download-art").onclick = () => {
+function canvasBlob(canvas) {
+  return new Promise((resolve, reject) => canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error("That image could not be exported. Try again.")), "image/png"));
+}
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob), anchor = document.createElement("a");
+  anchor.href = url; anchor.download = filename; anchor.click();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+$("#download-art").onclick = async () => {
   if (!state.image) return;
-  const output = trimCanvas($("#sticker-canvas"));
-  output.toBlob((blob) => {
-    if (!blob) {
-      toast("The preview could not be exported. Try again.");
-      return;
-    }
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = `irling-${state.shape}-preview.png`;
-    anchor.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-    toast("Preview downloaded. Print-ready files come in the next version.");
-  }, "image/png");
+  const button = $("#download-art"), image = state.image;
+  const { product, size, border } = state, shape = product === "sticker" ? state.shape : "die-cut";
+  button.disabled = true; button.setAttribute("aria-busy", "true");
+  try {
+    // Release the idle model before allocating a native-resolution outline.
+    editor.releaseIdleModel();
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    const { canvas, layout } = renderArtwork(image, { shape, size, border });
+    const blob = await canvasBlob(canvas);
+    const bytes = setPngDensity(new Uint8Array(await blob.arrayBuffer()), layout.dpi);
+    downloadBlob(new Blob([bytes], { type: "image/png" }), `irling-${product}-${shape}-${size}in-artwork.png`);
+    toast(`Artwork downloaded: ${canvas.width} × ${canvas.height} px, ${Math.floor(layout.dpi)} DPI at ${size}″.`);
+  } catch (error) { toast(error.message); }
+  finally { button.disabled = false; button.setAttribute("aria-busy", "false"); }
+};
+$("#download-preview").onclick = async () => {
+  if (!state.image) return;
+  try {
+    const snapshot = makeCanvas(1000);
+    snapshot.getContext("2d").drawImage($("#sticker-canvas"), 0, 0);
+    downloadBlob(await canvasBlob(snapshot), `irling-${state.product}-preview.png`);
+    toast("Preview downloaded. Use the artwork PNG for your print design.");
+  } catch (error) { toast(error.message); }
 };
 
 $("#checkout-button").onclick = () => {
-  if (!state.asset) return;
+  if (!state.asset || state.product !== "sticker") return;
   const quote = getQuote();
   const snapshot = {
     ...state,

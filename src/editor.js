@@ -439,6 +439,7 @@ export function createEditor({ onApply, notify, loadImage, makeCanvas, trimCanva
   };
   return {
     warmup() { engine.warmup(); },
+    releaseIdleModel() { if (!segmenting) engine.cancel(); },
     async open(next, { automatic = false } = {}) {
       cancelInference(); const version = generation;
       try {

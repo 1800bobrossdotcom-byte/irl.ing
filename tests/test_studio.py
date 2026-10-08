@@ -119,11 +119,21 @@ class StudioTests(unittest.TestCase):
         with page.expect_download() as download_info:
             page.locator('#download-art').click()
         download = download_info.value
-        self.assertTrue(download.suggested_filename.endswith('-preview.png'))
+        self.assertTrue(download.suggested_filename.endswith('-artwork.png'))
         with open(download.path(),'rb') as file:
             data = file.read()
         self.assertEqual(data[:8],b'\x89PNG\r\n\x1a\n')
         self.assertGreater(len(data),1000)
+        with page.expect_download() as preview_info:
+            page.locator('#download-preview').click()
+        preview = preview_info.value
+        self.assertTrue(preview.suggested_filename.endswith('-preview.png'))
+        with open(preview.path(),'rb') as file:
+            preview_data = file.read()
+        self.assertEqual(preview_data[:8],b'\x89PNG\r\n\x1a\n')
+        self.assertGreater(len(preview_data),1000)
+        self.assertNotEqual(data, preview_data,
+                            'Artwork and styled mockup must be separate exports')
         page.locator('#edit-object').click()
         page.wait_for_selector('#editor-dialog[open]')
         self.assertTrue(page.locator('#editor-dialog').is_visible())

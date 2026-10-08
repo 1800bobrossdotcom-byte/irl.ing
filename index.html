@@ -95,7 +95,7 @@
       <section class="capture-panel" aria-labelledby="capture-title">
         <div class="capture-copy">
           <span class="section-index">START HERE</span>
-          <h2 id="capture-title">Your photo. Your sticker.</h2>
+          <h2 id="capture-title">Your photo. Your thing.</h2>
           <p>Choose a photo. We’ll find the subject.</p>
         </div>
         <div class="capture-actions">
@@ -116,14 +116,14 @@
           Private by design. Your photo stays on your phone.
         </p>
       </section>
-      <ol class="flow-steps" aria-label="Make a sticker">
+      <ol class="flow-steps" aria-label="Make something of your photo">
         <li data-step="photo" aria-current="step">
           <span>1</span>Choose a photo
         </li>
         <li data-step="cutout"><span>2</span>Keep your subject</li>
         <li data-step="sticker"><span>3</span>Make it yours</li>
       </ol>
-      <section class="studio" aria-label="Sticker studio">
+      <section class="studio" aria-label="Make it yours">
         <div class="workspace">
           <div class="workspace-top">
             <span class="section-index">01 — A LITTLE PIECE OF YOUR WORLD</span
@@ -144,7 +144,7 @@
                 id="sticker-canvas"
                 width="1000"
                 height="1000"
-                aria-label="Live sticker preview"
+                aria-label="Live artwork preview"
               ></canvas>
               <div class="holo-overlay"></div>
             </div>
@@ -160,13 +160,13 @@
               ><button
                 class="icon-button"
                 id="download-art"
-                aria-label="Download preview PNG"
-                title="Download preview PNG"
+                aria-label="Download artwork PNG"
+                title="Download artwork PNG"
               >
                 <svg class="icon"><use href="#i-download" /></svg>
               </button>
             </div>
-            <span class="preview-caption"
+            <span class="preview-caption" id="preview-caption"
               >A MOMENT, WITH A LITTLE STICKING POWER.</span
             >
           </div>
@@ -202,69 +202,80 @@
               your device</span
             ><button id="edit-object">Adjust cutout <span>↗</span></button>
           </div>
+          <p id="output-note" class="output-note" role="status"></p>
           <button
             class="primary-button mobile-continue"
             id="customize-sticker"
             hidden
           >
-            Choose size &amp; finish
+            Make it yours
             <svg class="icon"><use href="#i-arrow" /></svg>
           </button>
         </div>
         <aside class="configurator" aria-labelledby="config-title">
           <div class="section-index">02 — MAKE SOMETHING OF IT</div>
           <h2 id="config-title" tabindex="-1">
-            Good moments.<br />
-            Great little stickers.
+            Your moment.<br />
+            Made real.
           </h2>
           <p class="config-description">
-            Your first act of irl’ing. A little thing to take anywhere.
+            A sticker. A favorite tee. A little of your world to take with you.
           </p>
-          <fieldset>
-            <legend>Shape <span>Follow your own outline.</span></legend>
-            <div class="shape-options options" id="shape-options">
-              <button
-                class="option selected"
-                data-value="die-cut"
-                aria-pressed="true"
-              >
-                <span class="shape-icon die-cut"></span>Die-cut</button
-              ><button class="option" data-value="circle" aria-pressed="false">
-                <span class="shape-icon circle"></span>Circle</button
-              ><button class="option" data-value="oval" aria-pressed="false">
-                <span class="shape-icon oval"></span>Oval
-              </button>
+          <fieldset class="product-field">
+            <legend>Make it a</legend>
+            <div class="product-options options" id="product-options">
+              <button class="option selected" data-value="sticker" aria-pressed="true">Sticker</button>
+              <button class="option" data-value="tshirt" aria-pressed="false">T-shirt</button>
+              <button class="option" data-value="sweatshirt" aria-pressed="false">Sweatshirt</button>
             </div>
           </fieldset>
-          <fieldset>
-            <legend>
-              Finish <span id="finish-description">Soft feel. Zero glare.</span>
-            </legend>
-            <div class="finish-options options" id="finish-options">
-              <button
-                class="finish-option selected"
-                data-value="matte"
-                aria-pressed="true"
-              >
-                <span class="finish-swatch matte"></span>Matte</button
-              ><button
-                class="finish-option"
-                data-value="glossy"
-                aria-pressed="false"
-              >
-                <span class="finish-swatch glossy"></span>Glossy</button
-              ><button
-                class="finish-option"
-                data-value="holographic"
-                aria-pressed="false"
-              >
-                <span class="finish-swatch holographic"></span>Holographic
-              </button>
-            </div>
-          </fieldset>
+          <div id="sticker-settings">
+            <fieldset>
+              <legend>Shape <span>Follow your own outline.</span></legend>
+              <div class="shape-options options" id="shape-options">
+                <button
+                  class="option selected"
+                  data-value="die-cut"
+                  aria-pressed="true"
+                >
+                  <span class="shape-icon die-cut"></span>Die-cut</button
+                ><button class="option" data-value="circle" aria-pressed="false">
+                  <span class="shape-icon circle"></span>Circle</button
+                ><button class="option" data-value="oval" aria-pressed="false">
+                  <span class="shape-icon oval"></span>Oval
+                </button>
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend>
+                Finish <span id="finish-description">Soft feel. Zero glare.</span>
+              </legend>
+              <div class="finish-options options" id="finish-options">
+                <button
+                  class="finish-option selected"
+                  data-value="matte"
+                  aria-pressed="true"
+                >
+                  <span class="finish-swatch matte"></span>Matte</button
+                ><button
+                  class="finish-option"
+                  data-value="glossy"
+                  aria-pressed="false"
+                >
+                  <span class="finish-swatch glossy"></span>Glossy</button
+                ><button
+                  class="finish-option"
+                  data-value="holographic"
+                  aria-pressed="false"
+                >
+                  <span class="finish-swatch holographic"></span>Holographic
+                </button>
+              </div>
+            </fieldset>
+          </div>
           <div class="size-border-row">
             <fieldset>
-              <legend>Size <span>Longest edge</span></legend>
+              <legend id="size-label">Size <span>Longest edge</span></legend>
               <div class="size-options options" id="size-options">
                 <button class="option" data-value="2" aria-pressed="false">
                   2″</button
@@ -294,45 +305,51 @@
               />
             </fieldset>
           </div>
-          <fieldset>
-            <legend>
-              How many? <span>One for you. Some for your people.</span>
-            </legend>
-            <div class="quantity-options options" id="quantity-options">
-              <button class="option" data-value="10" aria-pressed="false">
-                10</button
-              ><button
-                class="option selected"
-                data-value="25"
-                aria-pressed="true"
-              >
-                25</button
-              ><button class="option" data-value="50" aria-pressed="false">
-                50</button
-              ><button class="option" data-value="100" aria-pressed="false">
-                100
-              </button>
-            </div>
-          </fieldset>
-          <div class="order-block">
-            <div class="price-line">
-              <div>
-                <strong id="total-price">$18.00</strong
-                ><span id="per-sticker">$0.72 / sticker</span>
+          <p id="garment-note" class="garment-note" hidden>
+            Centered front print preview. Choose a size, then download your artwork.
+          </p>
+          <div id="sticker-order">
+            <fieldset>
+              <legend>
+                How many? <span>One for you. Some for your people.</span>
+              </legend>
+              <div class="quantity-options options" id="quantity-options">
+                <button class="option" data-value="10" aria-pressed="false">
+                  10</button
+                ><button
+                  class="option selected"
+                  data-value="25"
+                  aria-pressed="true"
+                >
+                  25</button
+                ><button class="option" data-value="50" aria-pressed="false">
+                  50</button
+                ><button class="option" data-value="100" aria-pressed="false">
+                  100
+                </button>
               </div>
-              <span class="shipping-note"
-                >Shipping included<br /><span
-                  >Illustrative US pricing</span
-                ></span
-              >
-            </div>
-            <button class="primary-button" id="checkout-button">
-              Start irl’ing <svg class="icon"><use href="#i-arrow" /></svg>
-            </button>
-            <div class="checkout-caption">
-              <span class="tiny-dot"></span> Demo checkout · no payment required
+            </fieldset>
+            <div class="order-block">
+              <div class="price-line">
+                <div>
+                  <strong id="total-price">$18.00</strong
+                  ><span id="per-sticker">$0.72 / sticker</span>
+                </div>
+                <span class="shipping-note"
+                  >Shipping included<br /><span
+                    >Illustrative US pricing</span
+                  ></span
+                >
+              </div>
+              <button class="primary-button" id="checkout-button">
+                Start irl’ing <svg class="icon"><use href="#i-arrow" /></svg>
+              </button>
+              <div class="checkout-caption">
+                <span class="tiny-dot"></span> Demo checkout · no payment required
+              </div>
             </div>
           </div>
+          <button id="download-preview" class="text-button preview-download">Download preview PNG</button>
         </aside>
       </section>
       <section class="bottom-strip" aria-label="The idea">

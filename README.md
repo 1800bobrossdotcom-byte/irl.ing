@@ -2,7 +2,7 @@
 
 **Less scrolling. More irl’ing.**
 
-Irl’ing is a verb: being present, seeing what's around you, and doing something with it. The mobile-friendly studio turns a photo into a reusable sticker cutout. Its identity is an open viewfinder with an outward arrow: notice a moment, then bring it into real life.
+Irl’ing is a verb: being present, seeing what's around you, and doing something with it. The mobile-friendly studio turns a photo into reusable artwork for stickers, T-shirts, and sweatshirts. Its identity is an open viewfinder with an outward arrow: notice a moment, then bring it into real life.
 
 ## Run
 
@@ -25,7 +25,7 @@ Vercel deploys `master`. `vercel.json` selects Vite, `npm run build`, and `dist/
 
 ## On a phone
 
-Open irl.ing and tap **Use a photo** or **Take a photo** at the top of the page. The editor finds the subject automatically, shows the first usable result immediately, and offers **Keep this bit** or **Touch up**. Conservative edge finishing runs in the background without blocking either action. Touch up opens Erase/Restore and a brush size; detailed controls are under **More tools**. **Try an example** uses the same flow without requiring a file. After Keep, review the sticker and tap **Choose size & finish**. Photo import errors appear in the photo dialog as well as on the page.
+Open irl.ing and tap **Use a photo** or **Take a photo** at the top of the page. The editor finds the subject automatically, shows the first usable result immediately, and offers **Keep this bit** or **Touch up**. Conservative edge finishing runs in the background without blocking either action. Touch up opens Erase/Restore and a brush size; detailed controls are under **More tools**. **Try an example** uses the same flow without requiring a file. After Keep, tap **Make it yours**, choose Sticker, T-shirt, or Sweatshirt, then select size and border. Photo import errors appear in the photo dialog as well as on the page.
 
 HEIC/HEIF inputs are accepted when the browser can decode them natively; otherwise an explicit message asks for a JPG/PNG or a new camera photo. No HEIC conversion service is used. These workflows have been exercised with mobile Chromium emulation, not a physical phone. Safari/WebKit verification is pending because the cloud network blocked the test-browser download.
 
@@ -34,9 +34,9 @@ HEIC/HEIF inputs are accepted when the browser can decode them natively; otherwi
 - Local photo/camera import, with an automatic U²-Net background-removal model running in a Web Worker through ONNX Runtime Web. First use loads roughly 17 MB of uncompressed model/runtime resources from this same site. Photos do not leave the device.
 - Automatic source-guided edge finishing on fresh cutouts, with manual refinement, optional halo cleanup and painted-area locks under More tools. RGB detail from the imported photo improves uncertain mask boundaries; mask edits remain reversible.
 - Zoom/pinch/hand inspection, image-pixel soft brushes with hardness, undo/redo, light/dark/checker backgrounds, and full-resolution tap-to-keep selection. Traced outlines can become brush-editable masks without closing the editor. Connected or overlapping objects need manual refinement.
-- Die-cut/circle/oval previews, three finish previews, size, border and quantity controls, plus an explicitly illustrative price and demo checkout.
-- Browser-local IndexedDB storage for images, original sources, masks and sticker settings. Legacy localStorage moments migrate automatically, with the old copy retained until migration commits. There is no arbitrary 12-moment limit; device quotas still apply.
-- Reopening saved masks and cleaned colors for further editing, responsive layouts, downloadable sticker previews, and a separate clean transparent cutout PNG at imported image resolution.
+- Precise contour-following white outlines, die-cut/circle/oval sticker previews and centered T-shirt/sweatshirt front-print mockups. Sticker finish and price/quantity/checkout controls remain separate from garments, which support artwork downloads.
+- Browser-local IndexedDB storage for images, original sources, masks and product/size/border settings. Legacy localStorage moments migrate automatically, with the old copy retained until migration commits. There is no arbitrary 12-moment limit; device quotas still apply.
+- Reopening saved masks and cleaned colors, responsive layouts, separate preview and transparent artwork downloads. Artwork exports retain available source detail up to the 300-DPI print target, with actual physical-density metadata and no upscaling of small photos. Finish effects and garment illustrations stay in preview files. See [artwork geometry and output](docs/artwork-output.md).
 
 Clear, distinct foreground subjects work best. The compact model is a useful first cut, not a guarantee of hair-perfect masks or arbitrary object recognition. The user can keep the photo as is, retry, or use manual editing when loading or execution fails. The verified model starts loading after photo-picker intent and stays initialized briefly for another photo: 45 seconds idle, 15 seconds on devices reporting 2 GB RAM or less. Hidden pages and explicit cancellation release it immediately; each edge-finishing worker is released after completion. Warmup respects the browser’s save-data setting. The undo history has a roughly 24 MB pixel budget.
 
@@ -57,6 +57,6 @@ The production build checks the bundled model's SHA-256. The worker verifies it 
 
 ## Product boundaries
 
-Saved moments stay in this browser, not a cloud account; browser-data clearing removes them. Imports are limited to 20 MB and resized to a 1600-pixel maximum edge. Mobile camera support depends on the device's native image picker.
+Saved moments stay in this browser, not a cloud account; browser-data clearing removes them. Imports are limited to 20 MB, a 2400-pixel edge and four megapixels; devices reporting at most 2 GB RAM use 1600 pixels and two megapixels. Existing saved photos retain their stored dimensions. Mobile camera support depends on the device's native image picker.
 
-The sticker PNG is a visual preview; the clean cutout PNG retains imported image resolution and transparency. Neither is a manufacturing proof or a production cutting contour. Prices, delivery estimates and checkout are still demos. No payment is collected and no order reaches a printer. Real fulfillment requires provider selection, server-owned quotes, production artwork validation, payment integration and order reconciliation. See [the technical roadmap](docs/prototype.md).
+The artwork PNG contains the graphic and optional white border at its available resolution, with physical-size metadata; the preview PNG contains display effects and any garment mockup. The editor also offers a bare cutout PNG. These are not manufacturing proofs, vector cutting contours or garment underbase separations. Garment mockups are illustrations rather than manufacturer templates. Sticker prices, delivery estimates and checkout are still demos; garments have no checkout. No payment is collected and no order reaches a printer. Real fulfillment requires provider selection, server-owned quotes, production artwork validation, payment integration and order reconciliation. See [the technical roadmap](docs/prototype.md).
