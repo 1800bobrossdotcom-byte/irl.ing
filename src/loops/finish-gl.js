@@ -1,6 +1,8 @@
 // On-phone finishing for decoded loops, in WebGL2.
 //
-//   1. EASU — edge-adaptive upscale (port of AMD FidelityFX FSR 1, MIT):
+//   1. EASU — edge-adaptive upscale (port of AMD FidelityFX FSR 1; MIT,
+//      Copyright (c) 2021 Advanced Micro Devices, Inc. — full notice in
+//      public/third-party-notices.txt):
 //      12 taps around the sample, a Lanczos-2 approximation stretched along
 //      the local edge direction, clamped to the nearest 2×2 to avoid ringing.
 //   2. RCAS — contrast-adaptive sharpening (FSR 1), with its noise guard.

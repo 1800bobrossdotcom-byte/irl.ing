@@ -2,74 +2,55 @@
 
 **Less scrolling. More irl’ing.**
 
-Irl’ing is a verb: being present, seeing what's around you, and doing something with it. The mobile-friendly studio turns a photo into reusable artwork for stickers, T-shirts, and sweatshirts. Its identity is an open viewfinder with an outward arrow: notice a moment, then bring it into real life.
+Irl’ing is a verb: being present, seeing what’s around you, and doing something with it. irl.ing is about six raw seconds of your actual life. You hold to record, let go to pause, and keep going. There are no filters. Then you put the phone down.
+
+## What’s here
+
+- **`/`**: the landing page. It plays a live loop through the same on-phone finishing pipeline the lab uses, has a hold-to-record demo, and shows how a loop survives a bad link.
+- **`/loops/`**: the loops lab, Android (Chrome) first.
+  - **Encoding:** clips are encoded on the phone with its own AV1 encoder (VP9 or H.264 where AV1 isn't available) to a 50, 100 or 200 KB budget.
+  - **Packaging:** each loop is cut into two-second, checksummed chunks and signed with a key that never leaves the phone.
+  - **Playback:** loops are rebuilt lifelike with FSR 1 upscaling and sharpening, measured film grain and dithering, with an optional "smart pixels" look.
+  - **No camera needed:** **Try the sample** works without one.
+
+  See [little loops v2](docs/loops-v2.md).
+- **`/preview/`**: an early static layout mock.
+
+Nothing is uploaded: loops stay on the phone until someone shares the file. There are no accounts yet, and no server.
 
 ## Run
 
-Node.js 22.12+ or 24 is required. This environment uses Node 24.
+Node.js 22.12+ or 24 is required.
 
 ```sh
-cd /workspace/irl.ing
-npm ci --cache /workspace/.npm-cache
-npm run dev
+npm ci
+npm run dev        # http://localhost:3001
 ```
 
-The development server uses port 3001. To exercise the production build:
+Production build:
 
 ```sh
 npm run build
 PORT=3003 npm start
 ```
 
-Vercel deploys `master`. `vercel.json` selects Vite, `npm run build`, and `dist/`. Commit the lockfile with dependency changes. No provider credentials, paid APIs or external photo storage are needed for the current release.
+Vercel deploys `master`; `vercel.json` selects Vite, `npm run build` and `dist/`. Commit the lockfile with any dependency changes.
 
-## Little loops lab
-
-`/loops/` is a separate page for six-second, hold-to-record loops: hold to record, let go to pause, keep going. There are no filters.
-
-- **Encoding:** the phone encodes the clip with its own AV1 encoder (VP9 or H.264 where AV1 isn't available) to a 50, 100 or 200 KB budget, then measures the quality it actually achieved.
-- **Packaging:** the loop is wrapped in two-second, checksummed chunks and signed with a key that never leaves the phone.
-- **Playback:** FSR 1 upscaling and sharpening, measured film grain and dithering, plus an optional "smart pixels" look. Each loop assembles itself from scattered pixels.
-- **In transit:** these controls show what survives a relay trim, a flipped byte or a cut link.
-- **No camera needed:** **Try the sample** works without one.
-
-Chrome on Android is the first target. See [little loops v2](docs/loops-v2.md) and [the compression findings](docs/compression-research.md); `scripts/bench/rd-bench.sh` reruns the quality-at-equal-bytes benchmark.
-
-## On a phone
-
-Open irl.ing and tap **Use a photo** or **Take a photo** at the top of the page. The editor finds the subject automatically, shows the first usable result immediately, and offers **Keep this bit** or **Touch up**. Conservative edge finishing runs in the background without blocking either action. Touch up opens Erase/Restore and a brush size; detailed controls are under **More tools**. **Try an example** uses the same flow without requiring a file. After Keep, tap **Make it yours**, choose Sticker, T-shirt, or Sweatshirt, then select size and border. Photo import errors appear in the photo dialog as well as on the page.
-
-HEIC/HEIF inputs are accepted when the browser can decode them natively; otherwise an explicit message asks for a JPG/PNG or a new camera photo. No HEIC conversion service is used. These workflows have been exercised with mobile Chromium emulation, not a physical phone. Safari/WebKit verification is pending because the cloud network blocked the test-browser download.
-
-## What works
-
-- Local photo/camera import, with an automatic U²-Net background-removal model running in a Web Worker through ONNX Runtime Web. First use loads roughly 17 MB of uncompressed model/runtime resources from this same site. Photos do not leave the device.
-- Automatic source-guided edge finishing on fresh cutouts, with manual refinement, optional halo cleanup and painted-area locks under More tools. RGB detail from the imported photo improves uncertain mask boundaries; mask edits remain reversible.
-- Zoom/pinch/hand inspection, image-pixel soft brushes with hardness, undo/redo, light/dark/checker backgrounds, and full-resolution tap-to-keep selection. Traced outlines can become brush-editable masks without closing the editor. Connected or overlapping objects need manual refinement.
-- Precise contour-following white outlines, die-cut/circle/oval sticker previews and centered T-shirt/sweatshirt front-print mockups. Sticker finish and price/quantity/checkout controls remain separate from garments, which support artwork downloads.
-- Browser-local IndexedDB storage for images, original sources, masks and product/size/border settings. Legacy localStorage moments migrate automatically, with the old copy retained until migration commits. There is no arbitrary 12-moment limit; device quotas still apply.
-- Reopening saved masks and cleaned colors, responsive layouts, separate preview and transparent artwork downloads. Artwork exports retain available source detail up to the 300-DPI print target, with actual physical-density metadata and no upscaling of small photos. Finish effects and garment illustrations stay in preview files. See [artwork geometry and output](docs/artwork-output.md).
-
-Clear, distinct foreground subjects work best. The compact model is a useful first cut, not a guarantee of hair-perfect masks or arbitrary object recognition. The user can keep the photo as is, retry, or use manual editing when loading or execution fails. The verified model starts loading after photo-picker intent and stays initialized briefly for another photo: 45 seconds idle, 15 seconds on devices reporting 2 GB RAM or less. Hidden pages and explicit cancellation release it immediately; each edge-finishing worker is released after completion. Warmup respects the browser’s save-data setting. The undo history has a roughly 24 MB pixel budget.
-
-A local Chromium check at a 390×844 viewport measured about 2.57 seconds to the first usable cutout and 1.90 / 1.79 seconds for subsequent photos sharing the initialized engine. These are desktop CPU measurements with a phone viewport, not hardware-phone or network guarantees. First use still needs to download and initialize the local tool.
-
-## Validate
+## Test
 
 ```sh
 npm test
-npm run build
 # With the production server running on port 3003:
-STUDIO_URL=http://127.0.0.1:3003 python3 -m unittest discover -s tests -p 'test_*.py' -v
+STUDIO_URL=http://127.0.0.1:3003 node tests/landing-browser.mjs
 STUDIO_URL=http://127.0.0.1:3003 node tests/loops-browser.mjs
 ```
 
-Numerical tests cover known-alpha strands, chromatic boundaries, halo cleanup, region locks, source transparency, brush/viewport behavior and persistence validation. Chromium browser workflows cover real inference, editor gestures and history, saved edits, migration, import/model/storage failures, tracing/export, responsive layouts and demo checkout. Browser tests need Python Playwright, Pillow, and Chromium, available in this cloud environment; use `CHROMIUM_PATH` to override `/usr/bin/chromium`. See [edge refinement math and evidence](docs/edge-refinement.md) for methods, quantitative synthetic results, and limits.
+Unit tests cover the loop container (damage, truncation, relay trimming, signatures and tampering), grain estimation and color conversion. The browser tests need Playwright and Chromium, which this cloud environment provides; set `CHROMIUM_PATH` to choose a browser. They use Chromium's fake camera and microphone at phone-sized viewports. Nothing has been verified on a physical Android phone yet.
 
-The production build checks the bundled model's SHA-256. The worker verifies it again before inference. Model provenance and licenses are in [the third-party notices](public/third-party-notices.txt).
+## Research and benchmarks
 
-## Product boundaries
+- [Compression findings](docs/compression-research.md): requirements, a survey of NASA/JPL, CCSDS, NGA, AV1, FSR and Gaussian-splat work, and the plan.
+- `scripts/bench/rd-bench.sh`: quality at equal bytes on a standard test clip (AV1, H.264 and the retired v1 dots codec). Needs ffmpeg.
+- [The v1 dots format](docs/loops-dots.md): retired and kept as a benchmark baseline.
 
-Saved moments stay in this browser, not a cloud account; browser-data clearing removes them. Imports are limited to 20 MB, a 2400-pixel edge and four megapixels; devices reporting at most 2 GB RAM use 1600 pixels and two megapixels. Existing saved photos retain their stored dimensions. Mobile camera support depends on the device's native image picker.
-
-The artwork PNG contains the graphic and optional white border at its available resolution, with physical-size metadata; the preview PNG contains display effects and any garment mockup. The editor also offers a bare cutout PNG. These are not manufacturing proofs, vector cutting contours or garment underbase separations. Garment mockups are illustrations rather than manufacturer templates. Sticker prices, delivery estimates and checkout are still demos; garments have no checkout. No payment is collected and no order reaches a printer. Real fulfillment requires provider selection, server-owned quotes, production artwork validation, payment integration and order reconciliation. See [the technical roadmap](docs/prototype.md).
+Third-party notices are in [`public/third-party-notices.txt`](public/third-party-notices.txt), served at `/third-party-notices.txt`.

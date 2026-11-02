@@ -48,7 +48,7 @@ All integers are little-endian.
 | --- | --- |
 | Bit error in a chunk | Its CRC fails and the chunk is skipped. Losing a base-layer chunk loses that GOP; the player holds the last good frame for those two seconds. |
 | Corrupted length field | The reader finds the next `IRLC` sync word and continues. |
-| File cut short | Every chunk before the cut is kept. Base layers come first, so a 60% cut still plays all six seconds at 15 fps, with sound. |
+| File cut short | Every chunk before the cut is kept. The base layer comes first, so a cut anywhere after it still plays all six seconds at 15 fps (the built-in sample and a fake-camera loop both did at a 60% cut). Sound is sent after the base layer, so whether it survives depends on where the cut lands. |
 | Relay trim | `trimLayers(bytes, 0)` copies all chunks except enhancement-layer video, with no decoding and no re-signing: about 46% smaller at 15 fps. The signature still verifies every chunk that remains ("4 of 7 signed parts present"). |
 | Tampering | A changed chunk with a recomputed CRC is reported as unsigned, because its hash is not in the signed manifest. |
 

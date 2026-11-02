@@ -2,602 +2,192 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#f6f5ef" />
+    <title>irl.ing — Less scrolling. More irl’ing.</title>
     <meta
       name="description"
-      content="Irl’ing. Being here. Seeing things. Making something of it. Turn a little piece of your world into a sticker."
+      content="Six raw seconds of your actual life. Hold to record, let go to pause, no filters. Loops are tiny, signed on your phone, and rebuilt lifelike when they play."
     />
-    <title>irl.ing — Less scrolling. More irl’ing.</title>
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://irl.ing/" />
+    <meta property="og:title" content="irl.ing — Less scrolling. More irl’ing." />
+    <meta property="og:description" content="Six raw seconds of your actual life. Hold to record, let go to pause. No filters." />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/src/styles.css" />
-    <script type="module" src="/src/app.js"></script>
+    <link rel="stylesheet" href="/src/landing/landing.css" />
+    <script type="module" src="/src/landing/landing.js"></script>
   </head>
   <body>
-    <svg
-      class="icon-library"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      <symbol id="i-arrow" viewBox="0 0 24 24">
-        <path d="M5 19 19 5M5 5h14v14" />
-      </symbol>
-      <symbol id="i-plus" viewBox="0 0 24 24">
-        <path d="M12 5v14M5 12h14" />
-      </symbol>
-      <symbol id="i-camera" viewBox="0 0 24 24">
-        <path d="M8 5 6 8H3v12h18V8h-3l-2-3Z" />
-        <circle cx="12" cy="13" r="4" />
-      </symbol>
-      <symbol id="i-check" viewBox="0 0 24 24">
-        <path d="m5 12 4 4L19 6" />
-      </symbol>
-      <symbol id="i-close" viewBox="0 0 24 24">
-        <path d="m6 6 12 12M6 18 18 6" />
-      </symbol>
-      <symbol id="i-heart" viewBox="0 0 24 24">
-        <path
-          d="M20.8 4.6c-2-2-5.2-1.6-6.8.5L12 7.5l-2-2.4c-1.6-2.1-4.8-2.5-6.8-.5-2.2 2.2-1.8 5.5.3 7.6L12 21l8.5-8.8c2.1-2.1 2.5-5.4.3-7.6Z"
-        />
-      </symbol>
-      <symbol id="i-download" viewBox="0 0 24 24">
-        <path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5" />
-      </symbol>
-      <symbol id="i-presence" viewBox="0 0 48 48">
-        <path
-          d="M18 7H9a2 2 0 0 0-2 2v9m0 12v9a2 2 0 0 0 2 2h9m12 0h9a2 2 0 0 0 2-2v-9M22 26 41 7M28 7h13v13"
-        />
-      </symbol>
-      <symbol id="i-spark" viewBox="0 0 24 24">
-        <path d="m12 2 2.7 7.3L22 12l-7.3 2.7L12 22l-2.7-7.3L2 12l7.3-2.7Z" />
-      </symbol>
-    </svg>
-    <header class="site-header">
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="top">
       <a class="wordmark" href="/" aria-label="irl.ing home"
-        ><span class="brand-mark"
-          ><svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
-            <path
-              class="mark-frame"
-              d="M18 7H9a2 2 0 0 0-2 2v9m0 12v9a2 2 0 0 0 2 2h9m12 0h9a2 2 0 0 0 2-2v-9"
-            />
-            <path class="mark-arrow" d="M22 26 41 7M28 7h13v13" /></svg></span
+        ><svg class="mark" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+          <path d="M18 7H9a2 2 0 0 0-2 2v9m0 12v9a2 2 0 0 0 2 2h9m12 0h9a2 2 0 0 0 2-2v-9" />
+          <path d="M22 26 41 7M28 7h13v13" /></svg
         >irl.ing</a
       >
-      <nav aria-label="Main navigation">
-        <button class="nav-link active" id="studio-nav">The studio</button
-        ><button class="nav-link" id="collection-nav">
-          My moments <span class="count" id="collection-count">0</span>
-        </button>
+      <nav aria-label="Sections">
+        <a href="#how">How it works</a>
+        <a href="#tiny">Tiny on purpose</a>
+        <a href="#pixels">Smart pixels</a>
       </nav>
-      <button class="how-link" id="how-button">
-        A little about irl’ing <svg class="icon"><use href="#i-arrow" /></svg>
-      </button>
+      <a class="pill" href="/loops/">Open the lab <span aria-hidden="true">↗</span></a>
     </header>
-    <main>
-      <section class="intro" aria-labelledby="main-title">
-        <div>
-          <div class="eyebrow">
-            <span class="live-dot"></span> BEING HERE. SEEING THINGS. MAKING
-            SOMETHING OF IT.
-          </div>
-          <h1 id="main-title">Less scrolling. <span>More irl’ing.</span></h1>
-          <p>
-            Your dog. That flower. A really good afternoon. Take a little of it
-            with you.
+
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="live" aria-hidden="true"></span> Being here. Seeing things. Doing something with it.</p>
+          <h1 id="hero-title">Less scrolling. <em>More irl’ing.</em></h1>
+          <p class="lede">
+            Six raw seconds of your actual life. Hold to record, let go to pause, keep going. No filters, no feed to fall into.
+            Then put the phone down.
           </p>
+          <div class="cta">
+            <a class="button primary" href="/loops/">Start a loop</a>
+            <a class="button ghost" href="#try" data-scroll>Try it right here <span aria-hidden="true">↓</span></a>
+          </div>
         </div>
-        <div class="intro-stamp" aria-hidden="true">
-          <span>IN REAL LIFE</span
-          ><svg class="icon"><use href="#i-presence" /></svg
-          ><span>IN THE MAKING</span>
+
+        <figure class="stage-card" id="try" aria-labelledby="try-caption">
+          <div class="stage-top">
+            <span class="tag"><span class="rec" aria-hidden="true"></span><span id="stage-label">LIVE LOOP</span></span>
+            <span class="tag muted" id="stage-clock">6.0s</span>
+          </div>
+          <div class="stage" id="hero-stage" role="img" aria-label="A drawn sunset over a moving sea, playing as a six-second loop"></div>
+          <div class="meter" aria-hidden="true">
+            <span class="meter-fill" id="meter-fill"></span>
+            <span class="meter-ticks" id="meter-ticks"></span>
+          </div>
+          <div class="stage-controls">
+            <p id="try-caption" class="stage-status" aria-live="polite">Hold the button to make a take.</p>
+            <button class="hold" id="hold" aria-label="Hold to record a take" aria-describedby="try-caption"><i></i></button>
+          </div>
+        </figure>
+      </section>
+
+      <section class="how" id="how" aria-labelledby="how-title">
+        <div class="section-head">
+          <p class="eyebrow">How it works</p>
+          <h2 id="how-title">Three steps. <em>Then go live your life.</em></h2>
+        </div>
+        <ol class="steps">
+          <li>
+            <span class="num">01</span>
+            <h3>Notice</h3>
+            <p>Something small. Something very you. A face, a place, a perfectly timed bad joke.</p>
+          </li>
+          <li>
+            <span class="num">02</span>
+            <h3>Hold</h3>
+            <p>Hold to record, let go to pause. Six seconds, stitched from as many takes as you like. Nothing to adjust, nothing to fake.</p>
+          </li>
+          <li>
+            <span class="num">03</span>
+            <h3>Share</h3>
+            <p>Your loop is squeezed to about 100&nbsp;KB on your phone, signed with a key that never leaves it, and rebuilt lifelike when it plays.</p>
+          </li>
+        </ol>
+        <p class="closer">Then put the phone down.</p>
+      </section>
+
+      <section class="tiny" id="tiny" aria-labelledby="tiny-title">
+        <div class="tiny-inner">
+          <div class="section-head">
+            <p class="eyebrow">Tiny on purpose</p>
+            <h2 id="tiny-title">Built for bad signal. <em>And far-away places.</em></h2>
+            <p class="section-lede">
+              We borrowed habits from the people who send pictures home from Mars: send the important part first, keep
+              damage small, and verify what arrives.
+            </p>
+          </div>
+          <dl class="stats">
+            <div><dt>about</dt><dd>100<small>KB</small></dd><p>for six seconds of 30&nbsp;fps video, encoded with AV1 on your own phone</p></div>
+            <div><dt>pieces of</dt><dd>2<small>s</small></dd><p>each with its own checksum, so a bad link costs a moment, not the loop</p></div>
+            <div><dt>signed by</dt><dd>1<small>key</small></dd><p>that lives on your phone and can’t be copied out of it</p></div>
+            <div><dt>filters</dt><dd>0</dd><p>what you saw is what they get; anything added on playback is labeled</p></div>
+          </dl>
+
+          <div class="chunks" aria-labelledby="chunks-title">
+            <div class="chunks-head">
+              <h3 id="chunks-title">What a loop looks like in transit</h3>
+              <div class="chips" role="group" aria-label="Transit scenario">
+                <button data-transit="sent" aria-pressed="true">As sent</button>
+                <button data-transit="relay" aria-pressed="false">Relay trims it</button>
+                <button data-transit="flip" aria-pressed="false">A bit flips</button>
+                <button data-transit="cut" aria-pressed="false">Link drops</button>
+              </div>
+            </div>
+            <div class="strip" id="strip" aria-hidden="true">
+              <span class="blk meta" style="--w: 2">info</span>
+              <span class="blk sign" style="--w: 3">signature</span>
+              <span class="blk base" style="--w: 9">0–2 s</span>
+              <span class="blk base" style="--w: 9" data-flip>2–4 s</span>
+              <span class="blk base" style="--w: 9">4–6 s</span>
+              <span class="blk sound" style="--w: 9">sound</span>
+              <span class="blk extra" style="--w: 7">extra frames</span>
+              <span class="blk extra" style="--w: 7">extra frames</span>
+              <span class="blk extra" style="--w: 7">extra frames</span>
+              <span class="cut-line"></span>
+            </div>
+            <div class="legend" aria-hidden="true">
+              <span><i class="head"></i>info and signature</span>
+              <span><i class="base"></i>every other frame, all six seconds</span>
+              <span><i class="sound"></i>sound</span>
+              <span><i class="extra"></i>the frames in between</span>
+            </div>
+            <p class="chunks-note" id="chunks-note" aria-live="polite"></p>
+          </div>
         </div>
       </section>
-      <section class="capture-panel" aria-labelledby="capture-title">
-        <div class="capture-copy">
-          <span class="section-index">START HERE</span>
-          <h2 id="capture-title">Your photo. Your thing.</h2>
-          <p>Choose a photo. We’ll find the subject.</p>
+
+      <section class="pixels" id="pixels" aria-labelledby="pixels-title">
+        <div class="pixels-stage">
+          <div class="stage" id="pixels-stage" role="img" aria-label="The same loop drawn in smart pixels that lean along its edges"></div>
+          <div class="slider">
+            <span>Lifelike</span>
+            <input type="range" id="pixels-look" min="0" max="100" value="60" aria-label="From lifelike to smart pixels" />
+            <span>Smart pixels</span>
+          </div>
         </div>
-        <div class="capture-actions">
-          <button class="primary-button" id="start-photo">
-            <svg class="icon"><use href="#i-plus" /></svg>Use a photo</button
-          ><button class="secondary-button" id="start-camera">
-            <svg class="icon"><use href="#i-camera" /></svg>Take a photo</button
-          ><button class="example-button" id="try-example">
-            Just looking? Try an example <span aria-hidden="true">→</span>
-          </button>
+        <div class="pixels-copy">
+          <p class="eyebrow">Smart pixels</p>
+          <h2 id="pixels-title">Every loop <em>finds its way to you.</em></h2>
+          <p>
+            Loops arrive as a scatter of pixels that fly home, lean along the edges of what you saw, and settle into the real
+            thing. Slide to stay somewhere in between.
+          </p>
+          <p class="fine">
+            Under the hood: game-engine upscaling and sharpening (AMD FSR&nbsp;1), the grain your camera actually had, and a
+            touch of dither. All of it happens on the phone that plays the loop.
+          </p>
+          <button class="button ghost" id="pixels-again">Assemble again</button>
         </div>
-        <p
-          id="import-status"
-          class="import-status"
-          role="status"
-          aria-live="polite"
-        >
-          Private by design. Your photo stays on your phone.
+      </section>
+
+      <section class="lab" aria-labelledby="lab-title">
+        <p class="eyebrow">Android first</p>
+        <h2 id="lab-title">The loops lab is open.</h2>
+        <p>
+          It works today in Chrome on Android: record, squeeze, sign and share a loop as a file. Friends, feeds that end, and
+          links that open anywhere are next.
         </p>
-      </section>
-      <ol class="flow-steps" aria-label="Make something of your photo">
-        <li data-step="photo" aria-current="step">
-          <span>1</span>Choose a photo
-        </li>
-        <li data-step="cutout"><span>2</span>Keep your subject</li>
-        <li data-step="sticker"><span>3</span>Make it yours</li>
-      </ol>
-      <section class="studio" aria-label="Make it yours">
-        <div class="workspace">
-          <div class="workspace-top">
-            <span class="section-index">01 — A LITTLE PIECE OF YOUR WORLD</span
-            ><span class="sample-tag" id="asset-status">Sample object</span>
-          </div>
-          <div class="preview-stage" id="preview-stage">
-            <div class="stage-grid" aria-hidden="true"></div>
-            <div class="preview-note" aria-hidden="true">
-              you stopped.<br /><em>you noticed.</em
-              ><svg viewBox="0 0 70 55">
-                <path
-                  d="M3 4c38-12 59 23 36 33-12 5-24-12-15-17 14-8 43 7 39 29m-8-6 8 7 5-10"
-                />
-              </svg>
-            </div>
-            <div class="sticker-wrap" id="sticker-wrap">
-              <canvas
-                id="sticker-canvas"
-                width="1000"
-                height="1000"
-                aria-label="Live artwork preview"
-              ></canvas>
-              <div class="holo-overlay"></div>
-            </div>
-            <span class="measurement" id="measurement">3″ × 3″</span>
-            <div class="preview-tools">
-              <button
-                class="icon-button"
-                id="save-object"
-                aria-label="Save moment"
-                title="Save to My moments"
-              >
-                <svg class="icon"><use href="#i-heart" /></svg></button
-              ><button
-                class="icon-button"
-                id="download-art"
-                aria-label="Download artwork PNG"
-                title="Download artwork PNG"
-              >
-                <svg class="icon"><use href="#i-download" /></svg>
-              </button>
-            </div>
-            <span class="preview-caption" id="preview-caption"
-              >A MOMENT, WITH A LITTLE STICKING POWER.</span
-            >
-          </div>
-          <div class="object-tray">
-            <div class="tray-label">
-              A little inspiration<span>Pick a sample. Or find your own.</span>
-            </div>
-            <div
-              class="sample-list"
-              id="sample-list"
-              aria-label="Sample objects"
-            ></div>
-            <button class="upload-button" id="upload-button">
-              <svg class="icon"><use href="#i-plus" /></svg
-              ><span>Your photo</span>
-            </button>
-          </div>
-          <input
-            id="photo-input"
-            type="file"
-            accept="image/png,image/jpeg,image/webp,image/gif,image/heic,image/heif"
-            hidden
-          /><input
-            id="camera-input"
-            type="file"
-            accept="image/*"
-            capture="environment"
-            hidden
-          />
-          <div class="workspace-bottom">
-            <span
-              ><svg class="icon"><use href="#i-check" /></svg> Photos stay on
-              your device</span
-            ><button id="edit-object">Adjust cutout <span>↗</span></button>
-          </div>
-          <p id="output-note" class="output-note" role="status"></p>
-          <button
-            class="primary-button mobile-continue"
-            id="customize-sticker"
-            hidden
-          >
-            Make it yours
-            <svg class="icon"><use href="#i-arrow" /></svg>
-          </button>
-        </div>
-        <aside class="configurator" aria-labelledby="config-title">
-          <div class="section-index">02 — MAKE SOMETHING OF IT</div>
-          <h2 id="config-title" tabindex="-1">
-            Your moment.<br />
-            Made real.
-          </h2>
-          <p class="config-description">
-            A sticker. A favorite tee. A little of your world to take with you.
-          </p>
-          <fieldset class="product-field">
-            <legend>Make it a</legend>
-            <div class="product-options options" id="product-options">
-              <button class="option selected" data-value="sticker" aria-pressed="true">Sticker</button>
-              <button class="option" data-value="tshirt" aria-pressed="false">T-shirt</button>
-              <button class="option" data-value="sweatshirt" aria-pressed="false">Sweatshirt</button>
-            </div>
-          </fieldset>
-          <div id="sticker-settings">
-            <fieldset>
-              <legend>Shape <span>Follow your own outline.</span></legend>
-              <div class="shape-options options" id="shape-options">
-                <button
-                  class="option selected"
-                  data-value="die-cut"
-                  aria-pressed="true"
-                >
-                  <span class="shape-icon die-cut"></span>Die-cut</button
-                ><button class="option" data-value="circle" aria-pressed="false">
-                  <span class="shape-icon circle"></span>Circle</button
-                ><button class="option" data-value="oval" aria-pressed="false">
-                  <span class="shape-icon oval"></span>Oval
-                </button>
-              </div>
-            </fieldset>
-            <fieldset>
-              <legend>
-                Finish <span id="finish-description">Soft feel. Zero glare.</span>
-              </legend>
-              <div class="finish-options options" id="finish-options">
-                <button
-                  class="finish-option selected"
-                  data-value="matte"
-                  aria-pressed="true"
-                >
-                  <span class="finish-swatch matte"></span>Matte</button
-                ><button
-                  class="finish-option"
-                  data-value="glossy"
-                  aria-pressed="false"
-                >
-                  <span class="finish-swatch glossy"></span>Glossy</button
-                ><button
-                  class="finish-option"
-                  data-value="holographic"
-                  aria-pressed="false"
-                >
-                  <span class="finish-swatch holographic"></span>Holographic
-                </button>
-              </div>
-            </fieldset>
-          </div>
-          <div class="size-border-row">
-            <fieldset>
-              <legend id="size-label">Size <span>Longest edge</span></legend>
-              <div class="size-options options" id="size-options">
-                <button class="option" data-value="2" aria-pressed="false">
-                  2″</button
-                ><button
-                  class="option selected"
-                  data-value="3"
-                  aria-pressed="true"
-                >
-                  3″</button
-                ><button class="option" data-value="4" aria-pressed="false">
-                  4″
-                </button>
-              </div>
-            </fieldset>
-            <fieldset class="border-field">
-              <legend>
-                <label for="border-input">White border</label>
-                <output id="border-value">8%</output>
-              </legend>
-              <input
-                id="border-input"
-                type="range"
-                min="0"
-                max="15"
-                value="8"
-                aria-label="White border percentage"
-              />
-            </fieldset>
-          </div>
-          <p id="garment-note" class="garment-note" hidden>
-            Centered front print preview. Choose a size, then download your artwork.
-          </p>
-          <div id="sticker-order">
-            <fieldset>
-              <legend>
-                How many? <span>One for you. Some for your people.</span>
-              </legend>
-              <div class="quantity-options options" id="quantity-options">
-                <button class="option" data-value="10" aria-pressed="false">
-                  10</button
-                ><button
-                  class="option selected"
-                  data-value="25"
-                  aria-pressed="true"
-                >
-                  25</button
-                ><button class="option" data-value="50" aria-pressed="false">
-                  50</button
-                ><button class="option" data-value="100" aria-pressed="false">
-                  100
-                </button>
-              </div>
-            </fieldset>
-            <div class="order-block">
-              <div class="price-line">
-                <div>
-                  <strong id="total-price">$18.00</strong
-                  ><span id="per-sticker">$0.72 / sticker</span>
-                </div>
-                <span class="shipping-note"
-                  >Shipping included<br /><span
-                    >Illustrative US pricing</span
-                  ></span
-                >
-              </div>
-              <button class="primary-button" id="checkout-button">
-                Start irl’ing <svg class="icon"><use href="#i-arrow" /></svg>
-              </button>
-              <div class="checkout-caption">
-                <span class="tiny-dot"></span> Demo checkout · no payment required
-              </div>
-            </div>
-          </div>
-          <button id="download-preview" class="text-button preview-download">Download preview PNG</button>
-        </aside>
-      </section>
-      <section class="bottom-strip" aria-label="The idea">
-        <div class="bottom-copy">
-          <span class="brand-emblem" aria-hidden="true"
-            ><svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
-              <path
-                class="mark-frame"
-                d="M18 7H9a2 2 0 0 0-2 2v9m0 12v9a2 2 0 0 0 2 2h9m12 0h9a2 2 0 0 0 2-2v-9"
-              />
-              <path class="mark-arrow" d="M22 26 41 7M28 7h13v13" /></svg
-          ></span>
-          <p>
-            <strong>irl’ing</strong> <em>/ər-ling/ · verb</em><br />Being,
-            seeing, doing. In real life.
-          </p>
-        </div>
-        <div class="mini-step">
-          <span>01</span>
-          <p>Be here.<small>The good stuff is all around you.</small></p>
-        </div>
-        <div class="mini-step">
-          <span>02</span>
-          <p>Notice something.<small>A small thing worth keeping.</small></p>
-        </div>
-        <div class="mini-step">
-          <span>03</span>
-          <p>
-            Make it a real thing.<small>A moment you can hold on to.</small>
-          </p>
-        </div>
+        <a class="button dark" href="/loops/">Open the loops lab <span aria-hidden="true">↗</span></a>
       </section>
     </main>
-    <footer>
-      <span>irl.ing © 2026</span
-      ><span>Life has good material. Make something of it.</span
-      ><span class="prototype-label"
-        >THE STUDIO · EARLY ACCESS <span>↗</span></span
+
+    <footer class="foot">
+      <a class="wordmark small" href="/" aria-label="irl.ing home"
+        ><svg class="mark" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+          <path d="M18 7H9a2 2 0 0 0-2 2v9m0 12v9a2 2 0 0 0 2 2h9m12 0h9a2 2 0 0 0 2-2v-9" />
+          <path d="M22 26 41 7M28 7h13v13" /></svg
+        >irl.ing</a
       >
+      <p>Being. Seeing. Living.</p>
+      <nav aria-label="Footer">
+        <a href="/loops/">Loops lab</a>
+        <a href="/third-party-notices.txt">Notices</a>
+      </nav>
     </footer>
-    <dialog id="upload-dialog" class="small-dialog">
-      <form method="dialog">
-        <button class="dialog-close icon-button" aria-label="Close">
-          <svg class="icon"><use href="#i-close" /></svg>
-        </button>
-      </form>
-      <span class="section-index">IT STARTS WITH NOTICING</span>
-      <h2>What's caught<br />your eye?</h2>
-      <p>
-        Your photos stay in this browser. Pick a moment you’d love to take with
-        you.
-      </p>
-      <button class="upload-drop" id="choose-photo">
-        <svg class="icon"><use href="#i-plus" /></svg
-        ><strong>Choose a photo</strong
-        ><span>JPG, PNG, WebP or GIF · up to 20 MB</span></button
-      ><button class="secondary-button" id="take-photo">
-        <svg class="icon"><use href="#i-camera" /></svg> Take a photo
-      </button>
-      <p id="upload-error" class="upload-error" role="alert" hidden></p>
-      <p id="upload-progress" class="quiet-note" role="status">
-        Transparent artwork works, too.
-      </p>
-    </dialog>
-    <dialog
-      id="editor-dialog"
-      class="editor-dialog"
-      aria-labelledby="editor-title"
-    >
-      <form method="dialog">
-        <button class="dialog-close icon-button" aria-label="Close editor">
-          <svg class="icon"><use href="#i-close" /></svg>
-        </button>
-      </form>
-      <div class="section-index">THAT’S THE THING</div>
-      <h2 id="editor-title">Your moment, cut out.</h2>
-      <p id="cutout-status" role="status" aria-live="polite">
-        Finding the bit that matters…
-      </p>
-      <div class="editor-progress-actions">
-        <button id="cancel-cutout" class="text-button" hidden>Cancel</button>
-        <button id="keep-photo" class="text-button" hidden>Use photo as is</button>
-      </div>
-      <div id="editor-viewport" class="editor-canvas-container">
-        <canvas
-          id="editor-canvas"
-          tabindex="0"
-          aria-label="Image cutout editor. In trace mode, tap around your object to select its outline. Zoom in for detail, or use the hand to move the image."
-        ></canvas>
-        <span id="brush-cursor" class="brush-cursor" aria-hidden="true" hidden></span>
-      </div>
-      <div class="editor-footer">
-        <button class="primary-button" id="use-cutout">
-          Keep this bit <svg class="icon"><use href="#i-arrow" /></svg>
-        </button>
-        <button id="touch-up" class="secondary-button" aria-expanded="false" aria-controls="touchup-panel">Touch up</button>
-      </div>
-      <div id="touchup-panel" class="touchup-panel" hidden>
-        <p id="editor-instructions">Erase a little, or bring detail back.</p>
-        <div class="touchup-tools" aria-label="Touch up your cutout">
-          <button id="erase-mask" class="pill" aria-pressed="false">Erase</button>
-          <button id="restore-mask" class="pill" aria-pressed="false">Restore</button>
-          <button id="undo-point" class="text-button" disabled>Undo</button>
-          <button id="redo-mask" class="text-button" disabled>Redo</button>
-        </div>
-        <div id="brush-control" hidden>
-          <label for="brush-size">Brush size
-            <input id="brush-size" type="range" min="1" max="150" value="25" />
-            <output id="brush-value" for="brush-size">25 px</output>
-          </label>
-        </div>
-        <details id="more-tools" class="more-tools">
-          <summary>More tools</summary>
-          <div class="editor-modes">
-            <button id="whole-image" class="pill selected" aria-pressed="true">Whole image</button>
-            <button id="trace-image" class="pill" aria-pressed="false">Trace an object</button>
-            <button id="clear-points" class="text-button" disabled hidden>Clear</button>
-            <button id="apply-outline" class="pill" hidden>Use outline</button>
-          </div>
-          <div id="refine-tools" class="refine-tools" hidden>
-            <button id="select-subject" class="pill" aria-pressed="false">Pick one object</button>
-            <button id="focus-edges" class="pill" aria-pressed="false">Refine area</button>
-            <button id="clear-focus" class="text-button" hidden>Clear area</button>
-            <button id="refine-edges" class="edge-refine-button">
-              <svg class="icon" aria-hidden="true"><use href="#i-spark" /></svg>
-              Refine hair &amp; edges
-            </button>
-          </div>
-          <div class="auto-cutout-row">
-            <button id="auto-cutout" class="auto-button">
-              <svg class="icon"><use href="#i-spark" /></svg>
-              <span id="auto-cutout-label">Remove background</span>
-            </button>
-            <label class="compare-control"><input id="compare-original" type="checkbox" /> Show original</label>
-          </div>
-          <div class="hardness-control">
-            <label for="brush-hardness">Brush hardness
-              <input id="brush-hardness" type="range" min="0" max="100" value="70" />
-              <output id="hardness-value" for="brush-hardness">70%</output>
-            </label>
-          </div>
-          <div class="editor-view-controls" aria-label="Image view">
-            <div class="editor-zoom-controls" role="group" aria-label="Zoom">
-              <button id="zoom-out" class="view-button" aria-label="Zoom out">−</button>
-              <button id="zoom-fit" class="view-button">Fit</button>
-              <button id="zoom-in" class="view-button" aria-label="Zoom in">+</button>
-            </div>
-            <button id="pan-image" class="pill" aria-pressed="false">Hand</button>
-            <label class="editor-background-control" for="editor-background">Check edges
-              <select id="editor-background">
-                <option value="checker">Checker</option>
-                <option value="light">Light</option>
-                <option value="dark">Dark</option>
-              </select>
-            </label>
-          </div>
-          <details id="edge-settings" class="edge-settings" hidden>
-            <summary>Fine-tune edges</summary>
-            <div class="edge-settings-controls">
-              <label for="edge-radius">Edge reach
-                <input id="edge-radius" type="range" min="2" max="16" value="6" />
-                <span>Closer <span aria-hidden="true">↔</span> Wider</span>
-              </label>
-              <label for="edge-strength">Detail
-                <input id="edge-strength" type="range" min="0" max="100" value="80" />
-                <span>Gentle <span aria-hidden="true">↔</span> Stronger</span>
-              </label>
-              <label for="edge-cleanup">Color cleanup
-                <input id="edge-cleanup" type="range" min="0" max="80" value="0" />
-                <span>Off <span aria-hidden="true">↔</span> Reduce halos</span>
-              </label>
-            </div>
-          </details>
-          <div class="editor-extra-actions">
-            <span id="point-count">Whole image selected</span>
-            <button id="download-cutout" class="text-button">Download clean PNG</button>
-          </div>
-          <p id="editor-note" class="quiet-note">
-            Pinch to zoom. Brush size follows your photo’s pixels, so zoom in for fine detail.
-            Light and dark views help you check the edges.
-          </p>
-        </details>
-      </div>
-    </dialog>
-    <dialog id="collection-dialog" class="collection-dialog">
-      <form method="dialog">
-        <button class="dialog-close icon-button" aria-label="Close collection">
-          <svg class="icon"><use href="#i-close" /></svg>
-        </button>
-      </form>
-      <span class="section-index">LITTLE THINGS, HELD ON TO</span>
-      <h2>
-        My moments<span class="heading-mark"
-          ><svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
-            <path
-              class="mark-frame"
-              d="M18 7H9a2 2 0 0 0-2 2v9m0 12v9a2 2 0 0 0 2 2h9m12 0h9a2 2 0 0 0 2-2v-9"
-            />
-            <path class="mark-arrow" d="M22 26 41 7M28 7h13v13" /></svg
-        ></span>
-      </h2>
-      <p>Things you stopped to notice. Saved in this browser.</p>
-      <div id="collection-grid" class="collection-grid"></div>
-    </dialog>
-    <dialog id="checkout-dialog" class="checkout-dialog">
-      <form method="dialog">
-        <button class="dialog-close icon-button" aria-label="Close checkout">
-          <svg class="icon"><use href="#i-close" /></svg>
-        </button>
-      </form>
-      <div id="checkout-content"></div>
-    </dialog>
-    <dialog id="how-dialog" class="small-dialog">
-      <form method="dialog">
-        <button class="dialog-close icon-button" aria-label="Close">
-          <svg class="icon"><use href="#i-close" /></svg>
-        </button>
-      </form>
-      <span class="section-index">IRL’ING · VERB</span>
-      <h2>Life is happening.<br />Get a little into it.</h2>
-      <p>
-        Being present. Seeing what’s around you. Doing something with it. That’s
-        irl’ing.
-      </p>
-      <ol class="how-steps">
-        <li>
-          <strong>Notice a little thing.</strong>
-          <p>Choose a sample, upload a photo, or use your camera.</p>
-        </li>
-        <li>
-          <strong>Make something of it.</strong>
-          <p>
-            Find your subject automatically, refine its edges, and try a few
-            shapes and finishes. Stickers are just the beginning.
-          </p>
-        </li>
-        <li>
-          <strong>Take it into real life.</strong>
-          <p>
-            Try a demo order. This prototype doesn’t charge you or manufacture
-            anything.
-          </p>
-        </li>
-      </ol>
-      <button class="primary-button" id="lets-make">
-        Let’s go irl’ing <svg class="icon"><use href="#i-arrow" /></svg>
-      </button>
-    </dialog>
-    <div id="toast" class="toast" role="status" aria-live="polite"></div>
   </body>
 </html>
