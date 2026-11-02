@@ -424,73 +424,128 @@ h1 em {
   color: var(--olive);
 }
 
-/* ---- tiny -------------------------------------------------------------- */
+/* ---- network ----------------------------------------------------------- */
 
-.tiny {
+.network {
+  grid-template-columns: minmax(0, 1fr);
+  padding-top: 8px;
+  padding-bottom: 88px;
+  display: grid;
+  gap: 32px;
+}
+.principles {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.principles li {
+  background: var(--white);
+  padding: 24px 22px 26px;
+  display: grid;
+  gap: 8px;
+  align-content: start;
+}
+.principles h3 {
+  font-size: 24px;
+}
+.principles li:nth-child(odd) h3 {
+  color: var(--orange);
+}
+.principles p {
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.55;
+}
+.status-note {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--muted);
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  max-width: 54em;
+}
+.badge {
+  flex: none;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: var(--lime);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+
+/* ---- lexicon ----------------------------------------------------------- */
+
+.lexicon {
   max-width: none;
   padding: 0;
   background: var(--night);
   color: var(--white);
 }
-.tiny-inner {
+.lexicon-inner {
   max-width: 1200px;
   margin: auto;
-  padding: 76px var(--gutter) 84px;
+  padding: 80px var(--gutter) 88px;
   display: grid;
   /* minmax(0, …): the strip's no-wrap labels must not widen the page */
   grid-template-columns: minmax(0, 1fr);
   gap: 44px;
 }
-.tiny .eyebrow {
+.lexicon .eyebrow {
   color: var(--lime);
 }
-.tiny h2 em {
+.lexicon h2 em {
   color: var(--lime);
 }
-.tiny .section-lede {
+.lexicon .section-lede {
   color: var(--night-muted);
 }
-.stats {
+.terms {
   margin: 0;
   display: grid;
-  grid-template-columns: 1fr 1fr;
   gap: 1px;
   background: var(--night-line);
   border: 1px solid var(--night-line);
   border-radius: var(--radius);
   overflow: hidden;
 }
-.stats div {
+.terms div {
   background: var(--night);
-  padding: 22px 18px 24px;
+  padding: 24px 20px 26px;
   display: grid;
   align-content: start;
-  gap: 6px;
+  gap: 10px;
 }
-.stats dt {
-  font-size: 12px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--night-muted);
-}
-.stats dd {
-  margin: 0;
-  font-size: clamp(54px, 13vw, 88px);
-  font-weight: 800;
-  letter-spacing: -0.05em;
-  line-height: 0.95;
+.terms dt {
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: italic;
+  font-size: 32px;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
   color: var(--lime);
 }
-.stats small {
-  font-size: 0.34em;
-  letter-spacing: 0;
-  margin-left: 4px;
+.terms dd {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.55;
   color: var(--white);
 }
-.stats p {
-  font-size: 14px;
+.terms dd.how-it-works {
+  font-size: 13px;
   line-height: 1.5;
   color: var(--night-muted);
+  border-top: 1px solid var(--night-line);
+  padding-top: 10px;
+  margin-top: 2px;
 }
 
 .chunks {
@@ -739,8 +794,11 @@ h1 em {
   .steps {
     grid-template-columns: repeat(3, 1fr);
   }
-  .stats {
-    grid-template-columns: repeat(4, 1fr);
+  .principles {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .terms {
+    grid-template-columns: repeat(2, 1fr);
   }
   .chunks {
     padding: 26px 24px;
@@ -769,5 +827,11 @@ h1 em {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 64px;
     align-items: center;
+  }
+  .principles {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .terms {
+    grid-template-columns: repeat(3, 1fr);
   }
 }

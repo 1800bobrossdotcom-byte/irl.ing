@@ -25,7 +25,8 @@ try {
     page.on("pageerror", (e) => errors.push(e.message));
     page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
     await page.goto(`${base}/`, { waitUntil: "networkidle" });
-    assert.equal(await page.title(), "irl.ing — Less scrolling. More irl’ing.");
+    assert.equal(await page.title(), "irl.ing — six-second social video. Less scrolling, more irl’ing.");
+    assert.equal(await page.locator(".terms dt").count(), 9, "the lexicon");
     assert.equal(await page.locator("a[href='/loops/']").first().isVisible(), true);
 
     // The hero loop is live.
@@ -52,7 +53,7 @@ try {
     assert.equal(await page.locator("#meter-ticks i").count(), 1);
 
     // Transit diagram.
-    await page.locator("#tiny").scrollIntoViewIfNeeded();
+    await page.locator("#lexicon").scrollIntoViewIfNeeded();
     await page.click('[data-transit="relay"]');
     assert.equal(await page.locator(".blk.extra.gone").count(), 3);
     assert.match(await page.locator("#chunks-note").innerText(), /without opening the file/);

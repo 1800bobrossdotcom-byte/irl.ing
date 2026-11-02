@@ -4,15 +4,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#f6f5ef" />
-    <title>irl.ing — Less scrolling. More irl’ing.</title>
+    <title>irl.ing — six-second social video. Less scrolling, more irl’ing.</title>
     <meta
       name="description"
-      content="Six raw seconds of your actual life. Hold to record, let go to pause, no filters. Loops are tiny, signed on your phone, and rebuilt lifelike when they play."
+      content="irl.ing is a six-second social video app. Hold to record, let go to pause, no filters, and feeds that end. Coming to Android first."
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://irl.ing/" />
-    <meta property="og:title" content="irl.ing — Less scrolling. More irl’ing." />
-    <meta property="og:description" content="Six raw seconds of your actual life. Hold to record, let go to pause. No filters." />
+    <meta property="og:title" content="irl.ing — six-second social video" />
+    <meta property="og:description" content="Hold to record. Let go to pause. Six raw seconds, looped for your friends. Then put the phone down." />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/src/landing/landing.css" />
     <script type="module" src="/src/landing/landing.js"></script>
@@ -28,8 +28,8 @@
       >
       <nav aria-label="Sections">
         <a href="#how">How it works</a>
-        <a href="#tiny">Tiny on purpose</a>
-        <a href="#pixels">Smart pixels</a>
+        <a href="#network">The network</a>
+        <a href="#lexicon">The lexicon</a>
       </nav>
       <a class="pill" href="/loops/">Open the lab <span aria-hidden="true">↗</span></a>
     </header>
@@ -37,15 +37,15 @@
     <main id="main">
       <section class="hero" aria-labelledby="hero-title">
         <div class="hero-copy">
-          <p class="eyebrow"><span class="live" aria-hidden="true"></span> Being here. Seeing things. Doing something with it.</p>
+          <p class="eyebrow"><span class="live" aria-hidden="true"></span> Six-second social video · Android first</p>
           <h1 id="hero-title">Less scrolling. <em>More irl’ing.</em></h1>
           <p class="lede">
-            Six raw seconds of your actual life. Hold to record, let go to pause, keep going. No filters, no feed to fall into.
-            Then put the phone down.
+            irl.ing is a social video app made of six raw seconds. Hold to record, let go to pause, and your moment loops for
+            your friends. No filters, no bottomless feed. Watch, laugh, then go back to your actual life.
           </p>
           <div class="cta">
-            <a class="button primary" href="/loops/">Start a loop</a>
-            <a class="button ghost" href="#try" data-scroll>Try it right here <span aria-hidden="true">↓</span></a>
+            <a class="button primary" href="/loops/">Make a loop</a>
+            <a class="button ghost" href="#try">Try it right here <span aria-hidden="true">↓</span></a>
           </div>
         </div>
 
@@ -69,7 +69,7 @@
       <section class="how" id="how" aria-labelledby="how-title">
         <div class="section-head">
           <p class="eyebrow">How it works</p>
-          <h2 id="how-title">Three steps. <em>Then go live your life.</em></h2>
+          <h2 id="how-title">Notice it. Hold it. <em>Loop it.</em></h2>
         </div>
         <ol class="steps">
           <li>
@@ -80,65 +80,48 @@
           <li>
             <span class="num">02</span>
             <h3>Hold</h3>
-            <p>Hold to record, let go to pause. Six seconds, stitched from as many takes as you like. Nothing to adjust, nothing to fake.</p>
+            <p>Hold to record, let go to pause, hold again. Six seconds, stitched from as many takes as you like. Comedy lives in the cuts.</p>
           </li>
           <li>
             <span class="num">03</span>
-            <h3>Share</h3>
-            <p>Your loop is squeezed to about 100&nbsp;KB on your phone, signed with a key that never leaves it, and rebuilt lifelike when it plays.</p>
+            <h3>Loop</h3>
+            <p>Send it to your people. It plays on repeat on their screen, exactly as raw as you made it.</p>
           </li>
         </ol>
         <p class="closer">Then put the phone down.</p>
       </section>
 
-      <section class="tiny" id="tiny" aria-labelledby="tiny-title">
-        <div class="tiny-inner">
-          <div class="section-head">
-            <p class="eyebrow">Tiny on purpose</p>
-            <h2 id="tiny-title">Built for bad signal. <em>And far-away places.</em></h2>
-            <p class="section-lede">
-              We borrowed habits from the people who send pictures home from Mars: send the important part first, keep
-              damage small, and verify what arrives.
-            </p>
-          </div>
-          <dl class="stats">
-            <div><dt>about</dt><dd>100<small>KB</small></dd><p>for six seconds of 30&nbsp;fps video, encoded with AV1 on your own phone</p></div>
-            <div><dt>pieces of</dt><dd>2<small>s</small></dd><p>each with its own checksum, so a bad link costs a moment, not the loop</p></div>
-            <div><dt>signed by</dt><dd>1<small>key</small></dd><p>that lives on your phone and can’t be copied out of it</p></div>
-            <div><dt>filters</dt><dd>0</dd><p>what you saw is what they get; anything added on playback is labeled</p></div>
-          </dl>
-
-          <div class="chunks" aria-labelledby="chunks-title">
-            <div class="chunks-head">
-              <h3 id="chunks-title">What a loop looks like in transit</h3>
-              <div class="chips" role="group" aria-label="Transit scenario">
-                <button data-transit="sent" aria-pressed="true">As sent</button>
-                <button data-transit="relay" aria-pressed="false">Relay trims it</button>
-                <button data-transit="flip" aria-pressed="false">A bit flips</button>
-                <button data-transit="cut" aria-pressed="false">Link drops</button>
-              </div>
-            </div>
-            <div class="strip" id="strip" aria-hidden="true">
-              <span class="blk meta" style="--w: 2">info</span>
-              <span class="blk sign" style="--w: 3">signature</span>
-              <span class="blk base" style="--w: 9">0–2 s</span>
-              <span class="blk base" style="--w: 9" data-flip>2–4 s</span>
-              <span class="blk base" style="--w: 9">4–6 s</span>
-              <span class="blk sound" style="--w: 9">sound</span>
-              <span class="blk extra" style="--w: 7">extra frames</span>
-              <span class="blk extra" style="--w: 7">extra frames</span>
-              <span class="blk extra" style="--w: 7">extra frames</span>
-              <span class="cut-line"></span>
-            </div>
-            <div class="legend" aria-hidden="true">
-              <span><i class="head"></i>info and signature</span>
-              <span><i class="base"></i>every other frame, all six seconds</span>
-              <span><i class="sound"></i>sound</span>
-              <span><i class="extra"></i>the frames in between</span>
-            </div>
-            <p class="chunks-note" id="chunks-note" aria-live="polite"></p>
-          </div>
+      <section class="network" id="network" aria-labelledby="network-title">
+        <div class="section-head">
+          <p class="eyebrow">The network we’re building</p>
+          <h2 id="network-title">A social network <em>with an ending.</em></h2>
+          <p class="section-lede">
+            Inspired by Vine, the six-second app a lot of us still miss, and rebuilt around one idea: the best thing your
+            phone can do is show you something real, then let you go.
+          </p>
         </div>
+        <ul class="principles">
+          <li>
+            <h3>Six seconds, max.</h3>
+            <p>Long enough to say something. Short enough to get back to your day.</p>
+          </li>
+          <li>
+            <h3>Raw only.</h3>
+            <p>No filters, no face-tuning, no beauty mode. What you saw is what your friends get.</p>
+          </li>
+          <li>
+            <h3>Friends before followers.</h3>
+            <p>Loops from people you actually know come first. Everyone else can wait.</p>
+          </li>
+          <li>
+            <h3>Feeds that end.</h3>
+            <p>When you’re caught up, we say so. No autoplay rabbit hole. Go outside.</p>
+          </li>
+        </ul>
+        <p class="status-note">
+          <span class="badge">Status</span> Recording, loops and everything in the lexicon below work today in the loops lab.
+          Profiles, friends and feeds are being built next, Android first.
+        </p>
       </section>
 
       <section class="pixels" id="pixels" aria-labelledby="pixels-title">
@@ -151,26 +134,113 @@
           </div>
         </div>
         <div class="pixels-copy">
-          <p class="eyebrow">Smart pixels</p>
-          <h2 id="pixels-title">Every loop <em>finds its way to you.</em></h2>
+          <p class="eyebrow">Every loop has an entrance</p>
+          <h2 id="pixels-title">Loops don’t load. <em>They arrive.</em></h2>
           <p>
-            Loops arrive as a scatter of pixels that fly home, lean along the edges of what you saw, and settle into the real
-            thing. Slide to stay somewhere in between.
+            Each loop lands as a scatter of pixels that fly home, lean along the edges of what you saw, and settle into the
+            real thing. Slide to hang out somewhere in between.
           </p>
-          <p class="fine">
-            Under the hood: game-engine upscaling and sharpening (AMD FSR&nbsp;1), the grain your camera actually had, and a
-            touch of dither. All of it happens on the phone that plays the loop.
-          </p>
-          <button class="button ghost" id="pixels-again">Assemble again</button>
+          <button class="button ghost" id="pixels-again">Do the entrance again</button>
+        </div>
+      </section>
+
+      <section class="lexicon" id="lexicon" aria-labelledby="lexicon-title">
+        <div class="lexicon-inner">
+          <div class="section-head">
+            <p class="eyebrow">The lexicon</p>
+            <h2 id="lexicon-title">New words for <em>a tiny new thing.</em></h2>
+            <p class="section-lede">
+              Under the jokes and the sunsets is some serious engineering. We gave it names you can say out loud.
+            </p>
+          </div>
+
+          <dl class="terms">
+            <div>
+              <dt>Hold-to-Loop</dt>
+              <dd>Press to live it, let go to pause it, press again. Six seconds from as many takes as you like.</dd>
+              <dd class="how-it-works">One continuous 30&nbsp;fps clip, stitched on recorded time.</dd>
+            </div>
+            <div>
+              <dt>Featherweight</dt>
+              <dd>A whole loop in about 100&nbsp;KB. Light enough to send on one bar of signal.</dd>
+              <dd class="how-it-works">AV1, encoded on your own phone, up to two passes to land on size.</dd>
+            </div>
+            <div>
+              <dt>Lifeboats</dt>
+              <dd>Loops travel in two-second lifeboats. If one sinks, the rest still float.</dd>
+              <dd class="how-it-works">Independent chunks, each with a checksum and a sync marker.</dd>
+            </div>
+            <div>
+              <dt>Lighten Up</dt>
+              <dd>Busy network? A relay drops the in-between frames and passes it on: half the weight, still whole.</dd>
+              <dd class="how-it-works">Two temporal layers, trimmed without decoding or re-signing.</dd>
+            </div>
+            <div>
+              <dt>Real Seal</dt>
+              <dd>Every loop is sealed by your phone. Change one frame and the seal tells on you.</dd>
+              <dd class="how-it-works">Ed25519 over every chunk’s hash, with a key that can’t leave the device.</dd>
+            </div>
+            <div>
+              <dt>True Grain</dt>
+              <dd>We measure the grain your camera actually saw and put it back when the loop plays. Labeled, never faked.</dd>
+              <dd class="how-it-works">Parametric film grain, after AV1’s film-grain synthesis.</dd>
+            </div>
+            <div>
+              <dt>Glow-Up</dt>
+              <dd>Tiny files, rebuilt crisp on the phone that plays them.</dd>
+              <dd class="how-it-works">Game-engine upscaling and sharpening (AMD FSR&nbsp;1), plus dither.</dd>
+            </div>
+            <div>
+              <dt>Smart Pixels</dt>
+              <dd>The entrance every loop makes: pixels that find their way home.</dd>
+              <dd class="how-it-works">Oriented splats sampled from each frame, leaning along its edges.</dd>
+            </div>
+            <div>
+              <dt>Mars Manners</dt>
+              <dd>Important parts first, damage kept small, everything checked on arrival.</dd>
+              <dd class="how-it-works">Habits borrowed from how rovers send pictures home.</dd>
+            </div>
+          </dl>
+
+          <div class="chunks" aria-labelledby="chunks-title">
+            <div class="chunks-head">
+              <h3 id="chunks-title">Lifeboats in action</h3>
+              <div class="chips" role="group" aria-label="Transit scenario">
+                <button data-transit="sent" aria-pressed="true">As sent</button>
+                <button data-transit="relay" aria-pressed="false">Lighten Up</button>
+                <button data-transit="flip" aria-pressed="false">A bit flips</button>
+                <button data-transit="cut" aria-pressed="false">Link drops</button>
+              </div>
+            </div>
+            <div class="strip" id="strip" aria-hidden="true">
+              <span class="blk meta" style="--w: 2">info</span>
+              <span class="blk sign" style="--w: 3">seal</span>
+              <span class="blk base" style="--w: 9">0–2 s</span>
+              <span class="blk base" style="--w: 9" data-flip>2–4 s</span>
+              <span class="blk base" style="--w: 9">4–6 s</span>
+              <span class="blk sound" style="--w: 9">sound</span>
+              <span class="blk extra" style="--w: 7">extra frames</span>
+              <span class="blk extra" style="--w: 7">extra frames</span>
+              <span class="blk extra" style="--w: 7">extra frames</span>
+              <span class="cut-line"></span>
+            </div>
+            <div class="legend" aria-hidden="true">
+              <span><i class="head"></i>info and Real Seal</span>
+              <span><i class="base"></i>every other frame, all six seconds</span>
+              <span><i class="sound"></i>sound</span>
+              <span><i class="extra"></i>the frames in between</span>
+            </div>
+            <p class="chunks-note" id="chunks-note" aria-live="polite"></p>
+          </div>
         </div>
       </section>
 
       <section class="lab" aria-labelledby="lab-title">
-        <p class="eyebrow">Android first</p>
-        <h2 id="lab-title">The loops lab is open.</h2>
+        <p class="eyebrow">Coming to Android first</p>
+        <h2 id="lab-title">Your first loop is six seconds away.</h2>
         <p>
-          It works today in Chrome on Android: record, squeeze, sign and share a loop as a file. Friends, feeds that end, and
-          links that open anywhere are next.
+          The loops lab works today in Chrome on Android: Hold-to-Loop, Featherweight files, Real Seal and all. Make one, send
+          it to a friend, and tell us what you made.
         </p>
         <a class="button dark" href="/loops/">Open the loops lab <span aria-hidden="true">↗</span></a>
       </section>

@@ -241,10 +241,10 @@ say("Hold the button to make a take. Let go to pause.");
 // ---- transit diagram -----------------------------------------------------
 
 const NOTES = {
-  sent: "Everything arrives: all six seconds at <b>30 fps</b>, with sound, and every piece checks out against the signature.",
-  relay: "A relay drops the in-between frames <b>without opening the file</b>: about half the size, still six seconds at 15 fps, still verified.",
-  flip: "One damaged piece is caught by its checksum and skipped. <b>Seconds 2–4 hold still</b>; everything else plays and verifies.",
-  cut: "The link dies partway through. Because the important parts were sent first, <b>all six seconds still play</b> at 15 fps.",
+  sent: "Every lifeboat arrives: all six seconds at <b>30 fps</b>, with sound, and the Real Seal checks out.",
+  relay: "Lighten Up: a relay drops the in-between frames <b>without opening the file</b>. About half the weight, still six seconds at 15 fps, still sealed.",
+  flip: "One lifeboat takes on water and its checksum catches it. <b>Seconds 2–4 hold still</b>; every other lifeboat plays and verifies.",
+  cut: "The link dies partway through. Mars Manners sent the important parts first, so <b>all six seconds still play</b> at 15 fps.",
 };
 const strip = $("strip");
 
