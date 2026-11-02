@@ -54,6 +54,7 @@ function getPlayer() {
       audio.play().catch(() => {});
     };
     player.onError = (e) => status(`Playback hit a problem (${e.message}).`);
+    player.onAudit = describeZoom;
   }
   applyPlayback();
   return player;
@@ -69,6 +70,21 @@ function applyPlayback() {
     hardness: HARDNESS[settings.hardness],
     look: Number($("look").value) / 100,
   });
+  describeZoom(player.audit);
+}
+
+/** The Honest Zoom line: what was checked, or why it's paused. */
+function describeZoom(audit) {
+  if (!player || !currentBytes) return;
+  const o = player.options;
+  let text;
+  if (!o.finish) text = "Honest Zoom off: finishing is off, so this is a plain upscale.";
+  else if (o.look > 0.001) text = "Honest Zoom paused: smart pixels are a style, not a faithful picture.";
+  else if (!audit?.checked) text = "Honest Zoom on: checking frames against what was sent…";
+  else if (audit.faithful === audit.checked)
+    text = `Honest Zoom verified: ${audit.checked} of ${audit.checked} checked frames match what was sent, every 2×2 block.`;
+  else text = `Honest Zoom found ${audit.mismatched} blocks that don’t match what was sent (${audit.checked - audit.faithful} of ${audit.checked} frames).`;
+  $("zoom").textContent = text;
 }
 
 // ---- recording -----------------------------------------------------------
@@ -301,6 +317,7 @@ async function showBytes(bytes, note = "") {
   p.play();
   if (parsed.audio) audio.play().catch(() => {});
   describe(parsed, checked, bytes, note);
+  describeZoom(null);
 }
 
 function describe(parsed, checked, bytes, note) {
@@ -467,7 +484,10 @@ async function playableVideo() {
 function describeVideo(v) {
   const codec = { avc: "H.264", vp9: "VP9", av1: "AV1" }[v.videoCodec] ?? v.videoCodec;
   const sound = v.audioCodec ? `, ${v.audioCodec === "aac" ? "AAC" : "Opus"} sound` : ", no sound";
-  return `MP4 · ${codec}${sound} · ${kb(v.file.size)}`;
+  const zoom = v.honest
+    ? ` · Honest Zoom ${v.honest.faithful}/${v.honest.frames} frames verified before encoding`
+    : " · smart-pixel style, not verified";
+  return `MP4 · ${codec}${sound} · ${v.size}² · ${kb(v.file.size)}${zoom}`;
 }
 
 $("save-video").addEventListener("click", async () => {
@@ -554,7 +574,7 @@ function again() {
   currentBytes = null;
   recorder.reset();
   for (const id of ["size-loop", "size-raw", "size-ratio", "quality"]) $(id).textContent = "—";
-  for (const id of ["facts", "trust", "transit-report", "stage-tag"]) $(id).textContent = "";
+  for (const id of ["facts", "trust", "zoom", "transit-report", "stage-tag"]) $(id).textContent = "";
   $("build").hidden = true;
   $("record-controls").hidden = true;
   $("setup-controls").hidden = false;

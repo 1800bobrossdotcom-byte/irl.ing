@@ -834,4 +834,8 @@ h1 em {
   .terms {
     grid-template-columns: repeat(3, 1fr);
   }
+  /* An odd one out on the last row spans it. */
+  .terms div:last-child:nth-child(3n + 1) {
+    grid-column: 1 / -1;
+  }
 }

@@ -2,14 +2,19 @@
 // messaging apps, desktop players. The .irl file stays the format loops
 // travel in between irl.ing users; this is the format people keep.
 //
-// Each frame is decoded, finished exactly as playback finishes it (Glow-Up
-// upscale and sharpening, True Grain, dither, and any smart-pixel look the
-// person chose), drawn at 720², and re-encoded: H.264 first because nearly
+// Each frame is decoded and finished exactly as playback finishes it. With the
+// lifelike look, the Honest Zoom frame (2× the loop's size, 720² for a 360²
+// loop) is checked block by block against the received frame and handed to
+// the encoder as-is; with smart pixels showing, the styled canvas is recorded
+// instead (and is not called faithful). H.264 first because nearly
 // everything can play it, then VP9 or AV1. Sound is re-encoded as AAC where
 // the browser can, otherwise Opus. Mediabunny (MPL-2.0) writes the MP4 and is
 // only loaded when someone actually saves or shares a video.
 
 import { Finisher } from "./finish-gl.js";
+import { framePlanes } from "./frame-planes.js";
+import { verifyFrame } from "./honest-zoom.js";
+import { COLOR_SPACE } from "./yuv.js";
 
 export const EXPORT_SIZE = 720;
 
@@ -88,7 +93,7 @@ async function decodeSound(audio, seconds) {
 /**
  * Render a parsed loop to an MP4 Blob.
  * look: the playback options ({ finish, sharpen, grain, look, grid, hardness }).
- * Returns { blob, videoCodec, audioCodec }.
+ * Returns { blob, videoCodec, audioCodec, honest: { frames, faithful } | null }.
  */
 export async function exportVideo(parsed, look, { onProgress } = {}) {
   const mb = await import("mediabunny");
@@ -98,7 +103,9 @@ export async function exportVideo(parsed, look, { onProgress } = {}) {
   const total = meta.frameCount;
   const seconds = total / fps;
 
-  const videoCodec = await mb.getFirstEncodableVideoCodec(["avc", "vp9", "av1"], { width: EXPORT_SIZE, height: EXPORT_SIZE });
+  const honest = look.finish && !(look.look > 0.001);
+  const size = honest ? meta.width * 2 : EXPORT_SIZE;
+  const videoCodec = await mb.getFirstEncodableVideoCodec(["avc", "vp9", "av1"], { width: size, height: size });
   if (!videoCodec) throw new Error("this browser can’t encode a video file");
   const sound = parsed.audio ? await decodeSound(parsed.audio, seconds) : null;
   const audioCodec = sound
@@ -107,11 +114,12 @@ export async function exportVideo(parsed, look, { onProgress } = {}) {
 
   const canvas = document.createElement("canvas");
   const finisher = new Finisher(canvas);
-  finisher.resize(EXPORT_SIZE);
+  finisher.resize(size);
   finisher.setGrain(meta.grain ?? null);
 
   const output = new mb.Output({ format: new mb.Mp4OutputFormat({ fastStart: "in-memory" }), target: new mb.BufferTarget() });
-  const video = new mb.CanvasSource(canvas, { codec: videoCodec, bitrate: mb.QUALITY_HIGH, keyFrameInterval: 2 });
+  const encoding = { codec: videoCodec, bitrate: mb.QUALITY_HIGH, keyFrameInterval: 2 };
+  const video = honest ? new mb.VideoSampleSource(encoding) : new mb.CanvasSource(canvas, encoding);
   output.addVideoTrack(video, { frameRate: fps });
   let audioTrack = null;
   if (sound && audioCodec) {
@@ -121,24 +129,47 @@ export async function exportVideo(parsed, look, { onProgress } = {}) {
   await output.start();
 
   const stream = decodedFrames(meta, frames);
+  const audit = { frames: 0, faithful: 0 };
+  const planesOf = async (frame) => {
+    if (!frame) return null;
+    try {
+      return { timestamp: frame.timestamp, i420: await framePlanes(frame) };
+    } finally {
+      frame.close();
+    }
+  };
   try {
-    let current = await stream.next();
-    let next = await stream.next();
+    let current = await planesOf(await stream.next());
+    let next = await planesOf(await stream.next());
     for (let i = 0; i < total; i++) {
       const us = (i * 1e6) / fps;
       // Hold the latest frame at or before this moment; lost pieces hold still.
       while (next && next.timestamp <= us) {
-        current.close();
         current = next;
-        next = await stream.next();
+        next = await planesOf(await stream.next());
       }
-      finisher.upload(current, meta.width);
-      finisher.render({ ...look, assemble: 1, frameNo: i });
-      await video.add(i / fps, 1 / fps);
+      finisher.uploadI420(current.i420, meta.width);
+      if (honest) finisher.zoomOnly({ ...look, frameNo: i });
+      else finisher.render({ ...look, assemble: 1, frameNo: i });
+      if (honest) {
+        const zoomed = finisher.readZoom();
+        audit.frames++;
+        if (verifyFrame(zoomed, current.i420, meta.width).mismatched === 0) audit.faithful++;
+        const sample = new mb.VideoSample(zoomed, {
+          format: "I420",
+          codedWidth: size,
+          codedHeight: size,
+          timestamp: i / fps,
+          duration: 1 / fps,
+          colorSpace: COLOR_SPACE,
+        });
+        await video.add(sample);
+        sample.close();
+      } else {
+        await video.add(i / fps, 1 / fps);
+      }
       if (i % 10 === 0) onProgress?.(i / total);
     }
-    current?.close();
-    next?.close();
   } finally {
     stream.close();
     finisher.destroy();
@@ -146,5 +177,5 @@ export async function exportVideo(parsed, look, { onProgress } = {}) {
   if (audioTrack) await audioTrack.add(sound);
   await output.finalize();
   onProgress?.(1);
-  return { blob: new Blob([output.target.buffer], { type: "video/mp4" }), videoCodec, audioCodec };
+  return { blob: new Blob([output.target.buffer], { type: "video/mp4" }), videoCodec, audioCodec, size, honest: honest ? audit : null };
 }

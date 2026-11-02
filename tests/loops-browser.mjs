@@ -77,6 +77,9 @@ try {
   assert.notEqual(a, await frameOf(), "the loop should be playing");
   await shot("2-lifelike", page.locator("#stage"));
 
+  // Honest Zoom: frames on screen are read back and checked against what was sent.
+  await waitFor(() => /^Honest Zoom verified: (\d+) of \1 checked frames/.test(document.querySelector("#zoom").textContent));
+
   // Finishing off vs on, then the smart-pixel look.
   await page.locator('[data-setting="finish"] button[data-value="off"]').click();
   await page.waitForTimeout(300);
@@ -85,6 +88,7 @@ try {
   await page.locator("#look").fill("100");
   await page.waitForTimeout(300);
   await shot("4-smart-pixels", page.locator("#stage"));
+  assert.match(await text("#zoom"), /^Honest Zoom paused: smart pixels are a style/);
   await page.locator("#look").fill("0");
 
   // Smaller budget re-encodes to a smaller, lower-quality loop.
@@ -115,7 +119,7 @@ try {
 
   // Save video: an ordinary MP4 anyone can play, not the .irl.
   const mp4 = await saveVideo();
-  assert.match(await text("#status"), /^Saved irl-loop\.mp4 \(MP4 · H\.264, no sound · [\d.]+ (KB|MB)\)\.$/);
+  assert.match(await text("#status"), /^Saved irl-loop\.mp4 \(MP4 · H\.264, no sound · 720² · [\d.]+ (KB|MB) · Honest Zoom 180\/180 frames verified before encoding\)\.$/);
   if (mp4.streams) {
     const [v] = mp4.streams;
     assert.deepEqual([v.codec_type, v.codec_name, v.width, v.height, Number(v.nb_read_frames)], ["video", "h264", 720, 720, 180]);
@@ -157,7 +161,7 @@ try {
   await page.waitForTimeout(2500);
   await shot("6-camera-loop");
   const cameraMp4 = await saveVideo();
-  assert.match(await text("#status"), /^Saved irl-loop\.mp4 \(MP4 · H\.264, (AAC|Opus) sound · /);
+  assert.match(await text("#status"), /^Saved irl-loop\.mp4 \(MP4 · H\.264, (AAC|Opus) sound · 720² · .* · Honest Zoom (\d+)\/\2 frames verified/);
   if (cameraMp4.streams) assert.deepEqual(cameraMp4.streams.map((s) => s.codec_type).sort(), ["audio", "video"]);
   await page.locator("#view-raw").click();
   await waitFor(() => !document.querySelector("#raw").hidden && document.querySelector("#raw").readyState >= 2);

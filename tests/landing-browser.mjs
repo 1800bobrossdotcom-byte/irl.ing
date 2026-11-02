@@ -26,7 +26,7 @@ try {
     page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
     await page.goto(`${base}/`, { waitUntil: "networkidle" });
     assert.equal(await page.title(), "irl.ing — six-second social video. Less scrolling, more irl’ing.");
-    assert.equal(await page.locator(".terms dt").count(), 9, "the lexicon");
+    assert.equal(await page.locator(".terms dt").count(), 10, "the lexicon");
     assert.equal(await page.locator("a[href='/loops/']").first().isVisible(), true);
 
     // The hero loop is live.
