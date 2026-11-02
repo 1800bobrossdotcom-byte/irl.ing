@@ -11,5 +11,8 @@
   "devDependencies": {
     "vite": "8.3.3"
   },
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "mediabunny": "1.61.6"
+  }
 }

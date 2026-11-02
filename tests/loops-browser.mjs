@@ -3,6 +3,7 @@
 //   npm run build && PORT=3003 npm start
 //   STUDIO_URL=http://127.0.0.1:3003 node tests/loops-browser.mjs [screenshot-dir]
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { mkdirSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 
@@ -33,6 +34,24 @@ const text = (id) => page.locator(id).innerText();
 const kb = async (id) => parseFloat(await text(id));
 const frameOf = () => page.locator("#player").evaluate((c) => c.toDataURL());
 const waitFor = (fn, arg, timeout = 60_000) => page.waitForFunction(fn, arg, { timeout });
+/** Stream summary from ffprobe, or null where ffprobe isn't installed. */
+function probe(path) {
+  try {
+    const out = execFileSync("ffprobe", ["-v", "error", "-count_frames", "-show_entries", "stream=codec_type,codec_name,width,height,nb_read_frames", "-of", "json", path]);
+    return JSON.parse(out).streams;
+  } catch (error) {
+    if (error.code === "ENOENT") return null;
+    throw error;
+  }
+}
+const saveVideo = async () => {
+  const [download] = await Promise.all([page.waitForEvent("download", { timeout: 180_000 }), page.locator("#save-video").click()]);
+  assert.equal(download.suggestedFilename(), "irl-loop.mp4");
+  const path = await download.path();
+  const bytes = readFileSync(path);
+  assert.equal(bytes.subarray(4, 8).toString(), "ftyp", "a real MP4");
+  return { path, streams: probe(path) };
+};
 const transit = async (value, expect) => {
   await page.locator(`[data-setting="transit"] button[data-value="${value}"]`).click();
   await waitFor((e) => document.querySelector("#facts").textContent.includes(e), expect);
@@ -94,6 +113,14 @@ try {
   assert.match(await text("#transit-report"), /link dropped after 60%.*file ends early/);
   await transit("original", "30 fps · 2 of 2 layers");
 
+  // Save video: an ordinary MP4 anyone can play, not the .irl.
+  const mp4 = await saveVideo();
+  assert.match(await text("#status"), /^Saved irl-loop\.mp4 \(MP4 · H\.264, no sound · [\d.]+ (KB|MB)\)\.$/);
+  if (mp4.streams) {
+    const [v] = mp4.streams;
+    assert.deepEqual([v.codec_type, v.codec_name, v.width, v.height, Number(v.nb_read_frames)], ["video", "h264", 720, 720, 180]);
+  }
+
   // The downloaded file alone reproduces the loop and its signature.
   const id = (await text("#trust")).match(/loop ID ([0-9a-f]{12})/)[1];
   const [download] = await Promise.all([page.waitForEvent("download"), page.locator("#download").click()]);
@@ -129,6 +156,9 @@ try {
   assert.match(await text("#size-ratio"), /^\d+×$/);
   await page.waitForTimeout(2500);
   await shot("6-camera-loop");
+  const cameraMp4 = await saveVideo();
+  assert.match(await text("#status"), /^Saved irl-loop\.mp4 \(MP4 · H\.264, (AAC|Opus) sound · /);
+  if (cameraMp4.streams) assert.deepEqual(cameraMp4.streams.map((s) => s.codec_type).sort(), ["audio", "video"]);
   await page.locator("#view-raw").click();
   await waitFor(() => !document.querySelector("#raw").hidden && document.querySelector("#raw").readyState >= 2);
 

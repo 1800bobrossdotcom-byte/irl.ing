@@ -1,6 +1,7 @@
 import { buildLoop, parseLoop, readChunks, readVideoPayload, TYPE, trimLayers, verify } from "./container.js";
 import { deviceKey } from "./device-key.js";
 import { encodeClip, FPS, GOP_FRAMES, measure } from "./loop-encoder.js";
+import { exportVideo } from "./export-video.js";
 import { LoopPlayer } from "./loop-player.js";
 import { captureSize, LoopRecorder, MAX_MS } from "./loop-recorder.js";
 import { sampleClip } from "./sample-clip.js";
@@ -296,6 +297,7 @@ async function showBytes(bytes, note = "") {
   if (parsed.audio) audio.src = objectUrl(new Blob([parsed.audio.data], { type: parsed.audio.mime }));
   setStage("loop");
   setPressed("view", "loop");
+  $("share").textContent = "Share video";
   p.play();
   if (parsed.audio) audio.play().catch(() => {});
   describe(parsed, checked, bytes, note);
@@ -416,34 +418,102 @@ function setEncodable(encodable) {
 $("look").addEventListener("input", applyPlayback);
 $("assemble").addEventListener("click", () => player?.assemble());
 
-// ---- sharing and opening -------------------------------------------------
+// ---- saving and sharing --------------------------------------------------
 
-function loopFile() {
-  return new File([currentBytes], "irl-loop.irl", { type: "application/octet-stream" });
-}
-
-function download() {
+function saveFile(file) {
   const a = document.createElement("a");
-  a.href = objectUrl(loopFile());
-  a.download = "irl-loop.irl";
+  a.href = objectUrl(file);
+  a.download = file.name;
   a.click();
 }
 
-$("download").addEventListener("click", download);
+/** The .irl itself: tiny and sealed, but only irl.ing can play it. */
+$("download").addEventListener("click", () => {
+  if (currentBytes) saveFile(new File([currentBytes], "irl-loop.irl", { type: "application/octet-stream" }));
+});
+
+let video = null; // { key, file, videoCodec, audioCodec } for the loop and look on screen
+let exporting = null;
+
+function videoKey() {
+  return `${showToken}|${JSON.stringify(player?.options ?? {})}`;
+}
+
+function setBusy(busy) {
+  for (const id of ["share", "save-video"]) $(id).disabled = busy;
+}
+
+/** An MP4 of the loop as it looks now, made once and reused. */
+async function playableVideo() {
+  const key = videoKey();
+  if (video?.key === key) return video;
+  if (exporting) return exporting;
+  setBusy(true);
+  status("Making your video… 0%");
+  exporting = (async () => {
+    const parsed = parseLoop(currentBytes);
+    const made = await exportVideo(parsed, { ...player.options }, { onProgress: (p) => status(`Making your video… ${Math.round(p * 100)}%`) });
+    video = { key, file: new File([made.blob], "irl-loop.mp4", { type: "video/mp4" }), ...made };
+    return video;
+  })();
+  try {
+    return await exporting;
+  } finally {
+    exporting = null;
+    setBusy(false);
+  }
+}
+
+function describeVideo(v) {
+  const codec = { avc: "H.264", vp9: "VP9", av1: "AV1" }[v.videoCodec] ?? v.videoCodec;
+  const sound = v.audioCodec ? `, ${v.audioCodec === "aac" ? "AAC" : "Opus"} sound` : ", no sound";
+  return `MP4 · ${codec}${sound} · ${kb(v.file.size)}`;
+}
+
+$("save-video").addEventListener("click", async () => {
+  if (!currentBytes) return;
+  try {
+    const v = await playableVideo();
+    saveFile(v.file);
+    status(`Saved irl-loop.mp4 (${describeVideo(v)}).`);
+  } catch (error) {
+    status(`Couldn’t make the video (${error.message}).`);
+  }
+});
+
 $("share").addEventListener("click", async () => {
-  const file = loopFile();
-  if (navigator.canShare?.({ files: [file] })) {
-    try {
-      await navigator.share({ files: [file], title: "irl.ing loop" });
-    } catch (error) {
-      if (error.name !== "AbortError") {
-        status("Sharing didn’t work on this device. Downloading instead.");
-        download();
-      }
+  if (!currentBytes) return;
+  const started = performance.now();
+  let v;
+  try {
+    v = await playableVideo();
+  } catch (error) {
+    status(`Couldn’t make the video (${error.message}).`);
+    return;
+  }
+  if (!navigator.canShare?.({ files: [v.file] })) {
+    saveFile(v.file);
+    status(`This browser can’t share files directly, so the video was saved (${describeVideo(v)}).`);
+    return;
+  }
+  // Share sheets need a recent tap. If making the video took a while, ask
+  // for one more tap rather than letting the browser refuse.
+  if (performance.now() - started > 4000) {
+    $("share").textContent = "Share video now";
+    status(`Your video is ready (${describeVideo(v)}). Tap Share video now.`);
+    return;
+  }
+  try {
+    await navigator.share({ files: [v.file], title: "irl.ing loop" });
+    $("share").textContent = "Share video";
+  } catch (error) {
+    if (error.name === "NotAllowedError") {
+      $("share").textContent = "Share video now";
+      status("Tap Share video now to open the share sheet.");
+    } else if (error.name !== "AbortError") {
+      saveFile(v.file);
+      status("Sharing didn’t work on this device, so the video was saved instead.");
     }
-  } else {
-    download();
-    status("This browser can’t share files directly, so the loop was downloaded.");
   }
 });
 

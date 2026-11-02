@@ -28,3 +28,11 @@ THE SOFTWARE.
 Film grain: the grain model is an independent, simplified implementation of
 the idea behind AV1 film grain synthesis (https://aomediacodec.github.io/av1-spec/);
 no AV1 library code is included.
+
+Mediabunny 1.61.6
+Writes the MP4 files made by "Save video" and "Share video"; loaded only
+when a video is exported. Included unmodified.
+Copyright (c) Vanilagy and Mediabunny contributors.
+License: Mozilla Public License 2.0, https://mozilla.org/MPL/2.0/
+Source code: https://github.com/Vanilagy/mediabunny (release 1.61.6) and the
+npm package mediabunny@1.61.6.

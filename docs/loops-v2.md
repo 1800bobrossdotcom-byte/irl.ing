@@ -26,6 +26,26 @@ v2 replaces the v1 dots codec, which measured far below AV1 at equal bytes ([fin
 
 Everything added on playback is listed in the file's `synthesizedOnPlayback` field and in the page text.
 
+## Saving and sharing: MP4 for people, .irl for irl.ing
+
+`.irl` only plays on irl.ing, so **Save video** and **Share video** produce an ordinary MP4 (`src/loops/export-video.js`). The steps:
+
+1. Each frame is decoded and finished exactly as playback finishes it: Glow-Up, True Grain, dither, and whatever look is selected. The entrance animation is left out.
+2. Frames are drawn at 720² and re-encoded with H.264, chosen first because nearly every device plays it, then VP9 or AV1.
+3. Sound is re-encoded as AAC where the browser can, otherwise Opus.
+4. Mediabunny (MPL-2.0) writes the file. It is loaded only when someone exports.
+
+Lost pieces hold the last good frame, so the MP4 is always the full six seconds.
+
+Measured in headless Chromium:
+
+- **Sample:** H.264 High profile, 720×720, 180 frames, 6.0 s, 1.22 MB, decoded cleanly by ffmpeg. It took about 13 s, with WebGL running in software.
+- **Fake-camera loop:** the MP4 carries both a video and a sound track.
+
+Android only opens the share sheet shortly after a tap. If making the video takes longer than about four seconds, the button becomes **Share video now** and a second tap shares it.
+
+The `.irl` stays available, as a secondary download, for loops travelling between irl.ing users: it is about 100 KB, sealed, and survives a bad link.
+
 ## File format (.irl v2)
 
 ```

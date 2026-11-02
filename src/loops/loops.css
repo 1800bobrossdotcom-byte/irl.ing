@@ -454,3 +454,16 @@ legend {
     grid-template-columns: repeat(4, 1fr);
   }
 }
+
+.link {
+  display: inline;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
