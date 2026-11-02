@@ -244,7 +244,7 @@ const NOTES = {
   sent: "Every lifeboat arrives: all six seconds at <b>30 fps</b>, with sound, and the Real Seal checks out.",
   relay: "Lighten Up: a relay drops the in-between frames <b>without opening the file</b>. About half the weight, still six seconds at 15 fps, still sealed.",
   flip: "One lifeboat takes on water and its checksum catches it. <b>Seconds 2–4 hold still</b>; every other lifeboat plays and verifies.",
-  cut: "The link dies partway through. Mars Manners sent the important parts first, so <b>all six seconds still play</b> at 15 fps.",
+  cut: "The link dies partway through. Cosmic Courtesy sent the important parts first, so <b>all six seconds still play</b> at 15 fps.",
 };
 const strip = $("strip");
 

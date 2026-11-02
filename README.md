@@ -6,7 +6,7 @@ Irl’ing is a verb: being present, seeing what’s around you, and doing someth
 
 ## What’s here
 
-- **`/`**: the landing page. It plays a live loop through the same on-phone finishing pipeline the lab uses, has a hold-to-record demo, sets out the network's principles, and ends with **the lexicon**, plain names for the tech (Hold-to-Loop, Featherweight, Lifeboats, Lighten Up, Real Seal, True Grain, Glow-Up, Smart Pixels, Mars Manners) and a demo of how a loop survives a bad link.
+- **`/`**: the landing page. It plays a live loop through the same on-phone finishing pipeline the lab uses, has a hold-to-record demo, sets out the network's principles, and ends with **the lexicon**, plain names for the tech (Hold-to-Loop, Featherweight, Lifeboats, Lighten Up, Real Seal, True Grain, Glow-Up, Smart Pixels, Cosmic Courtesy) and a demo of how a loop survives a bad link.
 - **`/loops/`**: the loops lab, Android (Chrome) first.
   - **Encoding:** clips are encoded on the phone with its own AV1 encoder (VP9 or H.264 where AV1 isn't available) to a 50, 100 or 200 KB budget.
   - **Packaging:** each loop is cut into two-second, checksummed chunks and signed with a key that never leaves the phone.
