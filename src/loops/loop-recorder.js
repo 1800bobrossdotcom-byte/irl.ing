@@ -1,10 +1,18 @@
 // Hold to record, let go to pause, up to six seconds in one clip.
 // While recording it keeps (1) the raw clip, which stays on this phone,
-// (2) the sound on its own, and (3) small square frames for the dots codec.
+// (2) the sound on its own, and (3) square 30 fps I420 frames for the
+// loop encoder. Frames are stamped on recorded time, so takes join up.
+
+import { i420Size, rgbaToI420 } from "./yuv.js";
 
 export const MAX_MS = 6000;
-export const CAPTURE_FPS = 12;
-export const CAPTURE_SIZE = 160;
+export const CAPTURE_FPS = 30;
+const MAX_FRAMES = (MAX_MS / 1000) * CAPTURE_FPS;
+
+/** Encode size: smaller on low-memory phones (frames are held until encoded). */
+export function captureSize() {
+  return (navigator.deviceMemory ?? 4) <= 2 ? 288 : 360;
+}
 
 function pickType(candidates) {
   if (typeof MediaRecorder === "undefined") return "";
@@ -26,11 +34,12 @@ function stopped(recorder) {
 }
 
 export class LoopRecorder {
-  constructor(video, { onProgress } = {}) {
+  constructor(video, { onProgress, size = captureSize() } = {}) {
     this.video = video;
     this.onProgress = onProgress;
+    this.size = size;
     this.canvas = document.createElement("canvas");
-    this.canvas.width = this.canvas.height = CAPTURE_SIZE;
+    this.canvas.width = this.canvas.height = size;
     this.ctx = this.canvas.getContext("2d", { willReadFrequently: true });
     this.facing = "user";
     this.reset();
@@ -144,20 +153,21 @@ export class LoopRecorder {
   capture(now) {
     const video = this.video;
     if (!video.videoWidth) return;
-    while (this.nextCapture <= this.elapsed(now) && this.frames.length < (MAX_MS / 1000) * CAPTURE_FPS) {
+    const size = this.size;
+    while (this.nextCapture <= this.elapsed(now) && this.frames.length < MAX_FRAMES) {
       const side = Math.min(video.videoWidth, video.videoHeight);
       const sx = (video.videoWidth - side) / 2;
       const sy = (video.videoHeight - side) / 2;
       const ctx = this.ctx;
       ctx.save();
       if (this.mirrored) {
-        ctx.translate(CAPTURE_SIZE, 0);
+        ctx.translate(size, 0);
         ctx.scale(-1, 1);
       }
       ctx.imageSmoothingQuality = "high";
-      ctx.drawImage(video, sx, sy, side, side, 0, 0, CAPTURE_SIZE, CAPTURE_SIZE);
+      ctx.drawImage(video, sx, sy, side, side, 0, 0, size, size);
       ctx.restore();
-      this.frames.push(ctx.getImageData(0, 0, CAPTURE_SIZE, CAPTURE_SIZE).data);
+      this.frames.push(rgbaToI420(ctx.getImageData(0, 0, size, size).data, size, size, new Uint8Array(i420Size(size, size))));
       this.nextCapture += 1000 / CAPTURE_FPS;
     }
   }
@@ -168,6 +178,7 @@ export class LoopRecorder {
     const [raw, audio] = await Promise.all([stopped(this.videoRecorder), stopped(this.audioRecorder)]);
     return {
       frames: this.frames,
+      size: this.size,
       durationMs: this.recordedMs,
       takes: this.takes.slice(),
       raw,

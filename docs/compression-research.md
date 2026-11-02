@@ -82,7 +82,10 @@ The "phone-like" rows imitate Chrome's encoder configuration with ffmpeg. They h
 
 ## Plan
 
-### Track A: lifelike loops on Android (build next)
+### Track A: lifelike loops on Android (built: see [loops v2](loops-v2.md))
+
+Done: items 1–3 and 5. Remaining: item 4 (subject priority) and verification on physical Android phones.
+
 
 1. **Base layer: AV1 through WebCodecs**, recorded on the phone, square, 360–432 px, two quantizer passes to land on a byte budget (~100 KB for 6 s). VP9 is the fallback.
 2. **Container `.irl` v2**:

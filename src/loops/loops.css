@@ -362,29 +362,51 @@ legend {
   flex-wrap: wrap;
   gap: 10px;
 }
-.ladder {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 10px;
+.facts {
+  margin: -6px 0 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink);
+  overflow-wrap: anywhere;
 }
-.ladder[hidden] {
+.facts:empty {
   display: none;
 }
-.rung {
-  display: grid;
-  gap: 6px;
-  padding: 6px;
-  border-radius: 12px;
-  border: 1px solid var(--line);
-  background: var(--paper);
-  text-align: left;
-  font-size: 13px;
+.look {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--muted);
 }
-.rung canvas {
-  width: 100%;
-  aspect-ratio: 1;
-  border-radius: 8px;
-  display: block;
+.look input {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--orange);
+  height: 32px;
+}
+.transit {
+  display: grid;
+  gap: 10px;
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+}
+.transit h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+.stage-tag {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  font-size: 10px;
+  letter-spacing: 1.4px;
+  font-weight: 700;
+  color: var(--night);
+  background: var(--green);
+  border-radius: 20px;
+  padding: 6px 10px;
 }
 .fine {
   margin: 0;
@@ -424,6 +446,9 @@ legend {
   }
   .settings {
     grid-template-columns: 1fr 1fr;
+  }
+  .settings .wide {
+    grid-column: 1 / -1;
   }
   .readout {
     grid-template-columns: repeat(4, 1fr);

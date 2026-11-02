@@ -1,30 +1,33 @@
-import { encodeFrames, parse, pickKeyframes, resampleSquare, serialize } from "./dots-codec.js";
-import { DotsRenderer } from "./dots-renderer.js";
-import { CAPTURE_FPS, CAPTURE_SIZE, LoopRecorder, MAX_MS } from "./loop-recorder.js";
+import { buildLoop, parseLoop, readChunks, readVideoPayload, TYPE, trimLayers, verify } from "./container.js";
+import { deviceKey } from "./device-key.js";
+import { encodeClip, FPS, GOP_FRAMES, measure } from "./loop-encoder.js";
+import { LoopPlayer } from "./loop-player.js";
+import { captureSize, LoopRecorder, MAX_MS } from "./loop-recorder.js";
 import { sampleClip } from "./sample-clip.js";
 
 const $ = (id) => document.getElementById(id);
 const OPTIONS = {
-  grid: [24, 32, 48, 64, 96, 128, 160].map((v) => [v, `${v}²`]),
-  fps: [4, 6, 8, 12].map((v) => [v, String(v)]),
-  buckets: [8, 16, 32, 64].map((v) => [v, String(v)]),
-  motion: [["settle", "Settle"], ["flow", "Flow"]],
-  shape: [["round", "Round"], ["square", "Square"]],
-  sound: [["on", "On"], ["off", "Off"]],
+  budget: [[50, "50 KB"], [100, "100 KB"], [200, "200 KB"]],
+  finish: [["on", "On"], ["off", "Off"]],
+  sharpen: [["off", "Off"], ["soft", "Soft"], ["crisp", "Crisp"]],
+  grain: [["on", "On"], ["off", "Off"]],
+  grid: [[96, "Fine"], [72, "Medium"], [48, "Bold"]],
+  hardness: [["soft", "Soft"], ["hard", "Crisp"]],
+  transit: [["original", "As sent"], ["relay", "Relay trim"], ["damaged", "Damaged chunk"], ["cut", "Cut at 60%"]],
 };
-const LADDER = [32, 48, 64, 96, 128];
+const SHARPEN = { off: null, soft: 1, crisp: 0.2 };
+const HARDNESS = { soft: 0.2, hard: 0.9 };
 const MIN_MS = 500;
 
-const settings = { grid: 64, fps: 6, buckets: 16, motion: "settle", shape: "round", sound: "on" };
-const live = $("live");
-const recorder = new LoopRecorder(live, { onProgress: showProgress });
-const renderer = new DotsRenderer($("dots"));
+const settings = { budget: 100, finish: "on", sharpen: "soft", grain: "on", grid: 72, hardness: "soft", transit: "original" };
+const recorder = new LoopRecorder($("live"), { onProgress: showProgress });
+let player = null;
 const audio = new Audio();
-let clip = null; // { frames, durationMs, raw, audio } — null for an opened file
-let opened = null; // a parsed .irl recipe when viewing someone's file
-let current = null; // { recipe, bytes }
-let ladder = [];
-let buildToken = 0;
+let clip = null; // recorded or sample source frames
+let original = null; // bytes of the loop as encoded here, or as opened
+let currentBytes = null;
+let encodeToken = 0;
+let showToken = 0;
 let urls = [];
 
 function status(text) {
@@ -40,6 +43,34 @@ function objectUrl(blob) {
   urls.push(url);
   return url;
 }
+
+function getPlayer() {
+  if (!player) {
+    player = new LoopPlayer($("player"));
+    player.onLoop = () => {
+      if (!audio.src) return;
+      audio.currentTime = 0;
+      audio.play().catch(() => {});
+    };
+    player.onError = (e) => status(`Playback hit a problem (${e.message}).`);
+  }
+  applyPlayback();
+  return player;
+}
+
+function applyPlayback() {
+  if (!player) return;
+  Object.assign(player.options, {
+    finish: settings.finish === "on",
+    sharpen: SHARPEN[settings.sharpen],
+    grain: settings.grain === "on" ? 1 : 0,
+    grid: settings.grid,
+    hardness: HARDNESS[settings.hardness],
+    look: Number($("look").value) / 100,
+  });
+}
+
+// ---- recording -----------------------------------------------------------
 
 function showProgress(ms) {
   $("fill").style.width = `${(ms / MAX_MS) * 100}%`;
@@ -66,18 +97,17 @@ function drawTicks(takes) {
 
 function setStage(mode) {
   $("live").hidden = mode !== "live";
-  $("dots").hidden = mode !== "dots";
+  $("player").hidden = mode !== "loop";
   $("raw").hidden = mode !== "raw";
   $("stage-hint").hidden = mode !== "hint";
+  $("stage-tag").hidden = mode !== "loop" || !$("stage-tag").textContent;
   $("stage").classList.toggle("mirrored", mode === "live" && recorder.mirrored);
   $("stage").classList.toggle("holdable", mode === "live");
 }
 
-// ---- camera and hold-to-record ------------------------------------------
-
 async function cameraOn() {
-  if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
-    status("This browser can’t record video here. Try Chrome on Android, or use the sample.");
+  if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder || !window.VideoEncoder) {
+    status("This browser can’t record and encode video here. Try Chrome on Android, or use the sample.");
     return;
   }
   status("Starting the camera…");
@@ -152,12 +182,11 @@ recorder.onFull = () => {
 async function finishRecording() {
   if (clip) return;
   $("done").disabled = true;
-  status("Making your loop…");
   const result = await recorder.finish();
   drawTicks(result.takes);
   recorder.close();
   $("record-controls").hidden = true;
-  if (result.frames.length < 2) {
+  if (result.frames.length < FPS / 2) {
     status("That was too short to loop. Hold a little longer.");
     again();
     return;
@@ -176,85 +205,137 @@ $("flip").addEventListener("click", async () => {
   }
 });
 $("try-sample").addEventListener("click", () => {
+  if (!window.VideoEncoder) {
+    status("This browser can’t encode video here (it needs WebCodecs). Try Chrome on Android.");
+    return;
+  }
   $("setup-controls").hidden = true;
-  useClip(sampleClip());
+  status("Drawing the sample…");
+  setTimeout(() => useClip(sampleClip(captureSize())));
 });
 
-// ---- building and showing dots ------------------------------------------
+// ---- encoding ------------------------------------------------------------
+
+function toBase64(bytes) {
+  let s = "";
+  for (const b of bytes) s += String.fromCharCode(b);
+  return btoa(s);
+}
 
 function useClip(result) {
   clip = result;
-  opened = null;
   if (clip.raw) $("raw").src = objectUrl(clip.raw);
   $("view-raw").disabled = !clip.raw;
   $("build").hidden = false;
-  $("again").hidden = false;
   showProgress(clip.durationMs);
-  setControlsEnabled(true);
-  rebuild();
+  setEncodable(true);
+  encodeAndPlay();
 }
 
-function recipeFromClip() {
-  const picks = pickKeyframes(clip.frames.length, CAPTURE_FPS, settings.fps);
-  const frames = picks.map((i) => resampleSquare(clip.frames[i], CAPTURE_SIZE, settings.grid));
-  return encodeFrames(frames, settings);
-}
-
-async function withAudio(recipe) {
-  if (clip?.audio && settings.sound === "on") {
-    recipe.audio = { mime: clip.audio.type || "audio/webm", bytes: new Uint8Array(await clip.audio.arrayBuffer()) };
+async function encodeAndPlay() {
+  const token = ++encodeToken;
+  const { frames, size } = clip;
+  try {
+    const encoded = await encodeClip(frames, size, settings.budget * 1000, { onStage: status });
+    if (token !== encodeToken) return;
+    status("Checking quality and grain…");
+    const measured = await measure(frames, encoded, size);
+    if (token !== encodeToken) return;
+    const sound = clip.audio ? { mime: clip.audio.type || "audio/webm", data: new Uint8Array(await clip.audio.arrayBuffer()) } : null;
+    const meta = {
+      v: 2,
+      codec: encoded.choice.codec,
+      codecName: encoded.choice.name,
+      width: size,
+      height: size,
+      fps: FPS,
+      frameCount: encoded.frames.length,
+      gopFrames: GOP_FRAMES,
+      layers: encoded.choice.layers,
+      ...(encoded.description && { description: toBase64(encoded.description) }),
+      grain: measured.grain,
+      quality: { psnrY: Math.round(measured.psnrY * 100) / 100, measuredOn: "encoding device" },
+      synthesizedOnPlayback: ["upscale", "sharpen", ...(measured.grain ? ["grain"] : []), "dither", "smart-pixels"],
+      encoder: { bitrate: Math.round(encoded.bitrate), passes: encoded.passes },
+    };
+    const keyPair = await deviceKey();
+    original = await buildLoop({ meta, frames: encoded.frames, gopFrames: GOP_FRAMES, audio: sound, keyPair });
+    if (token !== encodeToken) return;
+    choose("transit", "original", { quiet: true });
+    await showBytes(original);
+  } catch (error) {
+    if (token === encodeToken) status(`Couldn’t make the loop (${error.message}).`);
   }
-  return recipe;
 }
 
-async function rebuild() {
-  const token = ++buildToken;
-  status("Arranging dots…");
-  await new Promise((resolve) => setTimeout(resolve)); // let the status paint
-  const recipe = opened ?? (await withAudio(recipeFromClip()));
-  const bytes = await serialize(recipe);
-  if (token !== buildToken) return;
-  current = { recipe, bytes };
-  renderer.motion = settings.motion;
-  renderer.round = settings.shape === "round";
-  renderer.load(recipe);
-  showReadout();
-  playDots();
-  if (!$("ladder").hidden && !opened) compare();
-  status(opened ? "Opened loop. This is everything the file holds." : "Here’s your loop. Try other builds below.");
+// ---- showing a loop ------------------------------------------------------
+
+async function showBytes(bytes, note = "") {
+  // The newest request wins if loads overlap (quick taps between tests).
+  const token = ++showToken;
+  currentBytes = bytes;
+  let parsed;
+  try {
+    parsed = parseLoop(bytes);
+  } catch (error) {
+    status(`This loop can’t play: ${error.message}.`);
+    return;
+  }
+  const checked = await verify(parsed.chunks);
+  if (token !== showToken) return;
+  const p = getPlayer();
+  try {
+    await p.load(parsed);
+  } catch (error) {
+    if (token === showToken) status(`This loop can’t play: ${error.message}.`);
+    return;
+  }
+  if (token !== showToken) return;
+  audio.pause();
+  audio.removeAttribute("src");
+  if (parsed.audio) audio.src = objectUrl(new Blob([parsed.audio.data], { type: parsed.audio.mime }));
+  setStage("loop");
+  setPressed("view", "loop");
+  p.play();
+  if (parsed.audio) audio.play().catch(() => {});
+  describe(parsed, checked, bytes, note);
 }
 
-function showReadout() {
-  const { recipe, bytes } = current;
-  $("size-recipe").textContent = kb(bytes.length);
+function describe(parsed, checked, bytes, note) {
+  const { meta, report, frames } = parsed;
+  const videoBytes = frames.reduce((n, f) => n + f.data.length, 0);
+  $("size-loop").textContent = kb(bytes.length);
   $("size-raw").textContent = clip?.raw ? kb(clip.raw.size) : clip?.sample ? "sample" : "not included";
   $("size-ratio").textContent = clip?.raw ? `${Math.round(clip.raw.size / bytes.length)}×` : "—";
-  const n = recipe.grid * recipe.grid;
-  $("dot-count").textContent = `${n.toLocaleString()} · ${recipe.frameCount} keys`;
+  $("quality").textContent = meta.quality ? `${meta.quality.psnrY.toFixed(1)} dB` : "—";
+  $("quality").title = "Luma PSNR of the decoded loop against what the camera captured, measured where it was encoded";
+  // Each missing temporal layer halves the frame rate; lost GOPs don't change it.
+  const fps = Math.round(meta.fps / 2 ** (report.layers - report.layersPresent));
+  $("facts").textContent =
+    `${meta.codecName ?? meta.codec} · ${meta.width}² · ${fps} fps · ${report.layersPresent} of ${report.layers} layer${report.layers > 1 ? "s" : ""} · ` +
+    `video ${kb(videoBytes)}${parsed.audio ? ` + sound ${kb(parsed.audio.data.length)}` : ""}` +
+    (meta.grain ? " · grain measured" : " · no grain measured");
+  $("trust").textContent = !checked.signed
+    ? "Unsigned: this browser couldn’t create a signing key."
+    : !checked.valid
+      ? "Signature invalid: this loop has been altered."
+      : `Signed by device ${checked.key.slice(0, 8)} · loop ID ${checked.id.slice(0, 12)} · ` +
+        `${checked.present} of ${checked.total} signed parts present${checked.foreign ? `, ${checked.foreign} unsigned part ignored` : ", all authentic"}`;
+  const seconds = meta.gopFrames / meta.fps;
+  const lost = report.missingGops.map((g) => `${g * seconds}–${Math.min((g + 1) * seconds, meta.frameCount / meta.fps)} s`);
+  $("transit-report").textContent = [
+    note,
+    report.damaged ? `${report.damaged} damaged chunk${report.damaged > 1 ? "s" : ""} caught by checksum and skipped.` : "",
+    report.truncated ? "The file ends early; everything before the cut plays." : "",
+    lost.length ? `Lost in transit: ${lost.join(", ")} (holds the last good frame).` : "",
+    !parsed.audio && clip?.audio ? "Sound didn’t arrive." : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+  $("stage-tag").textContent = lost.length ? "PART LOST IN TRANSIT" : report.layersPresent < report.layers ? `${fps} FPS · RELAYED` : "";
+  $("stage-tag").hidden = !$("stage-tag").textContent;
+  status(clip ? "Here’s your loop." : "Opened loop. This is everything the file holds.");
 }
-
-function playDots() {
-  setStage("dots");
-  $("raw").pause();
-  setPressed("view", "dots");
-  renderer.play();
-  playLoopAudio();
-}
-
-function playLoopAudio() {
-  audio.pause();
-  const sound = current?.recipe.audio;
-  if (!sound) return;
-  audio.src = objectUrl(new Blob([sound.bytes], { type: sound.mime }));
-  audio.currentTime = 0;
-  audio.play().catch(() => {});
-}
-
-renderer.onLoop = () => {
-  if (!current?.recipe.audio) return;
-  audio.currentTime = 0;
-  audio.play().catch(() => {});
-};
 
 function setPressed(group, value) {
   document.querySelectorAll(`[data-${group}]`).forEach((b) => b.setAttribute("aria-pressed", String(b.dataset[group] === value)));
@@ -263,24 +344,42 @@ function setPressed(group, value) {
 document.querySelectorAll("[data-view]").forEach((button) =>
   button.addEventListener("click", () => {
     if (button.dataset.view === "raw" && clip?.raw) {
-      renderer.stop();
+      player?.stop();
       audio.pause();
       setStage("raw");
       setPressed("view", "raw");
       $("raw").currentTime = 0;
       $("raw").play().catch(() => {});
-    } else playDots();
+    } else if (currentBytes) {
+      $("raw").pause();
+      showBytes(currentBytes);
+    }
   }),
 );
 
-function setControlsEnabled(encodable) {
-  for (const key of ["grid", "fps", "buckets", "sound"]) {
-    document.querySelectorAll(`[data-setting="${key}"] button`).forEach((b) => {
-      b.disabled = !encodable || (key === "sound" && !clip?.audio);
-    });
-  }
-  $("compare").disabled = !encodable;
+// ---- in-transit tests ----------------------------------------------------
+
+function damagedCopy(bytes) {
+  const copy = bytes.slice();
+  const base = readChunks(bytes).chunks.filter((c) => c.type === TYPE.VIDEO && readVideoPayload(c.payload).layer === 0);
+  const target = base[Math.min(1, base.length - 1)];
+  copy[target.offset + 12 + Math.floor(target.payload.length / 2)] ^= 0x5a;
+  return copy;
 }
+
+function transit(kind) {
+  if (!original) return;
+  if (kind === "relay") {
+    const trimmed = trimLayers(original, 0);
+    const saved = Math.round((1 - trimmed.length / original.length) * 100);
+    return showBytes(trimmed, `A relay dropped the enhancement layer without decoding or re-signing: ${saved}% smaller.`);
+  }
+  if (kind === "damaged") return showBytes(damagedCopy(original), "One byte was flipped in transit.");
+  if (kind === "cut") return showBytes(original.subarray(0, Math.floor(original.length * 0.6)), "The link dropped after 60% of the file.");
+  return showBytes(original);
+}
+
+// ---- settings ------------------------------------------------------------
 
 function renderOptions() {
   document.querySelectorAll("[data-setting]").forEach((group) => {
@@ -298,68 +397,35 @@ function renderOptions() {
   });
 }
 
-function choose(key, value) {
+function choose(key, value, { quiet = false } = {}) {
   settings[key] = value;
   document
     .querySelectorAll(`[data-setting="${key}"] button`)
     .forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.value === String(value))));
-  if (key === "motion" || key === "shape") {
-    renderer.motion = settings.motion;
-    renderer.round = settings.shape === "round";
-    for (const rung of ladder) {
-      rung.renderer.motion = renderer.motion;
-      rung.renderer.round = renderer.round;
-    }
-    return;
-  }
-  rebuild();
+  if (quiet) return;
+  if (key === "budget") {
+    if (clip) encodeAndPlay();
+  } else if (key === "transit") transit(value);
+  else applyPlayback();
 }
 
-async function compare() {
-  if (!clip) return;
-  const box = $("ladder");
-  box.hidden = false;
-  ladder.forEach((rung) => rung.renderer.destroy());
-  ladder = [];
-  box.replaceChildren();
-  for (const grid of LADDER) {
-    const picks = pickKeyframes(clip.frames.length, CAPTURE_FPS, settings.fps);
-    const recipe = encodeFrames(
-      picks.map((i) => resampleSquare(clip.frames[i], CAPTURE_SIZE, grid)),
-      { ...settings, grid },
-    );
-    const bytes = await serialize(recipe);
-    const card = document.createElement("button");
-    card.className = "rung";
-    card.setAttribute("aria-pressed", String(grid === settings.grid));
-    card.setAttribute("aria-label", `${grid} by ${grid} dots, ${kb(bytes.length)} without sound. Use this resolution.`);
-    const canvas = document.createElement("canvas");
-    const label = document.createElement("span");
-    label.innerHTML = `<b>${grid}²</b> ${kb(bytes.length)}`;
-    card.append(canvas, label);
-    card.addEventListener("click", () => choose("grid", grid));
-    box.append(card);
-    const rung = { renderer: new DotsRenderer(canvas, { pixels: 240 }) };
-    rung.renderer.motion = settings.motion;
-    rung.renderer.round = settings.shape === "round";
-    rung.renderer.load(recipe);
-    rung.renderer.play();
-    ladder.push(rung);
-  }
+function setEncodable(encodable) {
+  document.querySelectorAll('[data-setting="budget"] button').forEach((b) => (b.disabled = !encodable));
 }
 
-$("compare").addEventListener("click", compare);
+$("look").addEventListener("input", applyPlayback);
+$("assemble").addEventListener("click", () => player?.assemble());
 
 // ---- sharing and opening -------------------------------------------------
 
 function loopFile() {
-  return new File([current.bytes], `irl-loop-${current.recipe.grid}.irl`, { type: "application/octet-stream" });
+  return new File([currentBytes], "irl-loop.irl", { type: "application/octet-stream" });
 }
 
 function download() {
   const a = document.createElement("a");
   a.href = objectUrl(loopFile());
-  a.download = loopFile().name;
+  a.download = "irl-loop.irl";
   a.click();
 }
 
@@ -370,8 +436,10 @@ $("share").addEventListener("click", async () => {
     try {
       await navigator.share({ files: [file], title: "irl.ing loop" });
     } catch (error) {
-      if (error.name !== "AbortError") status("Sharing didn’t work on this device. Downloading instead.");
-      if (error.name !== "AbortError") download();
+      if (error.name !== "AbortError") {
+        status("Sharing didn’t work on this device. Downloading instead.");
+        download();
+      }
     }
   } else {
     download();
@@ -383,46 +451,40 @@ $("open-file").addEventListener("change", async (event) => {
   const file = event.target.files[0];
   event.target.value = "";
   if (!file) return;
+  const bytes = new Uint8Array(await file.arrayBuffer());
   try {
-    const recipe = await parse(await file.arrayBuffer());
-    if (recorder.recording) holdEnd();
-    recorder.close();
-    $("setup-controls").hidden = true;
-    $("record-controls").hidden = true;
-    clip = null;
-    opened = recipe;
-    $("view-raw").disabled = true;
-    $("build").hidden = false;
-    $("ladder").hidden = true;
-    setControlsEnabled(false);
-    for (const key of ["grid", "fps", "buckets"]) {
-      settings[key] = recipe[key];
-      document
-        .querySelectorAll(`[data-setting="${key}"] button`)
-        .forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.value === String(recipe[key]))));
-    }
-    await rebuild();
-    $("size-raw").textContent = "not included";
+    parseLoop(bytes);
   } catch (error) {
     status(`That file isn’t a loop this page can open (${error.message}).`);
+    return;
   }
+  if (recorder.recording) holdEnd();
+  recorder.close();
+  encodeToken++;
+  $("setup-controls").hidden = true;
+  $("record-controls").hidden = true;
+  clip = null;
+  original = bytes;
+  $("view-raw").disabled = true;
+  $("build").hidden = false;
+  setEncodable(false);
+  choose("transit", "original", { quiet: true });
+  await showBytes(bytes);
 });
 
 function again() {
-  buildToken++;
-  renderer.stop();
+  encodeToken++;
+  player?.stop();
   audio.pause();
   $("raw").pause();
-  ladder.forEach((rung) => rung.renderer.destroy());
-  ladder = [];
-  $("ladder").hidden = true;
   urls.forEach((url) => URL.revokeObjectURL(url));
   urls = [];
   clip = null;
-  opened = null;
-  current = null;
+  original = null;
+  currentBytes = null;
   recorder.reset();
-  for (const id of ["size-recipe", "size-raw", "size-ratio", "dot-count"]) $(id).textContent = "—";
+  for (const id of ["size-loop", "size-raw", "size-ratio", "quality"]) $(id).textContent = "—";
+  for (const id of ["facts", "trust", "transit-report", "stage-tag"]) $(id).textContent = "";
   $("build").hidden = true;
   $("record-controls").hidden = true;
   $("setup-controls").hidden = false;
@@ -438,6 +500,7 @@ $("again").addEventListener("click", () => {
 document.addEventListener("visibilitychange", () => {
   if (document.hidden && recorder.recording) holdEnd();
 });
+window.addEventListener("resize", () => player?.sizeCanvas());
 
 renderOptions();
 setStage("hint");

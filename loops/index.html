@@ -4,10 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#f6f5ef" />
-    <meta
-      name="description"
-      content="Hold to record six raw seconds. Watch the moment become a loop of living dots."
-    />
+    <meta name="description" content="Hold to record six raw seconds. Share them as a tiny, signed loop that plays back lifelike." />
     <title>irl.ing — little loops</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/src/loops/loops.css" />
@@ -27,20 +24,21 @@
       <section class="intro">
         <p class="eyebrow">SIX RAW SECONDS. NO FILTERS.</p>
         <h1>Life, in little <em>loops.</em></h1>
-        <p class="lede">Hold to record. Let go to pause. Keep going. Then watch the moment rebuild itself, one dot at a time.</p>
+        <p class="lede">Hold to record. Let go to pause. Keep going. Your loop is squeezed to about 100 KB, signed on this phone, and rebuilt lifelike when it plays.</p>
       </section>
 
       <section class="recorder" aria-label="Recorder">
         <div class="stage" id="stage" aria-describedby="status">
           <video id="live" playsinline muted></video>
           <video id="raw" playsinline loop hidden></video>
-          <canvas id="dots" hidden aria-label="Your loop, drawn in dots"></canvas>
+          <canvas id="player" hidden aria-label="Your loop"></canvas>
           <div class="stage-hint" id="stage-hint">
             <span class="hint-mark" aria-hidden="true">↗</span>
             <strong>Something small.<br />Something very you.</strong>
             <span>Turn on the camera, or try the sample.</span>
           </div>
           <span class="rec-dot" id="rec-dot" hidden>REC</span>
+          <span class="stage-tag" id="stage-tag" hidden></span>
         </div>
         <div class="progress" id="progress" role="progressbar" aria-label="Recorded time" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0">
           <span class="fill" id="fill"></span>
@@ -60,36 +58,57 @@
 
       <section class="build" id="build" hidden aria-labelledby="build-title">
         <div class="build-head">
-          <h2 id="build-title">Your loop, as dots</h2>
+          <h2 id="build-title">Your loop</h2>
           <div class="view-toggle" role="group" aria-label="What to show">
-            <button data-view="dots" aria-pressed="true">Dots</button>
+            <button data-view="loop" aria-pressed="true">Loop</button>
             <button data-view="raw" aria-pressed="false" id="view-raw">Raw</button>
           </div>
         </div>
         <dl class="readout">
-          <div><dt>Loop file</dt><dd id="size-recipe">—</dd></div>
+          <div><dt>Loop file</dt><dd id="size-loop">—</dd></div>
           <div><dt>Raw video</dt><dd id="size-raw">—</dd></div>
           <div><dt>Smaller by</dt><dd id="size-ratio">—</dd></div>
-          <div><dt>Dots</dt><dd id="dot-count">—</dd></div>
+          <div><dt>Quality</dt><dd id="quality">—</dd></div>
         </dl>
+        <p class="facts" id="facts"></p>
+        <p class="facts" id="trust"></p>
+
         <div class="settings">
-          <fieldset><legend>Resolution</legend><div class="seg" data-setting="grid"></div></fieldset>
-          <fieldset><legend>Keyframes / second</legend><div class="seg" data-setting="fps"></div></fieldset>
-          <fieldset><legend>Brightness steps</legend><div class="seg" data-setting="buckets"></div></fieldset>
-          <fieldset><legend>Motion</legend><div class="seg" data-setting="motion"></div></fieldset>
-          <fieldset><legend>Dots</legend><div class="seg" data-setting="shape"></div></fieldset>
-          <fieldset><legend>Sound</legend><div class="seg" data-setting="sound"></div></fieldset>
+          <fieldset><legend>Size</legend><div class="seg" data-setting="budget"></div></fieldset>
+          <fieldset><legend>Finishing</legend><div class="seg" data-setting="finish"></div></fieldset>
+          <fieldset><legend>Sharpen</legend><div class="seg" data-setting="sharpen"></div></fieldset>
+          <fieldset><legend>Grain</legend><div class="seg" data-setting="grain"></div></fieldset>
+          <fieldset class="wide">
+            <legend>Look</legend>
+            <div class="look">
+              <span>Lifelike</span>
+              <input type="range" id="look" min="0" max="100" value="0" aria-label="From lifelike to smart pixels" />
+              <span>Smart pixels</span>
+            </div>
+          </fieldset>
+          <fieldset><legend>Pixels</legend><div class="seg" data-setting="grid"></div></fieldset>
+          <fieldset><legend>Pixel edges</legend><div class="seg" data-setting="hardness"></div></fieldset>
         </div>
+        <div class="actions">
+          <button class="ghost" id="assemble">Assemble again</button>
+        </div>
+
+        <div class="transit">
+          <h3>In transit</h3>
+          <p class="fine">See what survives a bad link. Each test changes the file the way a relay or a noisy channel would, then plays what is left.</p>
+          <div class="seg" data-setting="transit"></div>
+          <p class="facts" id="transit-report"></p>
+        </div>
+
         <div class="actions">
           <button class="primary" id="share">Share loop</button>
           <button class="ghost" id="download">Download .irl</button>
-          <button class="ghost" id="compare">Compare resolutions</button>
           <button class="ghost" id="again">Record another</button>
         </div>
-        <div class="ladder" id="ladder" hidden></div>
         <p class="fine">
-          The loop file holds no video. It holds one fixed set of colored dots and where each brightness step sits on every
-          keyframe; this page rebuilds the motion from that. The raw clip stays on this phone.
+          The loop file is AV1 video (VP9 or H.264 where AV1 isn’t available) in two-second chunks that each carry a
+          checksum, signed by a key that never leaves this phone. Sharpening, upscaling, grain and smart pixels are added on
+          playback and are labeled as such. The raw clip stays on this phone.
         </p>
       </section>
 

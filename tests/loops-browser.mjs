@@ -28,85 +28,113 @@ const context = await browser.newContext({
 const page = await context.newPage();
 const errors = [];
 page.on("pageerror", (error) => errors.push(String(error)));
-const shot = (name) => shots && page.screenshot({ path: `${shots}/${name}.png`, fullPage: true });
-const kb = async (id) => parseFloat(await page.locator(id).innerText());
-const frameOf = () => page.locator("#dots").evaluate((c) => c.toDataURL());
+const shot = (name, target = page) => shots && target.screenshot({ path: `${shots}/${name}.png`, ...(target === page && { fullPage: true }) });
+const text = (id) => page.locator(id).innerText();
+const kb = async (id) => parseFloat(await text(id));
+const frameOf = () => page.locator("#player").evaluate((c) => c.toDataURL());
+const waitFor = (fn, arg, timeout = 60_000) => page.waitForFunction(fn, arg, { timeout });
+const transit = async (value, expect) => {
+  await page.locator(`[data-setting="transit"] button[data-value="${value}"]`).click();
+  await waitFor((e) => document.querySelector("#facts").textContent.includes(e), expect);
+};
 
 try {
   await page.goto(`${base}/loops/`, { waitUntil: "networkidle" });
-  await shot("1-start");
 
-  // Sample clip: dots appear, animate, and report a small file.
+  // Sample: encoded on this "phone", signed, measured, and playing.
   await page.locator("#try-sample").click();
-  await page.waitForFunction(() => document.querySelector("#size-recipe").textContent.includes("KB"));
-  const first = await frameOf();
-  await page.waitForTimeout(700);
-  assert.notEqual(first, await frameOf(), "dots should be moving");
-  const at64 = await kb("#size-recipe");
-  assert.ok(at64 > 1 && at64 < 120, `64² sample is ${at64} KB`);
-  await shot("2-sample-dots");
-
-  await page.locator('[data-setting="grid"] button[data-value="128"]').click();
-  await page.waitForFunction((before) => parseFloat(document.querySelector("#size-recipe").textContent) > before, at64);
-  assert.equal(await page.locator("#dot-count").innerText(), "16,384 · 36 keys");
-
-  await page.locator("#compare").click();
-  await page.waitForFunction(() => document.querySelectorAll(".rung").length === 5);
-  await page.locator(".rung").nth(1).click();
-  await page.waitForFunction(() => document.querySelector("#dot-count").textContent.startsWith("2,304"));
+  await waitFor(() => document.querySelector("#quality").textContent.includes("dB"));
+  await page.waitForTimeout(500);
+  await shot("1-assembling", page.locator("#stage"));
+  assert.match(await text("#facts"), /^AV1 · 360² · 30 fps · 2 of 2 layers · video [\d.]+ KB · grain measured$/);
+  const loopKb = await kb("#size-loop");
+  assert.ok(loopKb > 70 && loopKb < 115, `100 KB budget gave ${loopKb} KB`);
+  const quality = await kb("#quality");
+  assert.ok(quality > 32, `sample quality ${quality} dB`);
+  assert.match(await text("#trust"), /^Signed by device [0-9a-f]{8} · loop ID [0-9a-f]{12} · 7 of 7 signed parts present, all authentic$/);
+  await page.waitForTimeout(2200); // assembly finished, lifelike
+  const a = await frameOf();
   await page.waitForTimeout(400);
-  await shot("3-compare");
+  assert.notEqual(a, await frameOf(), "the loop should be playing");
+  await shot("2-lifelike", page.locator("#stage"));
 
-  // The downloaded file alone rebuilds the loop.
+  // Finishing off vs on, then the smart-pixel look.
+  await page.locator('[data-setting="finish"] button[data-value="off"]').click();
+  await page.waitForTimeout(300);
+  await shot("3-unfinished", page.locator("#stage"));
+  await page.locator('[data-setting="finish"] button[data-value="on"]').click();
+  await page.locator("#look").fill("100");
+  await page.waitForTimeout(300);
+  await shot("4-smart-pixels", page.locator("#stage"));
+  await page.locator("#look").fill("0");
+
+  // Smaller budget re-encodes to a smaller, lower-quality loop.
+  await page.locator('[data-setting="budget"] button[data-value="50"]').click();
+  await waitFor((before) => parseFloat(document.querySelector("#size-loop").textContent) < before * 0.7, loopKb);
+  await waitFor(() => document.querySelector("#status").textContent === "Here’s your loop.");
+  const small = await kb("#quality");
+  assert.ok(small < quality, `50 KB (${small} dB) should trail 100 KB (${quality} dB)`);
+  await page.locator('[data-setting="budget"] button[data-value="100"]').click();
+  await waitFor((q) => document.querySelector("#quality").textContent === q, `${quality.toFixed(1)} dB`);
+
+  // In transit: relay trim, a flipped byte, a cut link.
+  await transit("relay", "15 fps · 1 of 2 layers");
+  assert.ok((await kb("#size-loop")) < loopKb * 0.75);
+  assert.match(await text("#trust"), /· 4 of 7 signed parts present, all authentic$/);
+  assert.match(await text("#transit-report"), /relay dropped the enhancement layer without decoding or re-signing/);
+  await shot("5-relayed");
+  await transit("damaged", "30 fps · 2 of 2 layers");
+  await waitFor(() => document.querySelector("#transit-report").textContent.includes("Lost in transit: 2–4 s"));
+  assert.match(await text("#transit-report"), /1 damaged chunk caught by checksum and skipped/);
+  assert.match(await text("#trust"), /6 of 7 signed parts present, all authentic/);
+  const held = await frameOf();
+  await page.waitForTimeout(300);
+  assert.notEqual(held, await frameOf(), "the surviving four seconds keep playing");
+  await transit("cut", "15 fps · 1 of 2 layers");
+  assert.match(await text("#transit-report"), /link dropped after 60%.*file ends early/);
+  await transit("original", "30 fps · 2 of 2 layers");
+
+  // The downloaded file alone reproduces the loop and its signature.
+  const id = (await text("#trust")).match(/loop ID ([0-9a-f]{12})/)[1];
   const [download] = await Promise.all([page.waitForEvent("download"), page.locator("#download").click()]);
   const bytes = readFileSync(await download.path());
-  assert.deepEqual([...bytes.subarray(0, 4)], [0x49, 0x52, 0x4c, 0x44]);
+  assert.equal(bytes.subarray(0, 4).toString(), "IRL2");
   await page.locator("#open-file").setInputFiles({ name: "loop.irl", mimeType: "application/octet-stream", buffer: bytes });
-  await page.waitForFunction(() => document.querySelector("#status").textContent.startsWith("Opened loop"));
-  assert.equal(await page.locator("#dot-count").innerText(), "2,304 · 36 keys");
-  assert.ok(await page.locator('[data-setting="grid"] button').first().isDisabled());
+  await waitFor(() => document.querySelector("#status").textContent.startsWith("Opened loop"));
+  assert.match(await text("#trust"), new RegExp(`loop ID ${id} · 7 of 7 signed parts present, all authentic`));
+  assert.ok(await page.locator('[data-setting="budget"] button').first().isDisabled());
   await page.locator("#open-file").setInputFiles({ name: "x.irl", mimeType: "application/octet-stream", buffer: Buffer.from("nope") });
-  await page.waitForFunction(() => document.querySelector("#status").textContent.includes("isn’t a loop"));
+  await waitFor(() => document.querySelector("#status").textContent.includes("isn’t a loop"));
 
   // Camera: hold, let go, hold again until six seconds stop it by themselves.
   await page.locator("#again").click();
   await page.locator("#camera-on").click();
-  await page.waitForFunction(() => document.querySelector("#live").videoWidth > 0);
+  await waitFor(() => document.querySelector("#live").videoWidth > 0);
   const record = page.locator("#record");
   await record.scrollIntoViewIfNeeded();
   const box = await record.boundingBox();
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
   await page.mouse.down();
   await page.waitForTimeout(1200);
-  await shot("4-recording");
   await page.mouse.up();
-  assert.match(await page.locator("#status").innerText(), /^Paused\. 4\.\ds left/);
-  assert.equal(await page.locator("#done").isDisabled(), false);
+  assert.match(await text("#status"), /^Paused\. 4\.\ds left/);
   assert.ok(await page.locator("#flip").isDisabled(), "camera switching locks after the first take");
-  assert.equal(await page.locator("#size-recipe").innerText(), "—", "no stale numbers from the last loop");
+  assert.equal(await text("#size-loop"), "—", "no stale numbers from the last loop");
   await page.mouse.down();
-  await page.waitForFunction(
-    () => !document.querySelector("#build").hidden && document.querySelector("#size-recipe").textContent.includes("KB"),
-    null,
-    { timeout: 15_000 },
-  );
+  await waitFor(() => !document.querySelector("#build").hidden && document.querySelector("#quality").textContent.includes("dB"));
   await page.mouse.up();
   assert.equal(await page.locator(".ticks i").count(), 1, "one pause mark between two takes");
-  assert.match(await page.locator("#size-raw").innerText(), /KB|MB/);
-  assert.match(await page.locator("#size-ratio").innerText(), /^\d+×$/);
-  // The resolution chosen on the last loop carries over to the next one.
-  assert.match(await page.locator("#dot-count").innerText(), /^2,304 · 3[56] keys$/);
-  await page.waitForTimeout(500);
-  await shot("5-camera-dots");
+  assert.match(await text("#facts"), /^AV1 · 360² · 30 fps · 2 of 2 layers · video [\d.]+ KB \+ sound [\d.]+ KB/);
+  assert.match(await text("#size-raw"), /KB|MB/);
+  assert.match(await text("#size-ratio"), /^\d+×$/);
+  await page.waitForTimeout(2500);
+  await shot("6-camera-loop");
   await page.locator("#view-raw").click();
-  await page.waitForFunction(() => !document.querySelector("#raw").hidden && document.querySelector("#raw").readyState >= 2);
+  await waitFor(() => !document.querySelector("#raw").hidden && document.querySelector("#raw").readyState >= 2);
 
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   assert.ok(overflow <= 0, `page scrolls sideways by ${overflow}px`);
-  console.log(
-    "loops lab ok:",
-    JSON.stringify({ sample64: `${at64} KB`, camera: await page.locator(".readout").innerText() }).replaceAll("\\n", " "),
-  );
+  console.log(`loops lab ok: sample ${loopKb} KB at ${quality} dB (50 KB: ${small} dB); camera ${await text("#facts")}`);
 } finally {
   await browser.close();
 }

@@ -1,4 +1,6 @@
-# Little loops and the dots format (.irl v1)
+# The dots format (.irl v1, retired)
+
+> Superseded by [little loops v2](loops-v2.md). Measured against AV1 at equal bytes, v1 was a visual style rather than a codec ([findings](compression-research.md)). The codec remains in `src/loops/dots-codec.js` as a benchmark baseline for `scripts/bench/rd-bench.sh`; the lab no longer writes or opens v1 files.
 
 `/loops/` is a lab for six-second, hold-to-record loops that are shared as **dots** rather than video. It runs entirely in the browser; nothing is uploaded.
 
@@ -54,7 +56,6 @@ The built-in sample scene measured 7.3 KB at 32², 25.7 KB at 64² and 81.9 KB a
 ## Limits and next steps
 
 - Measured against AV1 on the Xiph *foreman* clip, v1 is far less efficient: 22.7 dB at 206 KB versus 30.4 dB for AV1 at 28 KB ([findings](compression-research.md)). Treat v1 as a look, not a codec.
-
 - Colors are fixed per dot, so hues that share a brightness get averaged; more brightness steps buy accuracy for bytes.
 - The jump from the last keyframe back to the first is not path-matched, so loops "re-form" at the seam.
 - The lab is verified in Chromium at a 412×915 Android-like viewport with Chromium's fake camera and microphone, not yet on a physical Android phone.

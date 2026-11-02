@@ -25,7 +25,15 @@ Vercel deploys `master`. `vercel.json` selects Vite, `npm run build`, and `dist/
 
 ## Little loops lab
 
-`/loops/` is a separate page for six-second, hold-to-record loops: hold to record, let go to pause, keep going. There are no filters. The raw clip stays on the phone; what the page saves and shares is a small `.irl` dots file in which one fixed set of colored dots rearranges itself to rebuild the moment. Resolution, keyframes per second, brightness steps, motion and dot shape can be compared side by side with their real file sizes. **Try the sample** works without a camera. Chrome on Android is the first target. See [the dots format](docs/loops-dots.md). Measured against AV1, the dots format is a visual style rather than an efficient codec; [the compression findings](docs/compression-research.md) set the v2 plan, and `scripts/bench/rd-bench.sh` reruns the quality-at-equal-bytes benchmark.
+`/loops/` is a separate page for six-second, hold-to-record loops: hold to record, let go to pause, keep going. There are no filters.
+
+- **Encoding:** the phone encodes the clip with its own AV1 encoder (VP9 or H.264 where AV1 isn't available) to a 50, 100 or 200 KB budget, then measures the quality it actually achieved.
+- **Packaging:** the loop is wrapped in two-second, checksummed chunks and signed with a key that never leaves the phone.
+- **Playback:** FSR 1 upscaling and sharpening, measured film grain and dithering, plus an optional "smart pixels" look. Each loop assembles itself from scattered pixels.
+- **In transit:** these controls show what survives a relay trim, a flipped byte or a cut link.
+- **No camera needed:** **Try the sample** works without one.
+
+Chrome on Android is the first target. See [little loops v2](docs/loops-v2.md) and [the compression findings](docs/compression-research.md); `scripts/bench/rd-bench.sh` reruns the quality-at-equal-bytes benchmark.
 
 ## On a phone
 
