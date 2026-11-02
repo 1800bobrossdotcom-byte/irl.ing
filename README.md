@@ -23,6 +23,10 @@ PORT=3003 npm start
 
 Vercel deploys `master`. `vercel.json` selects Vite, `npm run build`, and `dist/`. Commit the lockfile with dependency changes. No provider credentials, paid APIs or external photo storage are needed for the current release.
 
+## Little loops lab
+
+`/loops/` is a separate page for six-second, hold-to-record loops: hold to record, let go to pause, keep going. There are no filters. The raw clip stays on the phone; what the page saves and shares is a small `.irl` dots file in which one fixed set of colored dots rearranges itself to rebuild the moment. Resolution, keyframes per second, brightness steps, motion and dot shape can be compared side by side with their real file sizes. **Try the sample** works without a camera. Chrome on Android is the first target. See [the dots format](docs/loops-dots.md).
+
 ## On a phone
 
 Open irl.ing and tap **Use a photo** or **Take a photo** at the top of the page. The editor finds the subject automatically, shows the first usable result immediately, and offers **Keep this bit** or **Touch up**. Conservative edge finishing runs in the background without blocking either action. Touch up opens Erase/Restore and a brush size; detailed controls are under **More tools**. **Try an example** uses the same flow without requiring a file. After Keep, tap **Make it yours**, choose Sticker, T-shirt, or Sweatshirt, then select size and border. Photo import errors appear in the photo dialog as well as on the page.
@@ -49,6 +53,7 @@ npm test
 npm run build
 # With the production server running on port 3003:
 STUDIO_URL=http://127.0.0.1:3003 python3 -m unittest discover -s tests -p 'test_*.py' -v
+STUDIO_URL=http://127.0.0.1:3003 node tests/loops-browser.mjs
 ```
 
 Numerical tests cover known-alpha strands, chromatic boundaries, halo cleanup, region locks, source transparency, brush/viewport behavior and persistence validation. Chromium browser workflows cover real inference, editor gestures and history, saved edits, migration, import/model/storage failures, tracing/export, responsive layouts and demo checkout. Browser tests need Python Playwright, Pillow, and Chromium, available in this cloud environment; use `CHROMIUM_PATH` to override `/usr/bin/chromium`. See [edge refinement math and evidence](docs/edge-refinement.md) for methods, quantitative synthetic results, and limits.

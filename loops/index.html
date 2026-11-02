@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f6f5ef" />
+    <meta
+      name="description"
+      content="Hold to record six raw seconds. Watch the moment become a loop of living dots."
+    />
+    <title>irl.ing — little loops</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/src/loops/loops.css" />
+    <script type="module" src="/src/loops/loops-app.js"></script>
+  </head>
+  <body>
+    <header class="loops-header">
+      <a class="wordmark" href="/" aria-label="irl.ing home"
+        ><svg class="mark" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+          <path d="M18 7H9a2 2 0 0 0-2 2v9m0 12v9a2 2 0 0 0 2 2h9m12 0h9a2 2 0 0 0 2-2v-9" />
+          <path d="M22 26 41 7M28 7h13v13" /></svg
+        >irl.ing</a
+      >
+      <span class="lab-badge">LOOPS LAB</span>
+    </header>
+    <main class="loops-main">
+      <section class="intro">
+        <p class="eyebrow">SIX RAW SECONDS. NO FILTERS.</p>
+        <h1>Life, in little <em>loops.</em></h1>
+        <p class="lede">Hold to record. Let go to pause. Keep going. Then watch the moment rebuild itself, one dot at a time.</p>
+      </section>
+
+      <section class="recorder" aria-label="Recorder">
+        <div class="stage" id="stage" aria-describedby="status">
+          <video id="live" playsinline muted></video>
+          <video id="raw" playsinline loop hidden></video>
+          <canvas id="dots" hidden aria-label="Your loop, drawn in dots"></canvas>
+          <div class="stage-hint" id="stage-hint">
+            <span class="hint-mark" aria-hidden="true">↗</span>
+            <strong>Something small.<br />Something very you.</strong>
+            <span>Turn on the camera, or try the sample.</span>
+          </div>
+          <span class="rec-dot" id="rec-dot" hidden>REC</span>
+        </div>
+        <div class="progress" id="progress" role="progressbar" aria-label="Recorded time" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0">
+          <span class="fill" id="fill"></span>
+          <span class="ticks" id="ticks"></span>
+        </div>
+        <div class="controls" id="setup-controls">
+          <button class="primary" id="camera-on">Turn on camera</button>
+          <button class="ghost" id="try-sample">Try the sample</button>
+        </div>
+        <div class="controls" id="record-controls" hidden>
+          <button class="ghost small" id="flip" aria-label="Switch camera">Flip</button>
+          <button class="record" id="record" aria-label="Hold to record"><i></i></button>
+          <button class="ghost small" id="done" disabled>Done</button>
+        </div>
+        <p class="status" id="status" role="status" aria-live="polite">Nothing leaves your phone in this lab.</p>
+      </section>
+
+      <section class="build" id="build" hidden aria-labelledby="build-title">
+        <div class="build-head">
+          <h2 id="build-title">Your loop, as dots</h2>
+          <div class="view-toggle" role="group" aria-label="What to show">
+            <button data-view="dots" aria-pressed="true">Dots</button>
+            <button data-view="raw" aria-pressed="false" id="view-raw">Raw</button>
+          </div>
+        </div>
+        <dl class="readout">
+          <div><dt>Loop file</dt><dd id="size-recipe">—</dd></div>
+          <div><dt>Raw video</dt><dd id="size-raw">—</dd></div>
+          <div><dt>Smaller by</dt><dd id="size-ratio">—</dd></div>
+          <div><dt>Dots</dt><dd id="dot-count">—</dd></div>
+        </dl>
+        <div class="settings">
+          <fieldset><legend>Resolution</legend><div class="seg" data-setting="grid"></div></fieldset>
+          <fieldset><legend>Keyframes / second</legend><div class="seg" data-setting="fps"></div></fieldset>
+          <fieldset><legend>Brightness steps</legend><div class="seg" data-setting="buckets"></div></fieldset>
+          <fieldset><legend>Motion</legend><div class="seg" data-setting="motion"></div></fieldset>
+          <fieldset><legend>Dots</legend><div class="seg" data-setting="shape"></div></fieldset>
+          <fieldset><legend>Sound</legend><div class="seg" data-setting="sound"></div></fieldset>
+        </div>
+        <div class="actions">
+          <button class="primary" id="share">Share loop</button>
+          <button class="ghost" id="download">Download .irl</button>
+          <button class="ghost" id="compare">Compare resolutions</button>
+          <button class="ghost" id="again">Record another</button>
+        </div>
+        <div class="ladder" id="ladder" hidden></div>
+        <p class="fine">
+          The loop file holds no video. It holds one fixed set of colored dots and where each brightness step sits on every
+          keyframe; this page rebuilds the motion from that. The raw clip stays on this phone.
+        </p>
+      </section>
+
+      <section class="open-loop">
+        <label class="ghost file-button">Open a .irl loop<input type="file" id="open-file" accept=".irl,application/octet-stream" /></label>
+      </section>
+    </main>
+  </body>
+</html>
