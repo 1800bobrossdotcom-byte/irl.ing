@@ -467,3 +467,222 @@ legend {
   text-underline-offset: 2px;
   cursor: pointer;
 }
+
+/* ---- accounts ------------------------------------------------------------ */
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.account-pill {
+  min-height: 38px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: var(--orange);
+  color: var(--white);
+  font-size: 13px;
+  font-weight: 700;
+  max-width: 46vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.account-pill.signed-in {
+  background: var(--ink);
+}
+@media (max-width: 420px) {
+  .lab-badge {
+    display: none;
+  }
+}
+.sheet {
+  border: 0;
+  padding: 26px 20px 28px;
+  width: min(460px, 100vw);
+  max-width: 100vw;
+  max-height: 92vh;
+  margin: auto auto 0;
+  border-radius: 22px 22px 0 0;
+  background: var(--white);
+  color: var(--ink);
+  box-shadow: 0 -20px 60px rgb(20 26 23 / 0.25);
+}
+@media (min-width: 600px) {
+  .sheet {
+    margin: auto;
+    border-radius: 22px;
+  }
+}
+.sheet::backdrop {
+  background: rgb(20 26 23 / 0.55);
+}
+.sheet-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--paper);
+  font-size: 24px;
+  line-height: 1;
+}
+.step {
+  display: grid;
+  gap: 14px;
+}
+.step[hidden] {
+  display: none;
+}
+.step h2 {
+  margin: 0;
+  font-size: 28px;
+  letter-spacing: -0.03em;
+  padding-right: 40px;
+}
+.step p {
+  margin: 0;
+  line-height: 1.55;
+  color: var(--muted);
+}
+.field {
+  display: grid;
+  gap: 6px;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+.field legend {
+  font-weight: 700;
+  margin-bottom: 6px;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--ink);
+  font-size: 14px;
+}
+.field em {
+  font-weight: 400;
+  color: var(--muted);
+}
+.field input,
+.field select,
+.danger input {
+  font: inherit;
+  font-weight: 400;
+  font-size: 17px;
+  min-height: 50px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0 14px;
+  background: var(--paper);
+  color: var(--ink);
+  width: 100%;
+}
+.handle-input {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+  padding-left: 14px;
+  font-size: 17px;
+  font-weight: 700;
+}
+.handle-input input {
+  border: 0;
+  background: transparent;
+  padding-left: 2px;
+  min-height: 50px;
+}
+.handle-input:focus-within {
+  outline: 3px solid var(--olive);
+  outline-offset: 2px;
+}
+.handle-input input:focus-visible {
+  outline: none;
+}
+.pair {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 10px;
+}
+.note {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--muted);
+}
+.note[data-state="good"] {
+  color: var(--olive);
+  font-weight: 700;
+}
+.note[data-state="bad"] {
+  color: #b5401a;
+}
+.rules {
+  background: var(--paper);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 14px;
+}
+.rules summary,
+.danger summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+.rules ul {
+  margin: 10px 0 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+}
+.check {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 15px;
+}
+.check input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--orange);
+}
+.error {
+  color: #b5401a !important;
+  font-weight: 700;
+  min-height: 0;
+}
+.error:empty {
+  display: none;
+}
+.wide {
+  width: 100%;
+  justify-content: center;
+}
+.switch {
+  text-align: center;
+  font-size: 14px;
+}
+.danger {
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+  display: grid;
+  gap: 10px;
+  font-size: 14px;
+}
+.danger[open] {
+  gap: 12px;
+}
+.danger > * + * {
+  margin-top: 10px;
+}
+.danger-button {
+  min-height: 48px;
+  border-radius: 999px;
+  background: #b5401a;
+  color: var(--white);
+  font-weight: 700;
+}

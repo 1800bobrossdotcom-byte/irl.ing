@@ -9,6 +9,7 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/src/loops/loops.css" />
     <script type="module" src="/src/loops/loops-app.js"></script>
+    <script type="module" src="/src/accounts/account-ui.js"></script>
   </head>
   <body>
     <header class="loops-header">
@@ -18,7 +19,10 @@
           <path d="M22 26 41 7M28 7h13v13" /></svg
         >irl.ing</a
       >
-      <span class="lab-badge">LOOPS LAB</span>
+      <div class="header-right">
+        <span class="lab-badge">LOOPS LAB</span>
+        <button class="account-pill" id="account-open" hidden>Claim your @name</button>
+      </div>
     </header>
     <main class="loops-main">
       <section class="intro">
@@ -123,5 +127,93 @@
         <label class="ghost file-button">Open a .irl loop<input type="file" id="open-file" accept=".irl,application/octet-stream" /></label>
       </section>
     </main>
+
+    <dialog class="sheet" id="account-sheet" aria-labelledby="sheet-title">
+      <button class="sheet-close" id="sheet-close" aria-label="Close">×</button>
+
+      <form class="step" data-step="claim" id="claim-form" novalidate>
+        <p class="eyebrow">Free · no password · 30 seconds</p>
+        <h2 id="sheet-title">Claim your @name</h2>
+        <label class="field">
+          <span>Your @name</span>
+          <span class="handle-input"><span aria-hidden="true">@</span><input id="handle" name="handle" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="20" required aria-describedby="handle-note" /></span>
+          <span class="note" id="handle-note" aria-live="polite">3–20 letters, numbers, _ or .</span>
+        </label>
+        <label class="field">
+          <span>Name to show <em>(optional)</em></span>
+          <input id="display-name" name="displayName" autocomplete="nickname" maxlength="40" />
+        </label>
+        <fieldset class="field">
+          <legend>Birthday</legend>
+          <div class="pair">
+            <select id="birth-month" aria-label="Birth month" required></select>
+            <select id="birth-year" aria-label="Birth year" required></select>
+          </div>
+          <span class="note">Only used to keep teens safe. Never shown.</span>
+        </fieldset>
+        <details class="rules">
+          <summary>Community rules</summary>
+          <ul>
+            <li><b>Be real.</b> No filters, no faking someone else.</li>
+            <li><b>Be kind.</b> No harassment, threats or hate.</li>
+            <li><b>Ask first.</b> Don’t post people who don’t want to be posted.</li>
+            <li><b>Keep it safe.</b> Nothing sexual involving anyone under 18, ever. No violence or illegal stuff.</li>
+            <li><b>Speak up.</b> Report what’s wrong; we’ll look.</li>
+          </ul>
+        </details>
+        <label class="check"><input type="checkbox" id="accept-rules" required /> I’ll follow the community rules.</label>
+        <div id="turnstile"></div>
+        <p class="error" id="claim-error" role="alert"></p>
+        <button class="primary wide" id="claim-continue" type="submit">Continue</button>
+        <p class="switch">Already irl’ing? <button class="link" type="button" id="to-signin">Sign in</button></p>
+      </form>
+
+      <section class="step" data-step="save" hidden>
+        <p class="eyebrow" id="save-handle"></p>
+        <h2>Save it to this phone</h2>
+        <p>Use your fingerprint, face or screen lock. That’s your key: no password to forget, nothing to phish.</p>
+        <p class="note" id="save-teen" hidden>You’re under 18, so your account stays friends-only and strangers can’t find you.</p>
+        <p class="error" id="save-error" role="alert"></p>
+        <button class="primary wide" id="save-passkey">Use fingerprint or face</button>
+        <p class="note">Your @name is held for 15 minutes.</p>
+      </section>
+
+      <section class="step" data-step="signin" hidden>
+        <h2>Welcome back</h2>
+        <p>Sign in with the passkey saved on this phone, or on your Google account.</p>
+        <p class="error" id="signin-error" role="alert"></p>
+        <button class="primary wide" id="signin-passkey">Sign in with fingerprint or face</button>
+        <p class="switch">New here? <button class="link" type="button" id="to-claim">Claim your @name</button></p>
+      </section>
+
+      <section class="step" data-step="done" hidden>
+        <p class="eyebrow">You’re in</p>
+        <h2 id="done-handle"></h2>
+        <p id="done-privacy"></p>
+        <p>Friends and sending loops come next. Save your spot for a friend now:</p>
+        <button class="primary wide" id="invite">Invite a friend</button>
+        <button class="ghost wide" id="done-close">Make a loop</button>
+      </section>
+
+      <section class="step" data-step="account" hidden>
+        <p class="eyebrow">Your account</p>
+        <h2 id="account-handle"></h2>
+        <p id="account-privacy"></p>
+        <button class="ghost wide" id="invite-2">Invite a friend</button>
+        <button class="ghost wide" id="sign-out">Sign out</button>
+        <details class="danger">
+          <summary>Delete account</summary>
+          <p>This removes your @name, passkeys and sessions for good. Type your @name to confirm.</p>
+          <input id="delete-confirm" autocapitalize="none" spellcheck="false" aria-label="Type your @name to confirm" />
+          <p class="error" id="delete-error" role="alert"></p>
+          <button class="danger-button wide" id="delete-account">Delete forever</button>
+        </details>
+      </section>
+
+      <section class="step" data-step="off" hidden>
+        <h2>Accounts open soon</h2>
+        <p>irl.ing accounts are almost ready. Keep making loops in the meantime.</p>
+      </section>
+    </dialog>
   </body>
 </html>

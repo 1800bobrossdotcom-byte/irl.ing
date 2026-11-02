@@ -18,7 +18,9 @@ Irl’ing is a verb: being present, seeing what’s around you, and doing someth
   See [little loops v2](docs/loops-v2.md).
 - **`/preview/`**: an early static layout mock.
 
-Nothing is uploaded: loops stay on the phone until someone shares the file. There are no accounts yet, and no server.
+- **Accounts** (`/api/auth/*`, one Vercel function): claim an @name and save it with a passkey (fingerprint, face or screen lock), no password. Better Auth on Postgres (Neon). Friends-only by default; teens can’t be found by strangers. Off until `DATABASE_URL` and `BETTER_AUTH_SECRET` are set. See [accounts](docs/accounts.md).
+
+Loops themselves aren’t uploaded: they stay on the phone until someone shares the file.
 
 ## Run
 
@@ -45,6 +47,8 @@ npm test
 # With the production server running on port 3003:
 STUDIO_URL=http://127.0.0.1:3003 node tests/landing-browser.mjs
 STUDIO_URL=http://127.0.0.1:3003 node tests/loops-browser.mjs
+# Accounts need Postgres; see docs/accounts.md:
+SITE_URL=http://localhost:3004 node tests/accounts-browser.mjs
 ```
 
 Unit tests cover the loop container (damage, truncation, relay trimming, signatures and tampering), grain estimation and color conversion. The browser tests need Playwright and Chromium, which this cloud environment provides; set `CHROMIUM_PATH` to choose a browser. They use Chromium's fake camera and microphone at phone-sized viewports. Nothing has been verified on a physical Android phone yet.

@@ -1,0 +1,28 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { adultFrom, getAuth, requireUserVerified, settings } from "../src/server/auth.js";
+
+test("passkeys must come with the fingerprint, face or screen-lock check", () => {
+  assert.doesNotThrow(() => requireUserVerified({ userVerified: true }));
+  for (const info of [{ userVerified: false }, {}, undefined, { userVerified: "true" }]) {
+    assert.throws(() => requireUserVerified(info), /fingerprint, face or screen lock/);
+  }
+});
+
+test("accounts stay off until the database and secret are set", () => {
+  assert.equal(getAuth({}), null);
+  assert.equal(getAuth({ DATABASE_URL: "postgres://x" }), null);
+  assert.equal(getAuth({ BETTER_AUTH_SECRET: "s" }), null);
+});
+
+test("the passkey domain follows the deployment", () => {
+  assert.equal(settings({ VERCEL_ENV: "production" }).rpID, "irl.ing");
+  assert.equal(settings({ VERCEL_ENV: "preview", VERCEL_URL: "irl-abc-bobdev1.vercel.app" }).baseURL, "https://irl-abc-bobdev1.vercel.app");
+  assert.equal(settings({}).baseURL, "http://localhost:3004");
+  assert.equal(settings({ BETTER_AUTH_URL: "https://irl.ing", VERCEL_URL: "x.vercel.app" }).rpID, "irl.ing");
+});
+
+test("only the month someone turns 18 is kept, counted cautiously", () => {
+  assert.equal(adultFrom(3, 2010), "2028-04");
+  assert.equal(adultFrom(12, 2010), "2029-01");
+});
