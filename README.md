@@ -2,7 +2,7 @@
 
 **Less scrolling. More irl’ing.**
 
-Irl’ing is a verb: being present, seeing what’s around you, and doing something with it. irl.ing is a six-second social video app, inspired by Vine and built around feeds that end. You hold to record, let go to pause, and your moment loops for your friends. There are no filters. Then you put the phone down. Recording, loops and the tech below work today in the loops lab; profiles, friends and feeds come next, Android first.
+Irl’ing is a verb: being present, seeing what’s around you, and doing something with it. irl.ing is a six-second social video app built around feeds that end. You hold to record, let go to pause, and your moment loops for your friends. There are no filters. Then you put the phone down. Recording, loops and the tech below work today in the loops lab; profiles, friends and feeds come next, Android first.
 
 ## What’s here
 
