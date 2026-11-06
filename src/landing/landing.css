@@ -268,6 +268,8 @@ h1 {
 }
 h1 em {
   display: block;
+  /* Room for the descender of "scrolling." above the apostrophe and i-dot. */
+  margin-top: 0.1em;
   font-style: normal;
   color: var(--rec);
 }
