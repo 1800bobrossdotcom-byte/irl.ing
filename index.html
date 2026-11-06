@@ -3,7 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#f6f5ef" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#111110" media="(prefers-color-scheme: dark)" />
     <title>irl.ing — six-second social video. Less scrolling, more irl’ing.</title>
     <meta
       name="description"
@@ -13,7 +14,15 @@
     <meta property="og:url" content="https://irl.ing/" />
     <meta property="og:title" content="irl.ing — six-second social video" />
     <meta property="og:description" content="Hold to record. Let go to pause. Six raw seconds, looped for your friends. Then put the phone down." />
+    <meta property="og:image" content="https://irl.ing/brand/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="The irl.ing logo, a record dot inside a ring of three takes, with the line Less scrolling. More irl’ing." />
+    <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="preload" href="/fonts/schibsted-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="/src/landing/landing.css" />
     <script type="module" src="/src/landing/landing.js"></script>
   </head>
@@ -21,17 +30,19 @@
     <a class="skip" href="#main">Skip to content</a>
     <header class="top">
       <a class="wordmark" href="/" aria-label="irl.ing home"
-        ><svg class="mark" viewBox="0 0 48 48" fill="none" aria-hidden="true">
-          <path d="M18 7H9a2 2 0 0 0-2 2v9m0 12v9a2 2 0 0 0 2 2h9m12 0h9a2 2 0 0 0 2-2v-9" />
-          <path d="M22 26 41 7M28 7h13v13" /></svg
-        >irl.ing</a
-      >
+        ><svg viewBox="0 0 442.24 196" aria-hidden="true">
+          <path d="M14.5 142V42M54.5 142V42M125.74 142V0M204.74 142V42M244.74 142V42M244.74 86A34 34 0 0 1 312.74 86M312.74 86V142M347.74 92a40 40 0 1 0 80 0a40 40 0 1 0 -80 0M427.74 42V144" fill="none" stroke="currentColor" stroke-width="24" />
+          <path d="M54.5 82A30 30 0 0 1 95.74 54.18M427.74 144A40 40 0 0 1 354.58 166.37" fill="none" stroke="currentColor" stroke-width="24" stroke-linecap="round" />
+          <circle cx="14.5" cy="14.5" r="14.5" fill="currentColor" />
+          <circle cx="204.74" cy="14.5" r="14.5" fill="currentColor" />
+          <circle class="rec" cx="165.24" cy="127.5" r="14.5" /></svg
+      ></a>
       <nav aria-label="Sections">
         <a href="#how">How it works</a>
         <a href="#network">The network</a>
         <a href="#lexicon">The lexicon</a>
       </nav>
-      <a class="pill" href="/loops/">Open the lab <span aria-hidden="true">↗</span></a>
+      <a class="pill" href="/loops/">Open the lab <span class="arrow" aria-hidden="true"></span></a>
     </header>
 
     <main id="main">
@@ -45,7 +56,7 @@
           </p>
           <div class="cta">
             <a class="button primary" href="/loops/">Make a loop</a>
-            <a class="button ghost" href="#try">Try it right here <span aria-hidden="true">↓</span></a>
+            <a class="button ghost" href="#try">Try it right here <span class="arrow down" aria-hidden="true"></span></a>
           </div>
         </div>
 
@@ -61,7 +72,17 @@
           </div>
           <div class="stage-controls">
             <p id="try-caption" class="stage-status" aria-live="polite">Hold the button to make a take.</p>
-            <button class="hold" id="hold" aria-label="Hold to record a take" aria-describedby="try-caption"><i></i></button>
+            <button class="hold" id="hold" aria-label="Hold to record a take" aria-describedby="try-caption">
+              <svg class="takes" viewBox="0 0 120 120" aria-hidden="true">
+                <circle class="track" cx="60" cy="60" r="48" />
+                <g id="take-ring">
+                  <path d="M74.16 14.14A48 48 0 0 1 91.59 96.14" />
+                  <path d="M65.72 107.66A48 48 0 0 1 23.86 91.59" />
+                  <path d="M12.34 65.72A48 48 0 0 1 45.84 14.14" />
+                </g>
+              </svg>
+              <i></i>
+            </button>
           </div>
         </figure>
       </section>
@@ -69,7 +90,7 @@
       <section class="how" id="how" aria-labelledby="how-title">
         <div class="section-head">
           <p class="eyebrow">How it works</p>
-          <h2 id="how-title">Notice it. Hold it. <em>Loop it.</em></h2>
+          <h2 id="how-title">Notice&nbsp;it. Hold&nbsp;it. <em>Loop&nbsp;it.</em></h2>
         </div>
         <ol class="steps">
           <li>
@@ -88,7 +109,7 @@
             <p>Send it to your people. It plays on repeat on their screen, exactly as raw as you made it.</p>
           </li>
         </ol>
-        <p class="closer">Then put the phone down.</p>
+        <p class="closer">Then put the phone down<span class="stop">.</span></p>
       </section>
 
       <section class="network" id="network" aria-labelledby="network-title">
@@ -135,7 +156,7 @@
         </div>
         <div class="pixels-copy">
           <p class="eyebrow">Every loop has an entrance</p>
-          <h2 id="pixels-title">Loops don’t load. <em>They arrive.</em></h2>
+          <h2 id="pixels-title">Loops don’t&nbsp;load. <em>They&nbsp;arrive.</em></h2>
           <p>
             Each loop lands as a scatter of pixels that fly home, lean along the edges of what you saw, and settle into the
             real thing. Slide to hang out somewhere in between.
@@ -241,28 +262,38 @@
       </section>
 
       <section class="lab" aria-labelledby="lab-title">
-        <p class="eyebrow">Coming to Android first</p>
-        <h2 id="lab-title">Your first loop is six seconds away.</h2>
-        <p>
-          The loops lab works today in Chrome on Android: Hold-to-Loop, Featherweight files, Real Seal and all. Make one, send
-          it to a friend, and tell us what you made.
-        </p>
-        <a class="button dark" href="/loops/">Open the loops lab <span aria-hidden="true">↗</span></a>
+        <div class="lab-copy">
+          <p class="eyebrow">Coming to Android first</p>
+          <h2 id="lab-title">Your first loop is six seconds away.</h2>
+          <p>
+            The loops lab works today in Chrome on Android: Hold-to-Loop, Featherweight files, Real Seal and all. Make one, send
+            it to a friend, and tell us what you made.
+          </p>
+          <a class="button dark" href="/loops/">Open the loops lab <span class="arrow" aria-hidden="true"></span></a>
+        </div>
       </section>
     </main>
 
     <footer class="foot">
-      <a class="wordmark small" href="/" aria-label="irl.ing home"
-        ><svg class="mark" viewBox="0 0 48 48" fill="none" aria-hidden="true">
-          <path d="M18 7H9a2 2 0 0 0-2 2v9m0 12v9a2 2 0 0 0 2 2h9m12 0h9a2 2 0 0 0 2-2v-9" />
-          <path d="M22 26 41 7M28 7h13v13" /></svg
-        >irl.ing</a
-      >
-      <p>Being. Seeing. Living.</p>
-      <nav aria-label="Footer">
-        <a href="/loops/">Loops lab</a>
-        <a href="/third-party-notices.txt">Notices</a>
-      </nav>
+      <div class="the-end">
+        <p class="end-line">You’re caught&nbsp;up<span class="stop">.</span></p>
+        <p class="end-sub">That’s the whole page. Close the tab, look up, go do something.</p>
+      </div>
+      <div class="foot-row">
+        <a class="wordmark small" href="/" aria-label="irl.ing home"
+          ><svg viewBox="0 0 442.24 196" aria-hidden="true">
+            <path d="M14.5 142V42M54.5 142V42M125.74 142V0M204.74 142V42M244.74 142V42M244.74 86A34 34 0 0 1 312.74 86M312.74 86V142M347.74 92a40 40 0 1 0 80 0a40 40 0 1 0 -80 0M427.74 42V144" fill="none" stroke="currentColor" stroke-width="24" />
+            <path d="M54.5 82A30 30 0 0 1 95.74 54.18M427.74 144A40 40 0 0 1 354.58 166.37" fill="none" stroke="currentColor" stroke-width="24" stroke-linecap="round" />
+            <circle cx="14.5" cy="14.5" r="14.5" fill="currentColor" />
+            <circle cx="204.74" cy="14.5" r="14.5" fill="currentColor" />
+            <circle class="rec" cx="165.24" cy="127.5" r="14.5" /></svg
+        ></a>
+        <p>Less scrolling. More irl’ing.</p>
+        <nav aria-label="Footer">
+          <a href="/loops/">Loops lab</a>
+          <a href="/third-party-notices.txt">Notices</a>
+        </nav>
+      </div>
     </footer>
   </body>
 </html>

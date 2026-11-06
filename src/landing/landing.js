@@ -97,7 +97,8 @@ let takes = [];
 let holdPointer = null;
 
 function say(html) {
-  $("try-caption").innerHTML = html;
+  // One span, so the caption stays a single line box inside its flex row.
+  $("try-caption").innerHTML = `<span>${html}</span>`;
 }
 
 function drawTicks() {
@@ -152,7 +153,7 @@ function finishTake() {
   hero.assemble();
   drawTicks();
   const n = takes.length;
-  say(`That’s a loop: ${n} take${n > 1 ? "s" : ""}, six seconds. <a href="/loops/">Make a real one →</a>`);
+  say(`That’s a loop: ${n} take${n > 1 ? "s" : ""}, six seconds. <a href="/loops/">Make a real one</a>`);
 }
 
 function onPointerDown(event) {
@@ -196,6 +197,49 @@ function updateMeter() {
   card.classList.toggle("looping", !demo);
   $("stage-label").textContent = mode === "hold" ? "RECORDING" : mode === "paused" ? `PAUSED · TAKE ${takes.length}` : "LIVE LOOP";
   $("stage-clock").textContent = `${(ms / 1000).toFixed(1)}s`;
+  drawRing(ms);
+}
+
+// ---- the take ring: the logo, redrawn from your own takes ------------------
+// The mark is three takes (2.6, 1.5, 1.9 s) around the record dot. Here the
+// ring shows the takes of whatever is on screen: the mark's own until you
+// record, then yours, with a gap wherever you let go.
+
+const ring = $("take-ring");
+const MARK_TAKES = [2600, 1500, 1900];
+const R = 48;
+const GAP = 20; // visible gap, degrees
+const CAP = ((6 / R) * 180) / Math.PI; // a round cap (stroke 12) eats this much arc
+let ringKey = "";
+
+function point(deg) {
+  const a = ((deg - 90) * Math.PI) / 180;
+  return `${(60 + R * Math.cos(a)).toFixed(2)} ${(60 + R * Math.sin(a)).toFixed(2)}`;
+}
+
+/** One take from a0 to a1 degrees; too short for an arc, it's a dot. */
+function takePath(a0, a1) {
+  if (a1 - a0 < 0.5) return `M${point(a0)}l0 0`;
+  return `M${point(a0)}A${R} ${R} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${point(a1)}`;
+}
+
+function drawRing(ms) {
+  const live = mode === "hold";
+  const list = takes.length || live ? [...takes, ...(live ? [recorded - takes.reduce((a, b) => a + b, 0)] : [])] : MARK_TAKES;
+  const playing = mode === "loop" && !reduced ? ms : null;
+  let at = 0;
+  const parts = list.map((take, i) => {
+    const last = i === list.length - 1;
+    const a0 = (at / LOOP_MS) * 360 + GAP / 2 + CAP;
+    let a1 = ((at + take) / LOOP_MS) * 360 - (live && last ? CAP : GAP / 2 + CAP);
+    a1 = Math.max(a0, a1);
+    const on = playing === null || (playing >= at && playing < at + take);
+    at += take;
+    const cls = live && last ? "live" : on ? "" : "dim";
+    return `<path${cls ? ` class="${cls}"` : ""} d="${takePath(a0, a1)}"/>`;
+  });
+  const key = parts.join("");
+  if (key !== ringKey) ring.innerHTML = ringKey = key;
 }
 
 // ---- smart pixels section -----------------------------------------------
