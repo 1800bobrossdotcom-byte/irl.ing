@@ -1,0 +1,19 @@
+{
+  "name": "irl.ing",
+  "short_name": "irl.ing",
+  "description": "Six-second social video. Hold to record, let go to pause, no filters, and feeds that end.",
+  "id": "/",
+  "start_url": "/loops/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#111110",
+  "theme_color": "#111110",
+  "icons": [
+    { "src": "/brand/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/brand/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/brand/maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/brand/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "/brand/app-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
