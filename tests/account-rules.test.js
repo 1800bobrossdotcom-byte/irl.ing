@@ -45,3 +45,12 @@ test("emails and codes", () => {
   assert.equal(normalizeCode("12345"), null);
   assert.equal(normalizeCode("12345a"), null);
 });
+
+test("teen status ends the month someone turns 18", async () => {
+  const { isTeenNow, monthOf } = await import("../src/accounts/rules.js");
+  assert.equal(monthOf(new Date(Date.UTC(2026, 10, 6))), "2026-11");
+  assert.equal(isTeenNow("2026-12", new Date(Date.UTC(2026, 10, 30))), true);
+  assert.equal(isTeenNow("2026-12", new Date(Date.UTC(2026, 11, 1))), false);
+  assert.equal(isTeenNow(null), false);
+  assert.equal(isTeenNow(""), false);
+});

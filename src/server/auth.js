@@ -17,6 +17,12 @@
 //   BETTER_AUTH_URL                 optional; defaults to https://irl.ing in production,
 //                                   the deployment URL on Vercel previews
 //   TURNSTILE_SECRET_KEY / TURNSTILE_SITE_KEY  optional bot check on claims
+//
+// Loop sharing (friends, feed, safety review) also needs storage and a
+// reviewer; until both are set, /irl/config reports sharing: false:
+//   R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET   see storage.js
+//   ANTHROPIC_API_KEY (optional MODERATION_MODEL)                      see moderation.js
+//   ADMIN_HANDLES                   comma-separated @names allowed to review
 
 import { randomUUID } from "node:crypto";
 import { passkey } from "@better-auth/passkey";
@@ -24,9 +30,12 @@ import { betterAuth } from "better-auth";
 import { APIError, createAuthEndpoint, freshSessionMiddleware, getSessionFromCtx, sessionMiddleware } from "better-auth/api";
 import { deleteSessionCookie } from "better-auth/cookies";
 import { captcha } from "better-auth/plugins/captcha";
-import pg from "pg";
 import * as z from "zod";
-import { accountDefaults, ageFrom, checkHandle, normalizeHandle } from "../accounts/rules.js";
+import { accountDefaults, ageFrom, checkHandle, isTeenNow, normalizeHandle } from "../accounts/rules.js";
+import { getPool } from "./db.js";
+import { getJudge } from "./moderation.js";
+import { deleteUserLoops, social } from "./social.js";
+import { getStorage } from "./storage.js";
 
 const CLAIM_MINUTES = 15;
 const claimKey = (id) => `irl-claim:${id}`;
@@ -72,20 +81,14 @@ export function adultFrom(birthMonth, birthYear) {
   return month > 12 ? `${birthYear + 19}-01` : `${birthYear + 18}-${String(month).padStart(2, "0")}`;
 }
 
-function isTeen(user, now = new Date()) {
-  if (!user.adultFrom) return false;
-  const current = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
-  return current < user.adultFrom;
-}
-
 /** Public view of an account: never the placeholder email or birth data. */
 function publicAccount(user) {
   return {
     handle: user.handle,
     name: user.name,
     visibility: user.visibility,
-    discoverable: user.discoverable && !isTeen(user),
-    teen: isTeen(user),
+    discoverable: user.discoverable && !isTeenNow(user.adultFrom),
+    teen: isTeenNow(user.adultFrom),
   };
 }
 
@@ -95,12 +98,12 @@ async function handleTaken(ctx, handle) {
 }
 
 /** irl.ing's own endpoints, mounted under /api/auth/irl/*. */
-function irlAccounts(s) {
+function irlAccounts(s, { db, storage, sharing }) {
   return {
     id: "irl-accounts",
     endpoints: {
       irlConfig: createAuthEndpoint("/irl/config", { method: "GET" }, async (ctx) =>
-        ctx.json({ accounts: true, turnstileSiteKey: s.turnstile?.siteKey || null, passkeys: true }),
+        ctx.json({ accounts: true, turnstileSiteKey: s.turnstile?.siteKey || null, passkeys: true, sharing }),
       ),
       irlCheckHandle: createAuthEndpoint(
         "/irl/check-handle",
@@ -158,6 +161,7 @@ function irlAccounts(s) {
         async (ctx) => {
           const user = ctx.context.session.user;
           if (normalizeHandle(ctx.body.confirmHandle) !== user.handle) throw new APIError("BAD_REQUEST", { message: "Type your @name to confirm." });
+          await deleteUserLoops(db, storage, user.id);
           await ctx.context.adapter.deleteMany({ model: "passkey", where: [{ field: "userId", value: user.id }] });
           await ctx.context.adapter.deleteMany({ model: "session", where: [{ field: "userId", value: user.id }] });
           await ctx.context.internalAdapter.deleteUser(user.id);
@@ -189,8 +193,16 @@ export function requireUserVerified(info, status = "BAD_REQUEST") {
   if (info?.userVerified !== true) throw new APIError(status, { message: NEED_VERIFICATION });
 }
 
-export function buildOptions(s = settings()) {
-  const pool = new pg.Pool({ connectionString: s.databaseUrl, max: 3 });
+/** Comma-separated @names allowed to use the review queue. */
+export function adminHandles(value = "") {
+  return value.split(",").map(normalizeHandle).filter(Boolean);
+}
+
+export function buildOptions(s = settings(), env = process.env) {
+  const pool = getPool(s.databaseUrl);
+  const storage = getStorage(env, { baseURL: s.baseURL, secret: s.secret });
+  const judge = getJudge(env);
+  const sharing = Boolean(storage && judge);
   return {
     appName: "irl.ing",
     baseURL: s.baseURL,
@@ -225,6 +237,13 @@ export function buildOptions(s = settings()) {
         "/passkey/generate-authenticate-options": { window: 60, max: 20 },
         "/passkey/verify-authentication": { window: 60, max: 10 },
         "/irl/delete-account": { window: 600, max: 5 },
+        "/irl/friends/request": { window: 600, max: 30 },
+        "/irl/invites": { window: 3600, max: 20 },
+        "/irl/invite": { window: 60, max: 20 },
+        "/irl/invites/accept": { window: 600, max: 20 },
+        "/irl/block": { window: 600, max: 30 },
+        "/irl/loops/share": { window: 600, max: 20 },
+        "/irl/report": { window: 600, max: 20 },
       },
     },
     advanced: {
@@ -273,7 +292,8 @@ export function buildOptions(s = settings()) {
           },
         },
       }),
-      irlAccounts(s),
+      irlAccounts(s, { db: pool, storage, sharing }),
+      social({ db: pool, storage, judge, admins: adminHandles(env.ADMIN_HANDLES), baseURL: s.baseURL }),
       ...(s.turnstile ? [captcha({ provider: "cloudflare-turnstile", secretKey: s.turnstile.secretKey, endpoints: ["/irl/claim"] })] : []),
     ],
   };

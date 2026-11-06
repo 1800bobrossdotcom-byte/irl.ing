@@ -35,15 +35,15 @@ create table if not exists irl_invite (
 create index if not exists irl_invite_inviter_idx on irl_invite ("inviter");
 
 -- A loop. Its id is the loop's Real Seal ID (SHA-256 of its signed manifest).
--- Status: uploading → (finalize) → visible | held. held = hidden pending
--- human review; removed = taken down. Rows for held/removed loops are kept
--- (with their audit trail) when an account is deleted only if the loop was
+-- A row exists only once the loop has passed verification and safety review.
+-- Status: visible (friends see it) | held (hidden until a person checks it) |
+-- removed (taken down). Deleting an account deletes its loops, except ones
 -- escalated for child safety, which the law requires preserving.
 create table if not exists irl_loop (
   "id" text primary key,
   "owner" text references "irl_user" ("id") on delete set null,
   "ownerHandle" text not null,
-  "status" text not null check ("status" in ('uploading', 'visible', 'held', 'removed')),
+  "status" text not null check ("status" in ('visible', 'held', 'removed')),
   "bytes" integer not null default 0,
   "sealKey" text,
   "ownerTeen" boolean not null default false,

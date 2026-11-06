@@ -30,7 +30,7 @@ irl.ing accounts run on [Better Auth](https://www.better-auth.com/) 1.7.10 with 
 | `irl_rate_limit` | request counters. |
 | `irl_account` | created by Better Auth, unused (no social or password logins). |
 
-The schema is in `db/schema.sql`. Every table is prefixed `irl_`, so the database can be shared without clashes.
+The schema is in `db/schema.sql`. Every table is prefixed `irl_`, so the database can be shared without clashes. Friends, loops and safety review add the tables in `db/social.sql`; see [the backend](social.md).
 
 ## Security
 

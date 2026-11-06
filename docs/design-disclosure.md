@@ -128,7 +128,7 @@ Privacy defaults:
 
 Code: `src/server/auth.js`, `src/accounts/`. Spec: `docs/accounts.md`. End-to-end test with real WebAuthn ceremonies: `tests/accounts-browser.mjs`.
 
-## 8. Friends, invites and blocks (Designed)
+## 8. Friends, invites and blocks (Built, not yet switched on)
 
 - **Mutual friendship.** One row per pair, stored smaller id first, as pending or accepted.
 - **Invites.** A code turns into a link and a QR code. Whoever joins through it becomes the inviter's friend; codes expire and have a use limit.
@@ -144,22 +144,22 @@ Code: `src/server/auth.js`, `src/accounts/`. Spec: `docs/accounts.md`. End-to-en
 
 Schema: `db/social.sql`.
 
-## 9. Loop storage (Designed)
+## 9. Loop storage (Built, not yet switched on)
 
 - **Storage:** private Cloudflare R2. Objects are keyed by loop ID: the `.irl` file plus three JPEG still frames.
-- **Upload:** short-lived signed PUT links (SigV4, `aws4fetch`).
-- **Finalize:** the server fetches the file, parses it, verifies the Real Seal, checks size and duration, records the signing key against the account (trust on first use), and runs safety review.
+- **Upload:** through irl.ing's server, in one request of at most 2 MB. The first design used signed PUT links straight to R2. That was dropped on 6 Nov 2026 because R2 can't cap a signed link's upload size.
+- **Verify before storing:** the server parses the file and verifies the Real Seal. It checks size and duration, records the signing key against the account (trust on first use) and runs safety review. Only then is anything written to storage.
 - **Playback:** a signed GET link, issued per loop to the owner and accepted friends only.
 - **Deletion:** deleting a loop or an account deletes its objects. The exception is child-safety escalations, which are preserved as the law requires.
 
-## 10. Safety review (Designed)
+## 10. Safety review (Built, not yet switched on)
 
 - **The reviewer:** Claude (Anthropic API, `claude-opus-5-5`, structured JSON output, refusal fallbacks) reviews each loop's three still frames against the community rules.
 - **Deciding:** irl.ing's policy maps the returned categories to show, hold or block. The stricter of the policy and the model wins, and teen thresholds are stricter.
 - **Failing closed:** refusals, errors and unreadable output hold the loop.
 - **People:** reports, a human review queue, strikes and an audit log complete it.
 
-Full program: [user safety](user-safety.md).
+Full program: [user safety](user-safety.md). Endpoints and setup: [the backend](social.md).
 
 ## 11. Timeline
 
@@ -175,4 +175,5 @@ Full program: [user safety](user-safety.md).
 | 2 Nov 2026 | Honest Zoom | `a2927d2` |
 | 2 Nov 2026 | Passkey-first accounts | `9f2de8e` |
 | 6 Nov 2026 | Accounts live on irl.ing | `645f4d8` |
-| 6 Nov 2026 | Social, storage and safety designs recorded (this document; [user safety](user-safety.md)) | this commit |
+| 6 Nov 2026 | Social, storage and safety designs recorded (this document; [user safety](user-safety.md)) | `aa48670` |
+| 6 Nov 2026 | Friends, invites, blocks, verified loop sharing, Claude safety review, reports and review queue built ([the backend](social.md)) | this commit |

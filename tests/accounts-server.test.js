@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { adultFrom, findDatabaseUrl, getAuth, requireUserVerified, settings } from "../src/server/auth.js";
+import { adminHandles, adultFrom, findDatabaseUrl, getAuth, requireUserVerified, settings } from "../src/server/auth.js";
 
 test("passkeys must come with the fingerprint, face or screen-lock check", () => {
   assert.doesNotThrow(() => requireUserVerified({ userVerified: true }));
@@ -35,4 +35,9 @@ test("the database is found under Neon's plain or prefixed names, always pooled"
   assert.equal(findDatabaseUrl({ irl_DATABASE_URL_UNPOOLED: "direct" }), "");
   assert.equal(findDatabaseUrl({ DATABASE_URL: "plain", irl_POSTGRES_URL: "prefixed" }), "plain");
   assert.equal(settings({ irl_POSTGRES_URL: "pooled", BETTER_AUTH_SECRET: "s" }).configured, true);
+});
+
+test("reviewers are listed by @name", () => {
+  assert.deepEqual(adminHandles(" @Rev.One, mod_two ,,"), ["rev.one", "mod_two"]);
+  assert.deepEqual(adminHandles(undefined), []);
 });

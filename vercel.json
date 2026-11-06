@@ -8,5 +8,10 @@
       "source": "/api/auth/:path*",
       "destination": "/api/auth"
     }
-  ]
+  ],
+  "functions": {
+    "api/auth.js": {
+      "maxDuration": 60
+    }
+  }
 }

@@ -70,3 +70,13 @@ export function normalizeCode(input) {
   const digits = String(input ?? "").replace(/[\s-]/g, "");
   return /^\d{6}$/.test(digits) ? digits : null;
 }
+
+/** The current month as "YYYY-MM" (UTC), the same shape as an account's adultFrom. */
+export function monthOf(now = new Date()) {
+  return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+
+/** Whether an account is still under 18, given the month it turns 18 ("YYYY-MM"). */
+export function isTeenNow(adultFrom, now = new Date()) {
+  return Boolean(adultFrom) && monthOf(now) < adultFrom;
+}
