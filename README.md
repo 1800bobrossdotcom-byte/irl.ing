@@ -60,4 +60,9 @@ Unit tests cover the loop container (damage, truncation, relay trimming, signatu
 - `scripts/bench/rd-bench.sh`: quality at equal bytes on a standard test clip (AV1, H.264 and the retired v1 dots codec). Needs ffmpeg.
 - [The v1 dots format](docs/loops-dots.md): retired and kept as a benchmark baseline.
 
+## Safety and design
+
+- [User safety](docs/user-safety.md): the safety program: what protects people today, what ships with loop sharing (private until checked, AI review, reports, human review, child-safety duties), data and processors, and the pre-launch checklist.
+- [Design disclosure](docs/design-disclosure.md): a dated record of how each part works, what's new, and when it was built.
+
 Third-party notices are in [`public/third-party-notices.txt`](public/third-party-notices.txt), served at `/third-party-notices.txt`.
