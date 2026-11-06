@@ -3,10 +3,22 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#f6f5ef" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#111110" media="(prefers-color-scheme: dark)" />
     <meta name="description" content="Hold to record six raw seconds. Share them as a tiny, signed loop that plays back lifelike." />
     <title>irl.ing — little loops</title>
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://irl.ing/loops/" />
+    <meta property="og:title" content="irl.ing — the loops lab" />
+    <meta property="og:description" content="Hold to record six raw seconds. Share them as a tiny, signed loop that plays back lifelike." />
+    <meta property="og:image" content="https://irl.ing/brand/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="preload" href="/fonts/schibsted-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="/src/loops/loops.css" />
     <script type="module" src="/src/loops/loops-app.js"></script>
     <script type="module" src="/src/accounts/account-ui.js"></script>
@@ -14,11 +26,13 @@
   <body>
     <header class="loops-header">
       <a class="wordmark" href="/" aria-label="irl.ing home"
-        ><svg class="mark" viewBox="0 0 48 48" fill="none" aria-hidden="true">
-          <path d="M18 7H9a2 2 0 0 0-2 2v9m0 12v9a2 2 0 0 0 2 2h9m12 0h9a2 2 0 0 0 2-2v-9" />
-          <path d="M22 26 41 7M28 7h13v13" /></svg
-        >irl.ing</a
-      >
+        ><svg viewBox="0 0 442.24 196" aria-hidden="true">
+          <path d="M14.5 142V42M54.5 142V42M125.74 142V0M204.74 142V42M244.74 142V42M244.74 86A34 34 0 0 1 312.74 86M312.74 86V142M347.74 92a40 40 0 1 0 80 0a40 40 0 1 0 -80 0M427.74 42V144" fill="none" stroke="currentColor" stroke-width="24" />
+          <path d="M54.5 82A30 30 0 0 1 95.74 54.18M427.74 144A40 40 0 0 1 354.58 166.37" fill="none" stroke="currentColor" stroke-width="24" stroke-linecap="round" />
+          <circle cx="14.5" cy="14.5" r="14.5" fill="currentColor" />
+          <circle cx="204.74" cy="14.5" r="14.5" fill="currentColor" />
+          <circle class="rec" cx="165.24" cy="127.5" r="14.5" /></svg
+      ></a>
       <div class="header-right">
         <span class="lab-badge">LOOPS LAB</span>
         <button class="account-pill" id="account-open" hidden>Claim your @name</button>
@@ -37,7 +51,7 @@
           <video id="raw" playsinline loop hidden></video>
           <canvas id="player" hidden aria-label="Your loop"></canvas>
           <div class="stage-hint" id="stage-hint">
-            <span class="hint-mark" aria-hidden="true">↗</span>
+            <span class="hint-mark" aria-hidden="true"><svg class="takes" viewBox="0 0 120 120"><circle class="track" cx="60" cy="60" r="48" /><path d="M74.16 14.14A48 48 0 0 1 91.59 96.14" /><path d="M65.72 107.66A48 48 0 0 1 23.86 91.59" /><path d="M12.34 65.72A48 48 0 0 1 45.84 14.14" /></svg><i></i></span>
             <strong>Something small.<br />Something very you.</strong>
             <span>Turn on the camera, or try the sample.</span>
           </div>
@@ -54,7 +68,7 @@
         </div>
         <div class="controls" id="record-controls" hidden>
           <button class="ghost small" id="flip" aria-label="Switch camera">Flip</button>
-          <button class="record" id="record" aria-label="Hold to record"><i></i></button>
+          <button class="record" id="record" aria-label="Hold to record"><svg class="takes" viewBox="0 0 120 120" aria-hidden="true"><circle class="track" cx="60" cy="60" r="48" /><path d="M74.16 14.14A48 48 0 0 1 91.59 96.14" /><path d="M65.72 107.66A48 48 0 0 1 23.86 91.59" /><path d="M12.34 65.72A48 48 0 0 1 45.84 14.14" /></svg><i></i></button>
           <button class="ghost small" id="done" disabled>Done</button>
         </div>
         <p class="status" id="status" role="status" aria-live="polite">Nothing leaves your phone in this lab.</p>
