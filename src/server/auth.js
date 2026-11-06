@@ -31,8 +31,27 @@ import { accountDefaults, ageFrom, checkHandle, normalizeHandle } from "../accou
 const CLAIM_MINUTES = 15;
 const claimKey = (id) => `irl-claim:${id}`;
 
+/**
+ * The pooled Postgres connection string. Neon's Vercel integration names it
+ * DATABASE_URL / POSTGRES_URL, or <prefix>_DATABASE_URL / <prefix>_POSTGRES_URL
+ * when a custom prefix was chosen (this project uses "irl_"). The
+ * *_NON_POOLING / *_UNPOOLED variants are never picked: serverless functions
+ * should go through Neon's pooler.
+ */
+export function findDatabaseUrl(env = process.env) {
+  if (env.DATABASE_URL) return env.DATABASE_URL;
+  if (env.POSTGRES_URL) return env.POSTGRES_URL;
+  for (const suffix of ["_DATABASE_URL", "_POSTGRES_URL"]) {
+    const name = Object.keys(env)
+      .filter((key) => key.endsWith(suffix) && /^[A-Za-z0-9]+_(DATABASE|POSTGRES)_URL$/.test(key) && env[key])
+      .sort()[0];
+    if (name) return env[name];
+  }
+  return "";
+}
+
 export function settings(env = process.env) {
-  const databaseUrl = env.DATABASE_URL || env.POSTGRES_URL || "";
+  const databaseUrl = findDatabaseUrl(env);
   const secret = env.BETTER_AUTH_SECRET || "";
   const baseURL =
     env.BETTER_AUTH_URL ||

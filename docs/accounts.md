@@ -42,8 +42,8 @@ The schema is in `db/schema.sql`. Every table is prefixed `irl_`, so the databas
 
 ## Switching it on in Vercel
 
-1. **Database.** If Neon is connected to this Vercel project, `DATABASE_URL` is already set. Check Project → Settings → Environment Variables.
-2. **Secret.** Add `BETTER_AUTH_SECRET` (Production and Preview). Generate it with `npm run secret` (or `openssl rand -base64 32`).
+1. **Database.** Connecting Neon to the project (Storage tab) sets the connection string. It's found under `DATABASE_URL`, `POSTGRES_URL`, or the same names with a custom prefix such as `irl_POSTGRES_URL`; the pooled address is always used. It must apply to Production as well as Preview.
+2. **Secret.** Add `BETTER_AUTH_SECRET`, ticking **both** Production and Preview. Generate it with `npm run secret` (or `openssl rand -base64 32`).
 3. **Tables.** Paste `db/schema.sql` into Neon’s SQL editor, or run `DATABASE_URL="…" BETTER_AUTH_SECRET="…" npm run db:migrate`.
 4. **Redeploy.**
 

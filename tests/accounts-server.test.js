@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { adultFrom, getAuth, requireUserVerified, settings } from "../src/server/auth.js";
+import { adultFrom, findDatabaseUrl, getAuth, requireUserVerified, settings } from "../src/server/auth.js";
 
 test("passkeys must come with the fingerprint, face or screen-lock check", () => {
   assert.doesNotThrow(() => requireUserVerified({ userVerified: true }));
@@ -25,4 +25,14 @@ test("the passkey domain follows the deployment", () => {
 test("only the month someone turns 18 is kept, counted cautiously", () => {
   assert.equal(adultFrom(3, 2010), "2028-04");
   assert.equal(adultFrom(12, 2010), "2029-01");
+});
+
+test("the database is found under Neon's plain or prefixed names, always pooled", () => {
+  assert.equal(findDatabaseUrl({ DATABASE_URL: "plain" }), "plain");
+  assert.equal(findDatabaseUrl({ POSTGRES_URL: "vercel" }), "vercel");
+  assert.equal(findDatabaseUrl({ irl_POSTGRES_URL: "pooled", irl_POSTGRES_URL_NON_POOLING: "direct", irl_POSTGRES_HOST: "h" }), "pooled");
+  assert.equal(findDatabaseUrl({ irl_DATABASE_URL: "db", irl_POSTGRES_URL: "pg" }), "db");
+  assert.equal(findDatabaseUrl({ irl_DATABASE_URL_UNPOOLED: "direct" }), "");
+  assert.equal(findDatabaseUrl({ DATABASE_URL: "plain", irl_POSTGRES_URL: "prefixed" }), "plain");
+  assert.equal(settings({ irl_POSTGRES_URL: "pooled", BETTER_AUTH_SECRET: "s" }).configured, true);
 });
