@@ -13,7 +13,17 @@ import { getStorage } from "../src/server/storage.js";
 
 const root = new URL("../dist/", import.meta.url).pathname;
 const port = Number(process.env.PORT ?? 3004);
-const types = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".txt": "text/plain; charset=utf-8", ".json": "application/json" };
+const types = {
+  ".html": "text/html; charset=utf-8",
+  ".js": "text/javascript",
+  ".css": "text/css",
+  ".svg": "image/svg+xml",
+  ".txt": "text/plain; charset=utf-8",
+  ".json": "application/json",
+  ".png": "image/png",
+  ".woff2": "font/woff2",
+  ".webmanifest": "application/manifest+json",
+};
 const s = settings();
 const storage = getStorage(process.env, { baseURL: s.baseURL, secret: s.secret });
 const storageTypes = { ".irl": "application/octet-stream", ".jpg": "image/jpeg" };

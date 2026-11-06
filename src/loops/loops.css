@@ -808,6 +808,11 @@ legend {
   .danger-button {
     background: #c92f0e;
   }
+  .sheet {
+    box-shadow:
+      0 0 0 1px var(--line),
+      0 -20px 60px rgb(0 0 0 / 0.5);
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .primary,
