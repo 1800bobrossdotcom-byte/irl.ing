@@ -22,6 +22,7 @@
     <link rel="stylesheet" href="/src/loops/loops.css" />
     <script type="module" src="/src/loops/loops-app.js"></script>
     <script type="module" src="/src/accounts/account-ui.js"></script>
+    <script type="module" src="/src/social/lab-share.js"></script>
   </head>
   <body>
     <header class="loops-header">
@@ -35,6 +36,7 @@
       ></a>
       <div class="header-right">
         <span class="lab-badge">LOOPS LAB</span>
+        <a class="account-pill" href="/friends/">Friends</a>
         <button class="account-pill" id="account-open" hidden>Claim your @name</button>
       </div>
     </header>
@@ -115,10 +117,12 @@
         </div>
 
         <div class="actions">
-          <button class="primary" id="share">Share video</button>
+          <button class="primary" id="share-friends" hidden>Share with friends</button>
+          <button class="ghost" id="share">Share video</button>
           <button class="ghost" id="save-video">Save video</button>
           <button class="ghost" id="again">Record another</button>
         </div>
+        <p class="fine" id="share-friends-note" role="status" aria-live="polite"></p>
         <p class="fine">
           Saves as a standard MP4. Or <button class="link" id="download">download the .irl file</button>: about 100 KB,
           plays only on irl.ing. The raw clip stays on this phone.
@@ -191,8 +195,8 @@
         <p class="eyebrow">You’re in</p>
         <h2 id="done-handle"></h2>
         <p id="done-privacy"></p>
-        <p>Friends come next. Invite one now.</p>
         <button class="primary wide" id="invite">Invite a friend</button>
+        <a class="ghost wide" href="/friends/" id="done-feed">Open your feed</a>
         <button class="ghost wide" id="done-close">Make a loop</button>
       </section>
 

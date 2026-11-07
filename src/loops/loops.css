@@ -836,3 +836,15 @@ legend {
     transition: none;
   }
 }
+
+/* Links that look like buttons (Friends, Open your feed). */
+a.ghost,
+a.primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+a.account-pill {
+  text-decoration: none;
+}

@@ -4,7 +4,7 @@ irl.ing is six raw seconds of real life, shared with people you actually know. S
 
 Every item is marked:
 - **Live**: running on irl.ing now.
-- **Built**: implemented and tested end to end, but not switched on yet. It needs storage and reviewer keys, and the app screens come with the redesign. See [the backend](social.md).
+- **Built**: implemented and tested end to end. Live on irl.ing since the 7 Nov 2026 launch. See [the backend](social.md).
 - **Designed**: specified; not built yet.
 - **Before launch**: required before irl.ing is opened to the public or listed in an app store.
 

@@ -280,6 +280,8 @@ async function encodeAndPlay() {
     if (token !== encodeToken) return;
     choose("transit", "original", { quiet: true });
     await showBytes(original);
+    // For "Share with friends" (src/social/lab-share.js).
+    window.dispatchEvent(new CustomEvent("irl:loop", { detail: { bytes: original, clip } }));
   } catch (error) {
     if (token === encodeToken) status(`Couldn’t make the loop (${error.message}).`);
   }
@@ -555,6 +557,7 @@ $("open-file").addEventListener("change", async (event) => {
   $("record-controls").hidden = true;
   clip = null;
   original = bytes;
+  window.dispatchEvent(new CustomEvent("irl:loop", { detail: { bytes, clip: null } })); // opened files aren't shared
   $("view-raw").disabled = true;
   $("build").hidden = false;
   setEncodable(false);
@@ -583,6 +586,7 @@ function again() {
   setStage("hint");
 }
 $("again").addEventListener("click", () => {
+  window.dispatchEvent(new CustomEvent("irl:loop", { detail: null }));
   again();
   status("Ready for another.");
 });

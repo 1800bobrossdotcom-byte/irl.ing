@@ -192,7 +192,10 @@ $("signin-passkey").addEventListener("click", async () => {
 // ---- signed in ----------------------------------------------------------------
 
 async function invite() {
-  const url = `${location.origin}/?from=${encodeURIComponent(me?.handle ?? "")}`;
+  // A real invite link: whoever joins through it becomes your friend.
+  let url = `${location.origin}/`;
+  const made = await api("/irl/invites", { method: "POST", body: "{}" }).catch(() => null);
+  if (made?.ok && made.body?.url) url = made.body.url;
   const text = `I’m on irl.ing as @${me?.handle}. Six seconds of real life, no filters.`;
   if (navigator.share) {
     try {

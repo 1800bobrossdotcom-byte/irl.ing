@@ -20,9 +20,9 @@ Irl’ing is a verb: being present, seeing what’s around you, and doing someth
 
 - **Accounts** (`/api/auth/*`, one Vercel function): claim an @name and save it with a passkey (fingerprint, face or screen lock), no password. Better Auth on Postgres (Neon). Friends-only by default; teens can’t be found by strangers. Off until `DATABASE_URL` and `BETTER_AUTH_SECRET` are set. See [accounts](docs/accounts.md).
 
-- **Friends and sharing** (same function; switched on for previews, off on irl.ing until launch). Mutual friends by invite link or exact @name, plus blocks. Sharing a loop to friends works like this: the server checks its Real Seal, Claude reviews three still frames against the community rules, and it's stored privately on Cloudflare R2. A feed that ends, reports and a human review queue complete it. See [the backend](docs/social.md) and [user safety](docs/user-safety.md).
+- **Friends and sharing** (same function; live). `/friends/` is the feed and friends, `/i/<code>` the invite page, `/review/` the review queue, and the lab has **Share with friends**. Mutual friends by invite link or exact @name, plus blocks. Sharing a loop to friends works like this: the server checks its Real Seal, Claude reviews three still frames against the community rules, and it's stored privately on Cloudflare R2. A feed that ends, reports and a human review queue complete it. See [the backend](docs/social.md) and [user safety](docs/user-safety.md).
 
-On irl.ing today, loops aren’t uploaded: they stay on the phone until someone shares the file.
+Loops stay on the phone unless you choose **Share with friends**.
 
 ## Run
 

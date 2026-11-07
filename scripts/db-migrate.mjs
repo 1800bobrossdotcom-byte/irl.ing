@@ -3,18 +3,19 @@
 // tables and columns; safe to re-run.
 //   DATABASE_URL=... BETTER_AUTH_SECRET=... node scripts/db-migrate.mjs         apply
 //   DATABASE_URL=... BETTER_AUTH_SECRET=... node scripts/db-migrate.mjs --sql   print SQL only
-//   node scripts/db-migrate.mjs --if-preview   apply only on a Vercel preview build
+//   node scripts/db-migrate.mjs --on-deploy    apply during a Vercel build
 //
-// --if-preview runs during Vercel builds (see vercel.json). Neon's Vercel
-// integration gives each Git branch its own copy of the database, taken when
-// the branch was first deployed, so a preview's copy can lack tables added
-// since. Production is never touched this way: migrate it deliberately.
+// --on-deploy runs during every Vercel build, preview and production (see
+// vercel.json), so a deployment never starts against a database missing its
+// tables. Neon's Vercel integration also gives each Git branch its own copy
+// of the database, taken when the branch was first deployed. The migration
+// only ever adds tables and columns; it never drops or rewrites anything.
 import { readFile } from "node:fs/promises";
 import { getMigrations } from "better-auth/db/migration";
 import { buildOptions, settings } from "../src/server/auth.js";
 
-const ifPreview = process.argv.includes("--if-preview");
-if (ifPreview && process.env.VERCEL_ENV !== "preview") {
+const ifPreview = process.argv.includes("--on-deploy");
+if (ifPreview && !["preview", "production"].includes(process.env.VERCEL_ENV)) {
   console.log(`Skipping database migration (VERCEL_ENV=${process.env.VERCEL_ENV ?? "unset"}).`);
   process.exit(0);
 }
@@ -24,10 +25,10 @@ if (!s.databaseUrl) {
   process.exit(ifPreview ? 0 : 1);
 }
 if (ifPreview) {
-  // A failed preview migration shouldn't block the preview build; the
-  // deployment's /api/auth/irl/config will name what's missing.
+  // A failed migration shouldn't block the build; the deployment's
+  // /api/auth/irl/config will name what's missing.
   process.on("uncaughtException", (error) => {
-    console.warn(`Preview database migration failed: ${error.code ?? ""} ${error.message}`);
+    console.warn(`Database migration failed: ${error.code ?? ""} ${error.message}`);
     process.exit(0);
   });
 }

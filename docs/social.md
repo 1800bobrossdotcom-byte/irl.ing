@@ -2,14 +2,14 @@
 
 This covers the server side of friends, invites, blocks, sharing loops, the feed, reports and human review. It runs in the same Vercel function as [accounts](accounts.md) (`/api/auth/*`), as a Better Auth plugin, so it shares sessions, origin checks and database-backed rate limits.
 
-**Status:** built and tested end to end. Sharing is switched on for Vercel previews.
+**Status:** live on irl.ing (launched 7 Nov 2026) and on previews.
 
 **Screens:**
 - `/friends/`: the feed (ending in "You're caught up."), your loops, friends, requests, add by @name, invite links with a QR code, and blocked people.
 - `/i/<code>`: the invite page.
 - `/review/`: the review queue, for reviewers only.
 
-Sign-up still happens in the lab's account sheet. The safety program it implements is in [user safety](user-safety.md).
+Sign-up happens in the lab's account sheet, whose "Invite a friend" makes a real invite link. **Share with friends** in the lab (`src/social/lab-share.js`) shares a loop recorded there: the sample and opened files can't be shared, and signed out the button opens sign-in. The safety program it implements is in [user safety](user-safety.md).
 
 ## How it fits together
 
@@ -112,7 +112,7 @@ Deleting an account also deletes its loops and their files, except escalations, 
    | `ADMIN_HANDLES` | Comma-separated @names of reviewers |
    | `MODERATION_MODEL` | Optional; overrides the default reviewer model |
 
-6. **Tables.** Run `npm run db:migrate` with the Neon connection string, or paste `db/social.sql` into Neon's SQL editor.
+6. **Tables.** Created automatically on every deploy (`db:migrate --on-deploy` in the build). To do it by hand: `npm run db:migrate`, or paste `db/social.sql` into Neon's SQL editor.
 7. **Redeploy.** `/api/auth/irl/config` then reports `sharing: true`.
 
 ### If it doesn't switch on
@@ -122,7 +122,7 @@ Previews sit behind Vercel's login, so open `<preview URL>/api/auth/irl/config` 
 | It shows | Meaning and fix |
 | --- | --- |
 | `"sharing": false, "sharingMissing": [...]` | Those variables aren't reaching this deployment. Check each name for typos, that **Preview** is ticked, and that it isn't limited to another Git branch. Variable changes apply to the next deployment. Production never lists names. |
-| `"code": "SCHEMA_MISMATCH", "missing": [...]` | The database lacks those tables. Neon's Vercel integration gives each Git branch its own copy of the database, made the first time that branch is previewed. Preview builds run `db:migrate --if-preview`, which adds what's missing, so redeploying fixes it. For production, run `npm run db:migrate` or paste the SQL. |
+| `"code": "SCHEMA_MISMATCH", "missing": [...]` | The database lacks those tables. Neon's Vercel integration gives each Git branch its own copy of the database, made the first time that branch is previewed. Every Vercel build runs `db:migrate --on-deploy`, which adds what's missing, so redeploying fixes it. |
 | `"code": "ENOTFOUND"`, `"ECONNREFUSED"` or `"ETIMEDOUT"` | The deployment can't reach Postgres. Check the database variables for this environment. |
 | Vercel's own "This page is unavailable" | The function failed before irl.ing's code ran. The deployment's **Logs** tab has the error. |
 
