@@ -6,7 +6,7 @@ Irl’ing is a verb: being present, seeing what’s around you, and doing someth
 
 ## What’s here
 
-- **`/`**: the landing page. It plays a live loop through the same on-phone finishing pipeline the lab uses, has a hold-to-record demo, sets out the network's principles, and ends with **the lexicon**, plain names for the tech (Hold-to-Loop, Featherweight, Lifeboats, Lighten Up, Real Seal, True Grain, Glow-Up, Honest Zoom, Smart Pixels, Cosmic Courtesy) and a demo of how a loop survives a bad link.
+- **`/`**: the landing page, kept minimal. A live hold-to-record loop runs through the lab's finishing pipeline, followed by three one-line steps and **the lexicon**: plain names for the tech (Hold-to-Loop, Featherweight, Lifeboats, Lighten Up, Real Seal, True Grain, Glow-Up, Honest Zoom, Smart Pixels, Cosmic Courtesy). Two small demos show smart pixels and how a loop survives a bad link. It ends with "You're caught up."
 - **`/loops/`**: the loops lab, for phone or desktop. Tested in Chromium (Chrome, Edge) so far; Safari, iPhone and Firefox are next. Hold-to-record works with touch, mouse, or Space and Enter.
   - **Encoding:** clips are encoded on the phone with its own AV1 encoder (VP9 or H.264 where AV1 isn't available) to a 50, 100 or 200 KB budget.
   - **Packaging:** each loop is cut into two-second, checksummed chunks and signed with a key that never leaves the phone.
@@ -20,7 +20,7 @@ Irl’ing is a verb: being present, seeing what’s around you, and doing someth
 
 - **Accounts** (`/api/auth/*`, one Vercel function): claim an @name and save it with a passkey (fingerprint, face or screen lock), no password. Better Auth on Postgres (Neon). Friends-only by default; teens can’t be found by strangers. Off until `DATABASE_URL` and `BETTER_AUTH_SECRET` are set. See [accounts](docs/accounts.md).
 
-- **Friends and sharing** (same function, built but not switched on yet). Mutual friends by invite link or exact @name, plus blocks. Sharing a loop to friends works like this: the server checks its Real Seal, Claude reviews three still frames against the community rules, and it's stored privately on Cloudflare R2. A feed that ends, reports and a human review queue complete it. See [the backend](docs/social.md) and [user safety](docs/user-safety.md).
+- **Friends and sharing** (same function; switched on for previews, off on irl.ing until launch). Mutual friends by invite link or exact @name, plus blocks. Sharing a loop to friends works like this: the server checks its Real Seal, Claude reviews three still frames against the community rules, and it's stored privately on Cloudflare R2. A feed that ends, reports and a human review queue complete it. See [the backend](docs/social.md) and [user safety](docs/user-safety.md).
 
 On irl.ing today, loops aren’t uploaded: they stay on the phone until someone shares the file.
 
