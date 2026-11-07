@@ -55,5 +55,11 @@ function failed(res, error) {
   res.statusCode = 500;
   res.setHeader("content-type", "application/json");
   res.setHeader("cache-control", "no-store");
-  res.end(JSON.stringify({ message: "Accounts are temporarily unavailable.", code }));
+  const body = { message: "Accounts are temporarily unavailable.", code };
+  // Which tables or columns the database lacks: irl.ing's own (public) schema, safe to show.
+  if (code === "SCHEMA_MISMATCH" && Array.isArray(error.findings)) {
+    body.missing = error.findings.map((f) => `${f.kind}: ${f.table}${f.column ? `.${f.column}` : ""}`);
+    body.fix = "Run npm run db:migrate against this database (or redeploy the preview, which does it).";
+  }
+  res.end(JSON.stringify(body));
 }
