@@ -124,6 +124,13 @@ Single-ink print: everything in ink, the dot included, on white; or everything r
 - **The ring** is reserved for the record button and the mark. Don’t put it around anything else.
 - **No gradients, glows, glass or drop shadows** on brand elements. The only pictures are loops.
 
+## Pictures of the product
+
+- **Lead with people.** The landing page is the product in use: an example feed of friends’ loops, each with an @name and the ⋯ menu, ending in “You’re caught up.” It reuses the `/friends/` styles, so it looks exactly like the real feed.
+- **Real footage only.** No drawn scenes or effects on the landing page. The example clips live in `public/samples/` as `feed-1.mp4`–`feed-4.mp4` (square, about six seconds, muted is fine) with a first-frame poster `feed-N.jpg` each. List the ones that exist in `public/samples/feed.json` (`"clips": [1, 2, 3, 4]`); unlisted slots show a calm tile (concrete or ink, the record ring and the @name) and request nothing. Clips play muted and looping while on screen; with reduced motion they show the poster and play on tap.
+- **Made-up names.** Example @names (@maya, @jules, @sam, @noor) must never be real accounts, and the feed is labeled “Example feed”. Only use footage of people who agreed to it.
+- **The tech has its own page.** The lexicon, the Hold-to-Loop try-out (on a drawn sample, labeled as such) and the Smart Pixels and Lifeboats demos live at `/how/`, linked quietly from the footer.
+
 ## Motion
 
 - Hold: the dot squares off while recording (150 ms), the ring draws the current take in Rec and keeps the earlier ones; when a loop plays, the take on screen is lit and the others dim.

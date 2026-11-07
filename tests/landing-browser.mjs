@@ -1,5 +1,5 @@
-// Browser check for the landing page at phone and desktop sizes. Run
-// against a server:
+// Browser check for the landing page and /how/ at phone and desktop sizes.
+// Run against a server:
 //   npm run build && PORT=3003 npm start
 //   STUDIO_URL=http://127.0.0.1:3003 node tests/landing-browser.mjs [screenshot-dir]
 import assert from "node:assert/strict";
@@ -14,6 +14,9 @@ const shots = process.argv[2];
 if (shots) mkdirSync(shots, { recursive: true });
 const browser = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});
 
+const overflowOf = (page) =>
+  page.evaluate(() => Math.max(...[...document.querySelectorAll("body *")].map((e) => e.getBoundingClientRect().right)) - document.documentElement.clientWidth);
+
 try {
   for (const [name, viewport, mobile] of [
     ["phone", { width: 390, height: 844 }, true],
@@ -24,17 +27,31 @@ try {
     const errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
     page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
+
+    // The landing: friends' loops, @names, and a way in.
     await page.goto(`${base}/`, { waitUntil: "networkidle" });
     assert.equal(await page.title(), "irl.ing — six-second social video. Less scrolling, more irl’ing.");
-    assert.equal(await page.locator(".terms dt").count(), 10, "the lexicon");
     assert.equal(await page.locator("a[href='/loops/']").first().isVisible(), true);
+    assert.equal(await page.locator(".cta a[href='/loops/']").innerText(), "Make your @name");
+    assert.equal(await page.locator(".cta a[href='/friends/']").innerText(), "Sign in");
+    assert.deepEqual(await page.locator("#feed .handle").allInnerTexts(), ["@maya", "@jules", "@sam", "@noor"]);
+    assert.match(await page.locator(".preview .end").innerText(), /^You’re caught up\.$/);
+    assert.equal(await page.locator("a[href='/how/']").count(), 1, "a quiet link to the tech");
+    assert.equal(await page.locator("#feed .frame:not(.has-clip)").count(), 4, "no clips listed yet: neutral tiles");
+    let overflow = await overflowOf(page);
+    assert.ok(overflow <= 0.5, `${name}: landing overflows by ${overflow}px`);
+    if (shots) await page.screenshot({ path: `${shots}/landing-${name}.png`, fullPage: true });
 
-    // The hero loop is live.
+    // /how/: the lexicon, the hold-to-record demo and both tech demos.
+    await page.goto(`${base}/how/`, { waitUntil: "networkidle" });
+    assert.equal(await page.locator(".terms dt").count(), 10, "the lexicon");
+
+    // The demo loop is live.
     await page.waitForTimeout(2600);
     const frame = () => page.locator("#hero-stage canvas").evaluate((c) => c.toDataURL());
     const a = await frame();
     await page.waitForTimeout(300);
-    assert.notEqual(a, await frame(), `${name}: hero loop should animate`);
+    assert.notEqual(a, await frame(), `${name}: demo loop should animate`);
 
     // Hold to record: two takes, timed by the real hold, auto-finish at six seconds.
     const hold = page.locator("#hold");
@@ -68,15 +85,13 @@ try {
     await page.waitForTimeout(1200);
     assert.notEqual(before, await page.locator("#pixels-look").inputValue());
 
-    const overflow = await page.evaluate(
-      () => Math.max(...[...document.querySelectorAll("body *")].map((e) => e.getBoundingClientRect().right)) - document.documentElement.clientWidth,
-    );
-    assert.ok(overflow <= 0.5, `${name}: content overflows by ${overflow}px`);
-    if (shots) await page.screenshot({ path: `${shots}/landing-${name}.png`, fullPage: true });
+    overflow = await overflowOf(page);
+    assert.ok(overflow <= 0.5, `${name}: /how/ overflows by ${overflow}px`);
+    if (shots) await page.screenshot({ path: `${shots}/how-${name}.png`, fullPage: true });
     assert.deepEqual(errors, [], `${name}: browser errors`);
     await context.close();
   }
-  console.log("landing ok: phone and desktop");
+  console.log("landing ok: phone and desktop, landing and /how/");
 } finally {
   await browser.close();
 }

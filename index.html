@@ -6,11 +6,11 @@
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#111110" media="(prefers-color-scheme: dark)" />
     <title>irl.ing — six-second social video. Less scrolling, more irl’ing.</title>
-    <meta name="description" content="Six-second videos of real life, for your friends. Hold to record, let go to pause. No filters. Feeds that end." />
+    <meta name="description" content="Six-second loops of real life, from your friends. No filters. A feed that ends." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://irl.ing/" />
     <meta property="og:title" content="irl.ing — six-second social video" />
-    <meta property="og:description" content="Hold to record, let go to pause. No filters. Feeds that end." />
+    <meta property="og:description" content="Six-second loops of real life, from your friends. No filters. A feed that ends." />
     <meta property="og:image" content="https://irl.ing/brand/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -34,120 +34,47 @@
           <circle cx="204.74" cy="14.5" r="14.5" fill="currentColor" />
           <circle class="rec" cx="165.24" cy="127.5" r="14.5" /></svg
       ></a>
-      <a class="pill" href="/loops/">Open the lab</a>
+      <a class="text-link" href="/friends/">Sign in</a>
     </header>
 
-    <main id="main">
-      <section class="hero" aria-labelledby="hero-title">
-        <div class="hero-copy">
-          <h1 id="hero-title">Less scrolling. <em>More irl’ing.</em></h1>
-          <p class="lede">Six-second videos of real life, for your friends. No&nbsp;filters. Feeds that&nbsp;end.</p>
-          <a class="button primary" href="/loops/">Make a loop</a>
-          <p class="status-note">Recording and loops work today in the lab. Friends and feeds come next.</p>
+    <main id="main" class="home">
+      <section class="intro" aria-labelledby="hero-title">
+        <h1 id="hero-title">Six-second loops from your friends<span class="dot">.</span></h1>
+        <p class="lede">Real life, no filters. And a feed that ends.</p>
+        <div class="cta">
+          <a class="btn rec" href="/loops/">Make your @name</a>
+          <a class="btn ghost" href="/friends/">Sign in</a>
         </div>
-
-        <figure class="stage-card" id="try" aria-labelledby="try-caption">
-          <div class="stage-top">
-            <span class="tag"><span class="rec" aria-hidden="true"></span><span id="stage-label">LIVE LOOP</span></span>
-            <span class="tag muted" id="stage-clock">6.0s</span>
-          </div>
-          <div class="stage" id="hero-stage" role="img" aria-label="A drawn sunset over a moving sea, playing as a six-second loop"></div>
-          <div class="meter" aria-hidden="true">
-            <span class="meter-fill" id="meter-fill"></span>
-            <span class="meter-ticks" id="meter-ticks"></span>
-          </div>
-          <div class="stage-controls">
-            <p id="try-caption" class="stage-status" aria-live="polite">Hold to record. Let go to pause.</p>
-            <button class="hold" id="hold" aria-label="Hold to record a take" aria-describedby="try-caption">
-              <svg class="takes" viewBox="0 0 120 120" aria-hidden="true">
-                <circle class="track" cx="60" cy="60" r="48" />
-                <g id="take-ring">
-                  <path d="M74.16 14.14A48 48 0 0 1 91.59 96.14" />
-                  <path d="M65.72 107.66A48 48 0 0 1 23.86 91.59" />
-                  <path d="M12.34 65.72A48 48 0 0 1 45.84 14.14" />
-                </g>
-              </svg>
-              <i></i>
-            </button>
-          </div>
-        </figure>
       </section>
 
-      <section class="how" id="how" aria-labelledby="how-title">
-        <h2 class="label" id="how-title">How it works</h2>
-        <ol class="steps">
-          <li>Hold to record.</li>
-          <li>Let go to pause. Hold again.</li>
-          <li>Six seconds, then it&nbsp;loops.</li>
-        </ol>
-      </section>
-
-      <section class="lexicon" id="lexicon" aria-labelledby="lexicon-title">
-        <h2 class="label" id="lexicon-title">The lexicon</h2>
-        <dl class="terms">
-          <div><dt>Hold-to-Loop</dt><dd>Hold to record, let go to pause.</dd></div>
-          <div><dt>Featherweight</dt><dd>A whole loop in about 100&nbsp;KB.</dd></div>
-          <div><dt>Lifeboats</dt><dd>Two-second pieces. Lose one, the rest play.</dd></div>
-          <div><dt>Lighten Up</dt><dd>A busy relay drops frames, not seconds.</dd></div>
-          <div><dt>Real Seal</dt><dd>Signed on your phone, so edits show.</dd></div>
-          <div><dt>True Grain</dt><dd>Your camera’s grain, measured and put back.</dd></div>
-          <div><dt>Glow-Up</dt><dd>Tiny files, upscaled sharp as they play.</dd></div>
-          <div><dt>Honest Zoom</dt><dd>Sharper, never contradicting what was sent.</dd></div>
-          <div><dt>Smart Pixels</dt><dd>Pixels that fly home as a loop arrives.</dd></div>
-          <div><dt>Cosmic Courtesy</dt><dd>Important parts first, damage kept small.</dd></div>
-        </dl>
-
-        <div class="demos">
-          <figure class="demo pixels" id="pixels" aria-labelledby="pixels-title">
-            <div class="stage" id="pixels-stage" role="img" aria-label="The same loop drawn in smart pixels"></div>
-            <figcaption>
-              <h3 id="pixels-title">Smart Pixels</h3>
-              <div class="slider">
-                <span>Lifelike</span>
-                <input type="range" id="pixels-look" min="0" max="100" value="60" aria-label="From lifelike to smart pixels" />
-                <span>Pixels</span>
-              </div>
-              <button class="button ghost small" id="pixels-again">Replay</button>
-            </figcaption>
-          </figure>
-
-          <div class="demo chunks" aria-labelledby="chunks-title">
-            <div class="chunks-head">
-              <h3 id="chunks-title">Lifeboats in action</h3>
-              <div class="chips" role="group" aria-label="Transit scenario">
-                <button data-transit="sent" aria-pressed="true">As sent</button>
-                <button data-transit="relay" aria-pressed="false">Lighten Up</button>
-                <button data-transit="flip" aria-pressed="false">A bit flips</button>
-                <button data-transit="cut" aria-pressed="false">Link drops</button>
-              </div>
-            </div>
-            <div class="strip" id="strip" aria-hidden="true">
-              <span class="blk meta" style="--w: 2">info</span>
-              <span class="blk sign" style="--w: 3">seal</span>
-              <span class="blk base" style="--w: 9">0–2 s</span>
-              <span class="blk base" style="--w: 9" data-flip>2–4 s</span>
-              <span class="blk base" style="--w: 9">4–6 s</span>
-              <span class="blk sound" style="--w: 9">sound</span>
-              <span class="blk extra" style="--w: 7">extra</span>
-              <span class="blk extra" style="--w: 7">extra</span>
-              <span class="blk extra" style="--w: 7">extra</span>
-              <span class="cut-line"></span>
-            </div>
-            <div class="legend" aria-hidden="true">
-              <span><i class="head"></i>seal</span>
-              <span><i class="base"></i>every other frame</span>
-              <span><i class="sound"></i>sound</span>
-              <span><i class="extra"></i>frames in between</span>
-            </div>
-            <p class="chunks-note" id="chunks-note" aria-live="polite"></p>
-          </div>
-        </div>
+      <section class="preview" aria-labelledby="preview-title">
+        <h2 class="label" id="preview-title">Example feed</h2>
+        <ul class="loops" id="feed">
+          <li class="loop" data-clip="1">
+            <div class="loop-head"><span class="handle">@maya</span><span class="more" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="2.2" /><circle cx="12" cy="12" r="2.2" /><circle cx="19" cy="12" r="2.2" /></svg></span></div>
+            <div class="frame" role="img" aria-label="@maya’s loop" data-handle="@maya"></div>
+          </li>
+          <li class="loop" data-clip="2">
+            <div class="loop-head"><span class="handle">@jules</span><span class="more" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="2.2" /><circle cx="12" cy="12" r="2.2" /><circle cx="19" cy="12" r="2.2" /></svg></span></div>
+            <div class="frame" role="img" aria-label="@jules’s loop" data-handle="@jules"></div>
+          </li>
+          <li class="loop" data-clip="3">
+            <div class="loop-head"><span class="handle">@sam</span><span class="more" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="2.2" /><circle cx="12" cy="12" r="2.2" /><circle cx="19" cy="12" r="2.2" /></svg></span></div>
+            <div class="frame" role="img" aria-label="@sam’s loop" data-handle="@sam"></div>
+          </li>
+          <li class="loop" data-clip="4">
+            <div class="loop-head"><span class="handle">@noor</span><span class="more" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="2.2" /><circle cx="12" cy="12" r="2.2" /><circle cx="19" cy="12" r="2.2" /></svg></span></div>
+            <div class="frame" role="img" aria-label="@noor’s loop" data-handle="@noor"></div>
+          </li>
+        </ul>
+        <p class="end">You’re caught up<span class="dot">.</span></p>
       </section>
     </main>
 
     <footer class="foot">
-      <p class="end-line">You’re caught&nbsp;up<span class="stop">.</span></p>
+      <p>Less scrolling. More irl’ing.</p>
       <nav aria-label="Footer">
+        <a href="/how/">How it works</a>
         <a href="/loops/">Loops lab</a>
         <a href="/third-party-notices.txt">Notices</a>
       </nav>

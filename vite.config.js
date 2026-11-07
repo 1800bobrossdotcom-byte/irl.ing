@@ -27,6 +27,7 @@ export default defineConfig({
         friends: resolve(import.meta.dirname, "friends/index.html"),
         invite: resolve(import.meta.dirname, "i/index.html"),
         review: resolve(import.meta.dirname, "review/index.html"),
+        how: resolve(import.meta.dirname, "how/index.html"),
       },
     },
   },

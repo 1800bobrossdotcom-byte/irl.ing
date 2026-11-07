@@ -1,0 +1,4 @@
+{
+  "about": "Clips for the example feed on the landing page. Add feed-N.mp4 (square, muted is fine, about 6 s) and feed-N.jpg (its first frame) to this folder, then list N here, e.g. [1, 2, 3, 4]. Unlisted slots show a neutral tile and request nothing.",
+  "clips": []
+}
