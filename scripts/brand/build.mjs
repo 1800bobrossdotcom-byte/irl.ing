@@ -225,13 +225,7 @@ async function renderPngs() {
   // Social share image, set in the brand's own (self-hosted) type.
   await page.setViewportSize({ width: 1200, height: 630 });
   await page.goto(new URL("./og.html", import.meta.url).href);
-  await page.evaluate(
-    ([lockup, mark]) => {
-      document.getElementById("lockup").innerHTML = lockup;
-      document.getElementById("mark").innerHTML = mark;
-    },
-    [file("public/brand/lockup-reverse.svg"), file("public/brand/mark-reverse.svg")],
-  );
+  await page.evaluate((lockup) => (document.getElementById("lockup").innerHTML = lockup), file("public/brand/lockup.svg"));
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(200);
   await page.screenshot({ path: resolve(root, "public/brand/og.png"), clip: { x: 0, y: 0, width: 1200, height: 630 } });

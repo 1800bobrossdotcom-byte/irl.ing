@@ -9,13 +9,14 @@ irl.ing has one gesture: hold to record, let go to pause, hold again. Every loop
 - **The mark, “the take”**, is a real loop: three takes of 2.6, 1.5 and 1.9 seconds, drawn clockwise from twelve o’clock as a ring around the record dot. The gaps are where someone let go. It isn’t a symbol of the button; on the landing page it *is* the button, and while you hold it the ring redraws itself from your own takes, so every loop gets a ring of its own.
 - **The wordmark** is drawn, not typed. Stems stand flat on the baseline (feet on the ground); curves end round (still moving). The two tittles and the period are one size, and the period, the dot in the domain, is the record light. It sits between *irl* and *ing*: real life, then doing something with it.
 - **Endings.** The page ends the way the feed will: “You’re caught up.” The full stop at the end of the biggest lines is the record dot.
+- **Less.** One surface, few words, no ornament. If a sentence can lose a word, it does; if a section can go, it goes. The loops bring the color.
 
 ### What changed, and why
 
 The previous identity was Arial 900, an orange viewfinder with an outward arrow, cream paper, olive and Georgia italics.
 
 - The arrow-in-a-frame read as the “open in new window” icon. It said *leave*, not *make*. Replaced by a mark that is the product’s own control.
-- Cream, a serif italic and a soft orange is the default look of a great many generated sites. Cut the cream (daylight white instead), cut the italics (emphasis is a highlighter stroke now), cut the olive.
+- Cream, a serif italic and a soft orange is the default look of a great many generated sites. Cut the cream (daylight white instead), cut the italics, cut the olive.
 - Kept and sharpened the two colors that were already working: orange became **Rec**, a hotter red-orange like a camera’s tally light, and lime became **Highlighter**, used the way you’d use a marker on paper.
 - Arial became **Schibsted Grotesk**, self-hosted.
 
@@ -30,7 +31,7 @@ All in `public/brand/` (the favicon is `public/favicon.svg`). Every file is gene
 | `mark.svg`, `mark-reverse.svg` | The take on its own: avatars, stickers, large graphics. |
 | `app-icon-maskable.svg` → `maskable-192.png`, `maskable-512.png`, `apple-touch-icon.png` | Full-bleed icon for Android adaptive/maskable and iOS. |
 | `app-icon.svg` → `icon-192.png`, `icon-512.png` | Rounded-tile icon (`purpose: any`). |
-| `og.png` (1200×630) | Social share image (`og:image`), template in `scripts/brand/og.html`. |
+| `og.png` (1200×630) | Social share image (`og:image`): the lockup and one line on white, template in `scripts/brand/og.html`. Sized to read at chat-thumbnail width (about 300 px); the lockup also survives a centered square crop. |
 | `public/favicon.svg` | Favicon, drawn separately for 16 px. |
 | `public/manifest.webmanifest` | Web app manifest, linked from both pages. Installs open the loops lab. |
 
@@ -83,7 +84,7 @@ The ring’s outer diameter equals the ascender height (142 units), sitting on t
 | `--line` | `#DCDCD6` | `#34342F` | Hairlines |
 | `--rec` | `#F33A16` | `#F33A16` | The record dot, the one action that starts something, big emphasis |
 | `--rec-text` | `#C92F0E` | `#FF5A3C` | Rec as text under 24 px, errors |
-| `--lime` | `#D8F04A` | `#D8F04A` | Highlighter: emphasis, selected chips, the closing band |
+| `--lime` | `#D8F04A` | `#D8F04A` | Highlighter: small confirmations (“@name is yours”), tags on the stage, diagram categories |
 | `--night` | `#111110` | `#000000` | Surfaces that stay dark in both themes (the recorder, the lexicon) |
 | `--night-2` | `#1D1D1B` | `#1A1A18` | Panels on night |
 | `--night-fg-2` | `#AAAAA2` | `#AAAAA2` | Secondary text on night |
@@ -91,7 +92,7 @@ The ring’s outer diameter equals the ascender height (142 units), sitting on t
 
 Contrast (WCAG 2.x): ink on white 18.9:1; `--fg-2` on white 6.7:1 and on concrete 5.8:1; ink on Rec 4.9:1 (so Rec buttons carry **ink** text, never white: white on Rec is 3.9:1); Rec on white 3.9:1, so Rec text is for 24 px and up only, and `--rec-text` (5.4:1) below that; ink on lime 14.8:1; lime on ink 14.8:1; chalk on ink 17.1:1; `--night-fg-2` on ink 8.1:1.
 
-Proportions: mostly daylight and ink, one Rec moment per view, lime as a marker, not a wallpaper (the single lime band is the exception, and it ends the page).
+Proportions: daylight and ink, one Rec moment per view, lime only in small doses. The one dark object on a page is the recorder.
 
 Single-ink print: everything in ink, the dot included, on white; or everything reversed out of a solid.
 
@@ -102,22 +103,24 @@ Single-ink print: everything in ink, the dot included, on white; or everything r
 | Style | Size | Line height | Weight | Tracking |
 | --- | --- | --- | --- | --- |
 | Display (hero) | `clamp(48px, 15.6vw, 112px)` | 0.93 | 860 | −0.055em |
-| Headline (h2) | `clamp(40px, 10.4vw, 84px)` | 0.95 | 840 | −0.048em |
-| Closing line | `clamp(50px, 14.5vw, 136px)` | 0.9 | 860 | −0.055em |
-| Title (h3, lexicon terms) | 28–36px | 1–1.05 | 820 | −0.035em |
-| Lede | 19px | 1.5 | 400 | 0 |
+| Steps (“How it works”) | `clamp(28px, 7.4vw, 40px)` | 1.05 | 820 | −0.04em |
+| Closing line | `clamp(50px, 14.5vw, 128px)` | 0.9 | 860 | −0.055em |
+| Term (lexicon), card titles | 18px | 1.3 | 800 | −0.02em |
+| Lede | 20px | 1.45 | 400 | 0 |
 | Body | 17px (lab 16px) | 1.55 | 400 | 0 |
 | Small, captions | 14–15px | 1.5 | 400–600 | 0 |
 | Label | 12–13px, uppercase | 1.35 | 700 | +0.12em |
 
-- Big type is set tight and lowercase where the copy allows. Headlines balance (`text-wrap: balance`); keep phrases together with non-breaking spaces (“Hold&nbsp;it.”).
-- Emphasis inside a headline is a lime highlighter stroke behind the words on light, lime text on dark. The hero line’s second half is Rec. Never italics.
+- Big type is set tight. Headlines balance (`text-wrap: balance`); keep phrases together with non-breaking spaces (“caught&nbsp;up”).
+- Three sizes do the work on a page: display, body, label. Section headings are labels, not headlines.
+- The only emphasis is the hero line’s second half, in Rec. Never italics.
 - Tabular figures only for counters that change while you watch (the hero clock).
 
 ## Graphic language
 
-- **Dots** are punctuation: the record light, bullets in the house rules, the full stop at the end of the biggest lines.
-- **The take bar** is a capsule split where you let go: the recorder meters, the step bars in “How it works”, the strip under the share image.
+- **Dots** are punctuation: the record light and the full stop at the end of the biggest lines.
+- **The take bar** is a capsule split where you let go: the recorder meters and the step bars in “How it works”.
+- **Hairlines** carry structure. No cards where a rule will do.
 - **The ring** is reserved for the record button and the mark. Don’t put it around anything else.
 - **No gradients, glows, glass or drop shadows** on brand elements. The only pictures are loops.
 
@@ -129,10 +132,12 @@ Single-ink print: everything in ink, the dot included, on white; or everything r
 
 ## Voice
 
-Plain, specific, warm, a little funny. Short sentences, real verbs, talk to one person.
+Plain, specific, warm. As few words as it takes to be clear, then stop. Real verbs, talk to one person.
 
-- **Say what’s true today.** “Recording, loops and everything in the lexicon below work today in the loops lab. Profiles, friends and feeds are being built next.” Never describe a feature that isn’t built as if it were.
-- **Name things once, then use the name.** The lexicon terms are proper nouns, always written exactly: Hold-to-Loop, Featherweight, Lifeboats, Lighten Up, Real Seal, True Grain, Glow-Up, Honest Zoom, Smart Pixels, Cosmic Courtesy. Plain words first, the engineering second.
+- **One line per idea.** A lexicon entry, a step, a status: each gets one short line.
+- **Say what’s true today.** “Recording and loops work today in the lab. Friends and feeds come next.” Never describe a feature that isn’t built as if it were.
+- **No device claims.** irl.ing is for any phone or computer. Don’t promise a platform, and don’t say “works everywhere”: say what to do when a browser can’t record yet.
+- **Name things once, then use the name.** The lexicon terms are proper nouns, always written exactly: Hold-to-Loop, Featherweight, Lifeboats, Lighten Up, Real Seal, True Grain, Glow-Up, Honest Zoom, Smart Pixels, Cosmic Courtesy. One plain line each; the engineering lives in the docs.
 - **Irl’ing is a verb.** Being present, seeing what’s around you, doing something with it. Use it like one: “More irl’ing.”
 - **End things.** “Then put the phone down.” “You’re caught up.”
 - No hype words (revolutionary, seamless, AI-powered), no exclamation marks, no emoji, and no comparisons to other apps.
@@ -140,7 +145,8 @@ Plain, specific, warm, a little funny. Short sentences, real verbs, talk to one 
 | Do | Don’t |
 | --- | --- |
 | “Hold to record, let go to pause.” | “Capture life’s magical moments!” |
-| “About 100 KB. Light enough to send on one bar of signal.” | “Ultra-optimized next-gen compression.” |
+| “A whole loop in about 100 KB.” | “Ultra-optimized next-gen compression.” |
+| “Use your fingerprint, face or screen lock. No password.” | “Secure your account with our seamless passwordless experience.” |
 | “When you’re caught up, we say so.” | “Never miss a thing.” |
 
 ## Do and don’t
