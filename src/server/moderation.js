@@ -195,6 +195,12 @@ export function stubJudge(suggested = "allow") {
   };
 }
 
+/** Names of the reviewer settings that are missing (never their values). */
+export function missingJudgeEnv(env = process.env) {
+  if (env.MODERATION_JUDGE?.startsWith("stub") && env.VERCEL_ENV !== "production") return [];
+  return env.ANTHROPIC_API_KEY?.trim() ? [] : ["ANTHROPIC_API_KEY"];
+}
+
 /** The configured reviewer, or null when it isn't set up (sharing stays off). */
 export function getJudge(env = process.env) {
   if (env.MODERATION_JUDGE?.startsWith("stub") && env.VERCEL_ENV !== "production") {

@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { diskStorage, getStorage, keys, r2Storage } from "../src/server/storage.js";
+import { diskStorage, getStorage, keys, missingStorageEnv, r2Storage } from "../src/server/storage.js";
 
 const id = "a".repeat(64);
 
@@ -55,4 +55,10 @@ test("sharing is off without storage; disk storage never runs in production", ()
   assert.equal(getStorage({ LOCAL_STORAGE_DIR: "/tmp/x", VERCEL_ENV: "production" }, opts), null);
   assert.equal(getStorage({ LOCAL_STORAGE_DIR: "/tmp/x" }, opts).kind, "local");
   assert.equal(getStorage({ R2_ACCOUNT_ID: "a", R2_ACCESS_KEY_ID: "k", R2_SECRET_ACCESS_KEY: "s", R2_BUCKET: "b" }).kind, "r2");
+});
+
+test("a preview can say which storage settings are missing, by name only", () => {
+  assert.deepEqual(missingStorageEnv({}), ["R2_ACCOUNT_ID", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY", "R2_BUCKET"]);
+  assert.deepEqual(missingStorageEnv({ R2_ACCOUNT_ID: "a", R2_ACCESS_KEY_ID: "k", R2_SECRET_ACCESS_KEY: " ", R2_BUCKET: "b" }), ["R2_SECRET_ACCESS_KEY"]);
+  assert.deepEqual(missingStorageEnv({ LOCAL_STORAGE_DIR: "/tmp/x" }), []);
 });

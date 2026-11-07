@@ -33,9 +33,9 @@ import { captcha } from "better-auth/plugins/captcha";
 import * as z from "zod";
 import { accountDefaults, ageFrom, checkHandle, isTeenNow, normalizeHandle } from "../accounts/rules.js";
 import { getPool } from "./db.js";
-import { getJudge } from "./moderation.js";
+import { getJudge, missingJudgeEnv } from "./moderation.js";
 import { deleteUserLoops, social } from "./social.js";
-import { getStorage } from "./storage.js";
+import { getStorage, missingStorageEnv } from "./storage.js";
 
 const CLAIM_MINUTES = 15;
 const claimKey = (id) => `irl-claim:${id}`;
@@ -98,12 +98,19 @@ async function handleTaken(ctx, handle) {
 }
 
 /** irl.ing's own endpoints, mounted under /api/auth/irl/*. */
-function irlAccounts(s, { db, storage, sharing }) {
+function irlAccounts(s, { db, storage, sharing, sharingMissing }) {
   return {
     id: "irl-accounts",
     endpoints: {
       irlConfig: createAuthEndpoint("/irl/config", { method: "GET" }, async (ctx) =>
-        ctx.json({ accounts: true, turnstileSiteKey: s.turnstile?.siteKey || null, passkeys: true, sharing }),
+        ctx.json({
+          accounts: true,
+          turnstileSiteKey: s.turnstile?.siteKey || null,
+          passkeys: true,
+          sharing,
+          // Off production only: which settings sharing still needs (names, never values).
+          ...(sharingMissing ? { sharingMissing } : {}),
+        }),
       ),
       irlCheckHandle: createAuthEndpoint(
         "/irl/check-handle",
@@ -203,6 +210,7 @@ export function buildOptions(s = settings(), env = process.env) {
   const storage = getStorage(env, { baseURL: s.baseURL, secret: s.secret });
   const judge = getJudge(env);
   const sharing = Boolean(storage && judge);
+  const sharingMissing = !sharing && env.VERCEL_ENV !== "production" ? [...missingStorageEnv(env), ...missingJudgeEnv(env)] : null;
   return {
     appName: "irl.ing",
     baseURL: s.baseURL,
@@ -292,7 +300,7 @@ export function buildOptions(s = settings(), env = process.env) {
           },
         },
       }),
-      irlAccounts(s, { db: pool, storage, sharing }),
+      irlAccounts(s, { db: pool, storage, sharing, sharingMissing }),
       social({ db: pool, storage, judge, admins: adminHandles(env.ADMIN_HANDLES), baseURL: s.baseURL }),
       ...(s.turnstile ? [captcha({ provider: "cloudflare-turnstile", secretKey: s.turnstile.secretKey, endpoints: ["/irl/claim"] })] : []),
     ],

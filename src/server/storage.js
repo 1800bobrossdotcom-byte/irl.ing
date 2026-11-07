@@ -96,6 +96,14 @@ export function diskStorage({ dir, baseURL, secret }) {
   };
 }
 
+const R2_ENV = ["R2_ACCOUNT_ID", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY", "R2_BUCKET"];
+
+/** Names of the storage settings that are missing (never their values). */
+export function missingStorageEnv(env = process.env) {
+  if (env.LOCAL_STORAGE_DIR && env.VERCEL_ENV !== "production") return [];
+  return R2_ENV.filter((name) => !env[name]?.trim());
+}
+
 /** The configured storage, or null when loop sharing isn't switched on. */
 export function getStorage(env = process.env, { baseURL, secret } = {}) {
   if (env.R2_ACCOUNT_ID && env.R2_ACCESS_KEY_ID && env.R2_SECRET_ACCESS_KEY && env.R2_BUCKET) {

@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import Anthropic from "@anthropic-ai/sdk";
-import { claudeJudge, decide, getJudge, stubJudge } from "../src/server/moderation.js";
+import { claudeJudge, decide, getJudge, missingJudgeEnv, stubJudge } from "../src/server/moderation.js";
 
 const clean = { flags: [], minor_in_frame: "no", suggested: "allow", summary: "Two friends laughing at a cafe." };
 const flag = (category, severity = "high") => ({ category, severity, reason: "test" });
@@ -110,4 +110,11 @@ test("no reviewer configured means sharing stays off; stubs never run in product
   assert.equal(getJudge({ ANTHROPIC_API_KEY: "x" }).name, "claude-opus-5-5");
   assert.equal(getJudge({ ANTHROPIC_API_KEY: "x", MODERATION_MODEL: "claude-haiku-5-5" }).name, "claude-haiku-5-5");
   assert.equal((await stubJudge().review({ ownerTeen: true })).decision.outcome, "show");
+});
+
+test("a preview can say the reviewer key is missing, by name only", () => {
+  assert.deepEqual(missingJudgeEnv({}), ["ANTHROPIC_API_KEY"]);
+  assert.deepEqual(missingJudgeEnv({ ANTHROPIC_API_KEY: "x" }), []);
+  assert.deepEqual(missingJudgeEnv({ MODERATION_JUDGE: "stub" }), []);
+  assert.deepEqual(missingJudgeEnv({ MODERATION_JUDGE: "stub", VERCEL_ENV: "production" }), ["ANTHROPIC_API_KEY"]);
 });
