@@ -13,7 +13,7 @@ irl.ing accounts run on [Better Auth](https://www.better-auth.com/) 1.7.10 with 
    - Only then is the account created, in one transaction with the passkey and the first session.
 3. **You’re in.** Accounts start friends-only. Under-18s can’t be found by strangers and can’t switch that on. "Invite a friend" shares a link.
 
-**Signing in** is one button using the passkey, which Android also syncs through Google Password Manager. **Signing out** and **deleting the account** are in the account sheet.
+**Signing in** is one button using the passkey. Passkeys work on phones and desktops, and sync through Google Password Manager, iCloud Keychain or a password manager; a desktop without one can sign in by scanning a QR code with the phone. **Signing out** and **deleting the account** are in the account sheet.
 
 - Deletion asks you to type your @name.
 - It needs a session from the last 10 minutes.
@@ -74,7 +74,7 @@ The browser test drives real WebAuthn ceremonies through Chromium’s virtual au
 
 ## Before a public launch
 
-- A privacy policy and terms page. Google Play requires a privacy policy, plus in-app and web account deletion; deletion is done.
-- Report and block, and a way to review reports. Play requires these for apps with user-generated content.
+- A privacy policy and terms page. App stores require a privacy policy, plus in-app and web account deletion; deletion is done.
+- Report and block, and a way to review reports. App stores require these for apps with user-generated content; they're built (see [the backend](social.md)).
 - Email as an optional recovery route (Better Auth email-code plugin plus an email provider such as Resend).
 - Linking each phone’s Real Seal key to the account, so loops show “Signed by @name”.

@@ -8,7 +8,7 @@ A dated record of how irl.ing is designed: what each part does, how it works, wh
 
 ## 1. What irl.ing is
 
-A six-second social video app, Android first. You hold to record, let go to pause, and keep going. Loops play for friends you've accepted; there are no filters, and feeds end. The design goal throughout is *tiny, honest and resilient*:
+A six-second social video app for any phone or desktop (originally planned Android first; widened on 7 Nov 2026). You hold to record, let go to pause, and keep going. Loops play for friends you've accepted; there are no filters, and feeds end. The design goal throughout is *tiny, honest and resilient*:
 
 - loops small enough for one bar of signal;
 - everything added on playback declared and bounded;
@@ -176,4 +176,6 @@ Full program: [user safety](user-safety.md). Endpoints and setup: [the backend](
 | 2 Nov 2026 | Passkey-first accounts | `9f2de8e` |
 | 6 Nov 2026 | Accounts live on irl.ing | `645f4d8` |
 | 6 Nov 2026 | Social, storage and safety designs recorded (this document; [user safety](user-safety.md)) | `aa48670` |
-| 6 Nov 2026 | Friends, invites, blocks, verified loop sharing, Claude safety review, reports and review queue built ([the backend](social.md)) | this commit |
+| 6 Nov 2026 | Friends, invites, blocks, verified loop sharing, Claude safety review, reports and review queue built ([the backend](social.md)) | `9781285` |
+| 6 Nov 2026 | New identity: the take mark, drawn wordmark, Rec and Highlighter ([brand](brand.md)) | `2c697e3` |
+| 7 Nov 2026 | Positioning widened from Android first to any phone or desktop | this commit |

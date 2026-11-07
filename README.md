@@ -2,12 +2,12 @@
 
 **Less scrolling. More irl’ing.**
 
-Irl’ing is a verb: being present, seeing what’s around you, and doing something with it. irl.ing is a six-second social video app built around feeds that end. You hold to record, let go to pause, and your moment loops for your friends. There are no filters. Then you put the phone down. Recording, loops and the tech below work today in the loops lab; profiles, friends and feeds come next, Android first.
+Irl’ing is a verb: being present, seeing what’s around you, and doing something with it. irl.ing is a six-second social video app built around feeds that end. You hold to record, let go to pause, and your moment loops for your friends. There are no filters. Then you put the phone down. Recording, loops and the tech below work today in the loops lab; profiles, friends and feeds come next. It runs in the browser on any phone or desktop.
 
 ## What’s here
 
 - **`/`**: the landing page. It plays a live loop through the same on-phone finishing pipeline the lab uses, has a hold-to-record demo, sets out the network's principles, and ends with **the lexicon**, plain names for the tech (Hold-to-Loop, Featherweight, Lifeboats, Lighten Up, Real Seal, True Grain, Glow-Up, Honest Zoom, Smart Pixels, Cosmic Courtesy) and a demo of how a loop survives a bad link.
-- **`/loops/`**: the loops lab, Android (Chrome) first.
+- **`/loops/`**: the loops lab, for phone or desktop. Tested in Chromium (Chrome, Edge) so far; Safari, iPhone and Firefox are next. Hold-to-record works with touch, mouse, or Space and Enter.
   - **Encoding:** clips are encoded on the phone with its own AV1 encoder (VP9 or H.264 where AV1 isn't available) to a 50, 100 or 200 KB budget.
   - **Packaging:** each loop is cut into two-second, checksummed chunks and signed with a key that never leaves the phone.
   - **Playback:** loops are rebuilt lifelike with FSR 1 upscaling and sharpening, measured film grain and dithering, with an optional "smart pixels" look.

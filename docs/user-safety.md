@@ -6,7 +6,7 @@ Every item is marked:
 - **Live**: running on irl.ing now.
 - **Built**: implemented and tested end to end, but not switched on yet. It needs storage and reviewer keys, and the app screens come with the redesign. See [the backend](social.md).
 - **Designed**: specified; not built yet.
-- **Before launch**: required before irl.ing is opened to the public or listed on Google Play.
+- **Before launch**: required before irl.ing is opened to the public or listed in an app store.
 
 ## Principles
 
@@ -137,7 +137,7 @@ Loops aren't end-to-end encrypted. irl.ing can review them for safety, which is 
 - [ ] NCMEC CyberTipline registration and named reporting staff
 - [ ] A safety contact and a process for law-enforcement requests
 - [ ] Report, block and the review queue live, with trained reviewers and response-time targets
-- [ ] Google Play: Data safety form, content rating, and the user-generated-content requirements (report, block, moderation, terms)
+- [ ] If listed in app stores: Google Play's Data safety form and Apple's privacy labels, content ratings, and both stores' user-generated-content requirements (report, block, moderation, terms)
 - [ ] Legal review of age and teen protections for target countries (US COPPA, UK Age Appropriate Design Code, EU DSA)
 - [ ] A crisis-support resource list for the self-harm flow, per country
 
