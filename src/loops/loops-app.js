@@ -124,7 +124,7 @@ function setStage(mode) {
 
 async function cameraOn() {
   if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder || !window.VideoEncoder) {
-    status("This browser can’t record and encode video here. Try Chrome on Android, or use the sample.");
+    status("This browser can’t record video here yet. Try another up-to-date browser, or use the sample.");
     return;
   }
   status("Starting the camera…");
@@ -223,7 +223,7 @@ $("flip").addEventListener("click", async () => {
 });
 $("try-sample").addEventListener("click", () => {
   if (!window.VideoEncoder) {
-    status("This browser can’t encode video here (it needs WebCodecs). Try Chrome on Android.");
+    status("This browser can’t encode video here yet (it needs WebCodecs). Try another up-to-date browser.");
     return;
   }
   $("setup-controls").hidden = true;

@@ -39,11 +39,7 @@
       </div>
     </header>
     <main class="loops-main">
-      <section class="intro">
-        <p class="eyebrow">SIX RAW SECONDS. NO FILTERS.</p>
-        <h1>Life, in little <em>loops.</em></h1>
-        <p class="lede">Hold to record. Let go to pause. Keep going. Your loop is squeezed to about 100 KB, signed on this phone, and rebuilt lifelike when it plays.</p>
-      </section>
+      <h1 class="sr-only">Loops lab</h1>
 
       <section class="recorder" aria-label="Recorder">
         <div class="stage" id="stage" aria-describedby="status">
@@ -52,8 +48,7 @@
           <canvas id="player" hidden aria-label="Your loop"></canvas>
           <div class="stage-hint" id="stage-hint">
             <span class="hint-mark" aria-hidden="true"><svg class="takes" viewBox="0 0 120 120"><circle class="track" cx="60" cy="60" r="48" /><path d="M74.16 14.14A48 48 0 0 1 91.59 96.14" /><path d="M65.72 107.66A48 48 0 0 1 23.86 91.59" /><path d="M12.34 65.72A48 48 0 0 1 45.84 14.14" /></svg><i></i></span>
-            <strong>Something small.<br />Something very you.</strong>
-            <span>Turn on the camera, or try the sample.</span>
+            <strong>Six seconds.<br />No filters.</strong>
           </div>
           <span class="rec-dot" id="rec-dot" hidden>REC</span>
           <span class="stage-tag" id="stage-tag" hidden></span>
@@ -71,7 +66,7 @@
           <button class="record" id="record" aria-label="Hold to record"><svg class="takes" viewBox="0 0 120 120" aria-hidden="true"><circle class="track" cx="60" cy="60" r="48" /><path d="M74.16 14.14A48 48 0 0 1 91.59 96.14" /><path d="M65.72 107.66A48 48 0 0 1 23.86 91.59" /><path d="M12.34 65.72A48 48 0 0 1 45.84 14.14" /></svg><i></i></button>
           <button class="ghost small" id="done" disabled>Done</button>
         </div>
-        <p class="status" id="status" role="status" aria-live="polite">Nothing leaves your phone in this lab.</p>
+        <p class="status" id="status" role="status" aria-live="polite">Nothing is uploaded.</p>
       </section>
 
       <section class="build" id="build" hidden aria-labelledby="build-title">
@@ -83,8 +78,8 @@
           </div>
         </div>
         <dl class="readout">
-          <div><dt>Loop file</dt><dd id="size-loop">—</dd></div>
-          <div><dt>Raw video</dt><dd id="size-raw">—</dd></div>
+          <div><dt>Loop</dt><dd id="size-loop">—</dd></div>
+          <div><dt>Raw</dt><dd id="size-raw">—</dd></div>
           <div><dt>Smaller by</dt><dd id="size-ratio">—</dd></div>
           <div><dt>Quality</dt><dd id="quality">—</dd></div>
         </dl>
@@ -106,15 +101,15 @@
             </div>
           </fieldset>
           <fieldset><legend>Pixels</legend><div class="seg" data-setting="grid"></div></fieldset>
-          <fieldset><legend>Pixel edges</legend><div class="seg" data-setting="hardness"></div></fieldset>
+          <fieldset><legend>Edges</legend><div class="seg" data-setting="hardness"></div></fieldset>
         </div>
         <div class="actions">
-          <button class="ghost" id="assemble">Assemble again</button>
+          <button class="ghost" id="assemble">Replay entrance</button>
         </div>
 
         <div class="transit">
           <h3>In transit</h3>
-          <p class="fine">See what survives a bad link. Each test changes the file the way a relay or a noisy channel would, then plays what is left.</p>
+          <p class="fine">What survives a bad link.</p>
           <div class="seg" data-setting="transit"></div>
           <p class="facts" id="transit-report"></p>
         </div>
@@ -125,15 +120,8 @@
           <button class="ghost" id="again">Record another</button>
         </div>
         <p class="fine">
-          Videos save as an MP4 that plays anywhere: your gallery, messages, any app. It’s rendered at 720² with the same
-          finishing you see here, and with the lifelike look every frame is Honest Zoom checked against what was sent.
-          <button class="link" id="download">Download the .irl file instead</button>: about 100 KB, in sealed two-second
-          chunks, but it only plays on irl.ing.
-        </p>
-        <p class="fine">
-          The .irl file is AV1 video (VP9 or H.264 where AV1 isn’t available) in two-second chunks that each carry a
-          checksum, signed by a key that never leaves this phone. Sharpening, upscaling, grain and smart pixels are added on
-          playback and are labeled as such. The raw clip stays on this phone.
+          Saves as a standard MP4. Or <button class="link" id="download">download the .irl file</button>: about 100 KB,
+          plays only on irl.ing. The raw clip stays on this phone.
         </p>
       </section>
 
@@ -146,7 +134,6 @@
       <button class="sheet-close" id="sheet-close" aria-label="Close">×</button>
 
       <form class="step" data-step="claim" id="claim-form" novalidate>
-        <p class="eyebrow">Free · no password · 30 seconds</p>
         <h2 id="sheet-title">Claim your @name</h2>
         <label class="field">
           <span>Your @name</span>
@@ -154,7 +141,7 @@
           <span class="note" id="handle-note" aria-live="polite">3–20 letters, numbers, _ or .</span>
         </label>
         <label class="field">
-          <span>Name to show <em>(optional)</em></span>
+          <span>Name <em>(optional)</em></span>
           <input id="display-name" name="displayName" autocomplete="nickname" maxlength="40" />
         </label>
         <fieldset class="field">
@@ -163,14 +150,14 @@
             <select id="birth-month" aria-label="Birth month" required></select>
             <select id="birth-year" aria-label="Birth year" required></select>
           </div>
-          <span class="note">Only used to keep teens safe. Never shown.</span>
+          <span class="note">13 and up. Only used to keep teens safe; never shown.</span>
         </fieldset>
         <details class="rules">
           <summary>Community rules</summary>
           <ul>
             <li><b>Be real.</b> No filters, no faking someone else.</li>
             <li><b>Be kind.</b> No harassment, threats or hate.</li>
-            <li><b>Ask first.</b> Don’t post people who don’t want to be posted.</li>
+            <li><b>Ask first.</b> Don’t post people without their OK.</li>
             <li><b>Keep it safe.</b> Nothing sexual involving anyone under 18, ever. No violence or illegal stuff.</li>
             <li><b>Speak up.</b> Report what’s wrong; we’ll look.</li>
           </ul>
@@ -185,16 +172,16 @@
       <section class="step" data-step="save" hidden>
         <p class="eyebrow" id="save-handle"></p>
         <h2>Save it to this phone</h2>
-        <p>Use your fingerprint, face or screen lock. That’s your key: no password to forget, nothing to phish.</p>
-        <p class="note" id="save-teen" hidden>You’re under 18, so your account stays friends-only and strangers can’t find you.</p>
+        <p>Use your fingerprint, face or screen lock. No password.</p>
+        <p class="note" id="save-teen" hidden>You’re under 18: friends-only, and strangers can’t find you.</p>
         <p class="error" id="save-error" role="alert"></p>
         <button class="primary wide" id="save-passkey">Use fingerprint or face</button>
-        <p class="note">Your @name is held for 15 minutes.</p>
+        <p class="note">Held for 15 minutes.</p>
       </section>
 
       <section class="step" data-step="signin" hidden>
         <h2>Welcome back</h2>
-        <p>Sign in with the passkey saved on this phone, or on your Google account.</p>
+        <p>Use your passkey.</p>
         <p class="error" id="signin-error" role="alert"></p>
         <button class="primary wide" id="signin-passkey">Sign in with fingerprint or face</button>
         <p class="switch">New here? <button class="link" type="button" id="to-claim">Claim your @name</button></p>
@@ -204,7 +191,7 @@
         <p class="eyebrow">You’re in</p>
         <h2 id="done-handle"></h2>
         <p id="done-privacy"></p>
-        <p>Friends and sending loops come next. Save your spot for a friend now:</p>
+        <p>Friends come next. Invite one now.</p>
         <button class="primary wide" id="invite">Invite a friend</button>
         <button class="ghost wide" id="done-close">Make a loop</button>
       </section>
@@ -217,7 +204,7 @@
         <button class="ghost wide" id="sign-out">Sign out</button>
         <details class="danger">
           <summary>Delete account</summary>
-          <p>This removes your @name, passkeys and sessions for good. Type your @name to confirm.</p>
+          <p>Removes your @name, passkeys and sessions for good. Type your @name to confirm.</p>
           <input id="delete-confirm" autocapitalize="none" spellcheck="false" aria-label="Type your @name to confirm" />
           <p class="error" id="delete-error" role="alert"></p>
           <button class="danger-button wide" id="delete-account">Delete forever</button>
@@ -226,7 +213,7 @@
 
       <section class="step" data-step="off" hidden>
         <h2>Accounts open soon</h2>
-        <p>irl.ing accounts are almost ready. Keep making loops in the meantime.</p>
+        <p>Keep making loops.</p>
       </section>
     </dialog>
   </body>

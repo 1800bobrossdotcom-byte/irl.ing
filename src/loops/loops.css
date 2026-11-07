@@ -60,19 +60,24 @@ a {
   padding: 8px 11px;
 }
 
-/* ---- intro --------------------------------------------------------------- */
+/* ---- layout -------------------------------------------------------------- */
 
+/* A tool, not a page: the recorder comes first, the words stay on the buttons. */
 .loops-main {
   max-width: 1080px;
   margin: auto;
-  padding: 0 16px 56px;
+  padding: 4px 16px 56px;
   display: grid;
   gap: 24px;
 }
-.intro {
-  padding-top: 14px;
-  display: grid;
-  gap: 14px;
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 .eyebrow {
   margin: 0;
@@ -81,25 +86,6 @@ a {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--fg-2);
-}
-h1 {
-  margin: 0;
-  font-size: clamp(42px, 12vw, 76px);
-  font-weight: 860;
-  letter-spacing: -0.05em;
-  line-height: 0.92;
-  text-wrap: balance;
-}
-h1 em {
-  font-style: normal;
-  color: var(--rec);
-}
-.lede {
-  color: var(--fg-2);
-  font-size: 17px;
-  line-height: 1.55;
-  margin: 0;
-  max-width: 34em;
 }
 
 /* ---- recorder ------------------------------------------------------------ */
@@ -446,6 +432,19 @@ legend {
   margin-bottom: 8px;
   padding: 0;
 }
+/* One row per setting: the label beside its choices. */
+.settings fieldset:not(.wide) {
+  display: flow-root;
+}
+.settings fieldset:not(.wide) legend {
+  float: left;
+  width: 7.4em;
+  margin: 0;
+  line-height: 42px;
+}
+.settings fieldset:not(.wide) .seg {
+  min-width: 0;
+}
 .actions {
   display: flex;
   flex-wrap: wrap;
@@ -497,6 +496,21 @@ legend {
   display: flex;
   justify-content: center;
 }
+/* A secondary way in, so it reads as a link, not a third button. */
+.open-loop .ghost {
+  box-shadow: none;
+  min-height: 44px;
+  padding: 0 8px;
+  font-size: 15px;
+  color: var(--fg-2);
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 4px;
+}
+.open-loop .ghost:hover {
+  background: none;
+  color: var(--fg);
+}
 .file-button {
   display: inline-flex;
   align-items: center;
@@ -521,15 +535,16 @@ legend {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     align-items: start;
     column-gap: 32px;
-    padding: 0 24px 72px;
+    padding: 8px 24px 72px;
   }
-  .intro,
   .open-loop {
     grid-column: 1 / -1;
   }
-  .intro {
-    padding-top: 20px;
-    padding-bottom: 8px;
+  /* Before there's a loop, the recorder sits alone in the middle. */
+  .loops-main:has(.build[hidden]) .recorder {
+    grid-column: 1 / -1;
+    justify-self: center;
+    width: min(100%, 560px);
   }
   .build {
     padding: 26px 24px;

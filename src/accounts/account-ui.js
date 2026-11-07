@@ -38,7 +38,7 @@ function show(step) {
 
 function privacyLine(account) {
   return account.teen
-    ? "Friends-only, and strangers can’t find you, because you’re under 18."
+    ? "Friends-only. You’re under 18, so strangers can’t find you."
     : "Friends-only to start. Only people you accept see your loops.";
 }
 
@@ -102,7 +102,7 @@ $("handle").addEventListener("input", () => {
     const res = await api("/irl/check-handle", { method: "POST", body: JSON.stringify({ handle: local.handle }) });
     if (seq !== checkSeq) return;
     if (res.ok && res.body.available) {
-      note.textContent = `@${res.body.handle} is yours if you want it.`;
+      note.textContent = `@${res.body.handle} is yours.`;
       note.dataset.state = "good";
     } else {
       note.textContent = res.body.reason ?? res.body.message ?? "Couldn’t check that name. Try again.";
@@ -147,7 +147,7 @@ $("claim-form").addEventListener("submit", async (event) => {
 
 function passkeyMessage(error) {
   const text = error?.message ?? "";
-  if (/abort|cancel|not allowed|timed out/i.test(text) || error?.code === "ERROR_CEREMONY_ABORTED") return "That was cancelled. Try again when you’re ready.";
+  if (/abort|cancel|not allowed|timed out/i.test(text) || error?.code === "ERROR_CEREMONY_ABORTED") return "Cancelled. Try again when you’re ready.";
   return text || "That didn’t work. Try again.";
 }
 
@@ -230,7 +230,7 @@ $("delete-account").addEventListener("click", async () => {
   show("claim");
   sheet.close();
   const status = $("status");
-  if (status) status.textContent = "Your account is gone. Thanks for trying irl.ing.";
+  if (status) status.textContent = "Your account is gone.";
 });
 
 // ---- bot check (only when Turnstile keys are configured) ------------------
