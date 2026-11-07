@@ -125,7 +125,7 @@ Local runs keep loops in a directory instead of R2, with HMAC-signed, expiring l
 ```sh
 export DATABASE_URL=postgres://postgres@localhost:5433/irling BETTER_AUTH_SECRET=dev-secret-at-least-32-characters-long
 npm run db:migrate && npm run build
-node tests/social-browser.mjs      # starts its own server on :3005 with sharing on
+node tests/social-browser.mjs      # starts its own server on :3005 (or SOCIAL_PORT) with sharing on
 npm test                           # unit tests, including the Claude reviewer against a fake client
 ```
 
