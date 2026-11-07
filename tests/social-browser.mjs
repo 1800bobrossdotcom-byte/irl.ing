@@ -7,7 +7,7 @@
 //   DATABASE_URL=postgres://... BETTER_AUTH_SECRET=... npm run db:migrate
 //   npm run build && DATABASE_URL=... BETTER_AUTH_SECRET=... node tests/social-browser.mjs
 //
-// It starts its own server on port 3005 with sharing switched on.
+// It starts its own server (port 3005, or SOCIAL_PORT) with sharing switched on.
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
@@ -19,7 +19,7 @@ import pg from "pg";
 import { buildLoop } from "../src/loops/container.js";
 
 const { chromium } = createRequire(import.meta.url)("playwright");
-const port = 3005;
+const port = Number(process.env.SOCIAL_PORT ?? 3005);
 const base = `http://localhost:${port}`;
 const unique = Date.now().toString(36).slice(-5);
 const handles = { sun: `sun.${unique}`, moon: `moon.${unique}`, tide: `tide.${unique}`, star: `star.${unique}`, rev: `rev.${unique}` };

@@ -18,7 +18,12 @@ export default async function auth(req, res) {
     res.end(JSON.stringify({ message: "That’s too big to send." }));
     return;
   }
-  const instance = getAuth();
+  let instance;
+  try {
+    instance = getAuth();
+  } catch (error) {
+    return failed(res, error);
+  }
   if (!instance) {
     res.statusCode = req.url?.startsWith("/api/auth/irl/config") ? 200 : 503;
     res.setHeader("content-type", "application/json");
@@ -27,5 +32,28 @@ export default async function auth(req, res) {
     return;
   }
   handler ??= toNodeHandler(instance);
-  return handler(req, res);
+  try {
+    await handler(req, res);
+  } catch (error) {
+    failed(res, error);
+  }
+}
+
+/**
+ * Answer with a clean error instead of crashing the function. The response
+ * names only the error's code (a Postgres SQLSTATE such as 28P01, or a
+ * network code such as ENOTFOUND), never its message, which can contain
+ * connection details. The full error goes to the function log.
+ */
+function failed(res, error) {
+  console.error("[irl] auth request failed:", error);
+  if (res.headersSent) {
+    res.end();
+    return;
+  }
+  const code = typeof error?.code === "string" && /^[A-Z0-9_]{2,32}$/.test(error.code) ? error.code : "UNKNOWN";
+  res.statusCode = 500;
+  res.setHeader("content-type", "application/json");
+  res.setHeader("cache-control", "no-store");
+  res.end(JSON.stringify({ message: "Accounts are temporarily unavailable.", code }));
 }
