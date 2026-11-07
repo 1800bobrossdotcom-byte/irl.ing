@@ -107,6 +107,17 @@ Deleting an account also deletes its loops and their files, except escalations, 
 6. **Tables.** Run `npm run db:migrate` with the Neon connection string, or paste `db/social.sql` into Neon's SQL editor.
 7. **Redeploy.** `/api/auth/irl/config` then reports `sharing: true`.
 
+### If it doesn't switch on
+
+Previews sit behind Vercel's login, so open `<preview URL>/api/auth/irl/config` in a browser signed in to Vercel.
+
+| It shows | Meaning and fix |
+| --- | --- |
+| `"sharing": false, "sharingMissing": [...]` | Those variables aren't reaching this deployment. Check each name for typos, that **Preview** is ticked, and that it isn't limited to another Git branch. Variable changes apply to the next deployment. Production never lists names. |
+| `"code": "SCHEMA_MISMATCH", "missing": [...]` | The database lacks those tables. Neon's Vercel integration gives each Git branch its own copy of the database, made the first time that branch is previewed. Preview builds run `db:migrate --if-preview`, which adds what's missing, so redeploying fixes it. For production, run `npm run db:migrate` or paste the SQL. |
+| `"code": "ENOTFOUND"`, `"ECONNREFUSED"` or `"ETIMEDOUT"` | The deployment can't reach Postgres. Check the database variables for this environment. |
+| Vercel's own "This page is unavailable" | The function failed before irl.ing's code ran. The deployment's **Logs** tab has the error. |
+
 ## Running and testing locally
 
 Local runs keep loops in a directory instead of R2, with HMAC-signed, expiring links served at `/api/dev-storage/*`. They use a stub reviewer that allows everything. Neither can run in production: both refuse when `VERCEL_ENV=production`.
