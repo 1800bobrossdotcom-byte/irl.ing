@@ -2,7 +2,7 @@
 // plugin so they share its sessions, origin checks and rate limits.
 //
 //   Friends   GET /irl/friends · POST /irl/friends/request · /respond · /remove
-//   Blocks    POST /irl/block · /irl/unblock
+//   Blocks    GET /irl/blocks · POST /irl/block · /irl/unblock
 //   Invites   POST /irl/invites · GET /irl/invite?code= · POST /irl/invites/accept
 //   Loops     POST /irl/loops/share · GET /irl/feed · GET /irl/loops/mine
 //             POST /irl/loops/delete
@@ -23,6 +23,7 @@ import { APIError, createAuthEndpoint, sessionMiddleware } from "better-auth/api
 import * as z from "zod";
 import { isTeenNow, normalizeHandle } from "../accounts/rules.js";
 import { parseLoop, verify } from "../loops/container.js";
+import { REPORT_REASONS } from "../social/reasons.js";
 import { query, transaction } from "./db.js";
 import { keys, LIMITS } from "./storage.js";
 
@@ -33,7 +34,6 @@ const REPORTS_TO_HIDE = 3;
 const STRIKES_TO_SUSPEND = 3;
 const MAX_SECONDS = 6.5;
 const LOOP_ID = /^[0-9a-f]{64}$/;
-const REPORT_REASONS = ["child_safety", "sexual", "violence", "self_harm", "hate", "harassment", "privacy", "scam", "other"];
 
 const NOT_FOUND = "No one by that @name.";
 const pair = (a, b) => (a < b ? [a, b] : [b, a]);
@@ -224,6 +224,15 @@ export function social({ db, storage, judge, admins = [], baseURL }) {
         },
       ),
 
+      irlBlocks: createAuthEndpoint("/irl/blocks", { method: "GET", use: [sessionMiddleware] }, async (ctx) => {
+        const rows = await query(
+          db,
+          `select u."handle", u."name" from irl_block b join "irl_user" u on u."id" = b."blocked" where b."blocker" = $1 order by u."handle"`,
+          [me(ctx).id],
+        );
+        return ctx.json({ blocked: rows.map((r) => ({ handle: r.handle, name: r.name })) });
+      }),
+
       irlUnblock: createAuthEndpoint(
         "/irl/unblock",
         { method: "POST", use: [sessionMiddleware], body: z.object({ handle: z.string().max(64) }) },
@@ -262,8 +271,11 @@ export function social({ db, storage, judge, admins = [], baseURL }) {
           if (!invite) throw fail("NOT_FOUND", "That invite has expired.");
           if (invite.inviter === user.id) throw fail("BAD_REQUEST", "That’s your own invite.");
           if (await blockedEitherWay(db, user.id, invite.inviter)) throw fail("NOT_FOUND", "That invite has expired.");
-          await makeFriends(db, user.id, invite.inviter, invite.inviter);
-          await query(db, `update irl_invite set "uses" = "uses" + 1 where "code" = $1`, [invite.code]);
+          // Already friends: nothing to do, and the invite keeps its uses.
+          if ((await friendship(db, user.id, invite.inviter))?.status !== "accepted") {
+            await makeFriends(db, user.id, invite.inviter, invite.inviter);
+            await query(db, `update irl_invite set "uses" = "uses" + 1 where "code" = $1`, [invite.code]);
+          }
           const [inviter] = await query(db, `select "handle", "name" from "irl_user" where "id" = $1`, [invite.inviter]);
           return ctx.json({ status: "friends", friend: inviter });
         },

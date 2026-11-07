@@ -5,8 +5,8 @@ import { REPORT_LABELS, REPORT_REASONS } from "../src/social/reasons.js";
 
 test("the report menu offers exactly the server's reasons, in plain words", () => {
   const source = readFileSync(new URL("../src/server/social.js", import.meta.url), "utf8");
-  const server = JSON.parse(source.match(/const REPORT_REASONS = (\[[^\]]*\]);/)[1]);
-  assert.deepEqual(REPORT_REASONS, server);
+  assert.match(source, /import \{ REPORT_REASONS \} from "\.\.\/social\/reasons\.js";/, "the server uses the same list");
+  assert.deepEqual(REPORT_REASONS, ["child_safety", "sexual", "violence", "self_harm", "hate", "harassment", "privacy", "scam", "other"]);
   for (const label of Object.values(REPORT_LABELS)) assert.match(label, /^[A-Z][a-z -]+$/, label);
 });
 

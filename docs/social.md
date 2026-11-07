@@ -2,7 +2,14 @@
 
 This covers the server side of friends, invites, blocks, sharing loops, the feed, reports and human review. It runs in the same Vercel function as [accounts](accounts.md) (`/api/auth/*`), as a Better Auth plugin, so it shares sessions, origin checks and database-backed rate limits.
 
-**Status:** built and tested end to end on this branch. It isn't switched on anywhere yet, and the app screens for it come with the redesign. The safety program it implements is in [user safety](user-safety.md).
+**Status:** built and tested end to end. Sharing is switched on for Vercel previews.
+
+**Screens:**
+- `/friends/`: the feed (ending in "You're caught up."), your loops, friends, requests, add by @name, invite links with a QR code, and blocked people.
+- `/i/<code>`: the invite page.
+- `/review/`: the review queue, for reviewers only.
+
+Sign-up still happens in the lab's account sheet. The safety program it implements is in [user safety](user-safety.md).
 
 ## How it fits together
 
@@ -30,10 +37,11 @@ All live under `/api/auth`. Everything except the invite lookup needs a session.
 | `POST /irl/friends/request {handle}` | Sends a request by exact @name. If they already asked you, you're friends. Teens, people who switched discovery off, blocked people and nonexistent names all get the same answer: "No one by that @name." |
 | `POST /irl/friends/respond {handle, accept}` | Accepts or declines a request. |
 | `POST /irl/friends/remove {handle}` | Ends a friendship. |
+| `GET /irl/blocks` | The people you've blocked (only you see this list), so screens can offer Unblock. |
 | `POST /irl/block {handle}` / `POST /irl/unblock {handle}` | Blocking ends any friendship or request and stops new ones. The answer is the same whether or not the account exists. |
 | `POST /irl/invites` | Makes an invite: `{code, url: https://irl.ing/i/<code>, expiresAt}`. It lasts 30 days and can be used 25 times. The QR code is drawn on the phone from the URL. |
 | `GET /irl/invite?code=` | Public: who sent this invite. Used on the invite page before signup. |
-| `POST /irl/invites/accept {code}` | You and the inviter become friends. This is how adults and teens connect: only through a code the other person chose to share. |
+| `POST /irl/invites/accept {code}` | You and the inviter become friends (an invite used by someone who's already a friend keeps its uses). This is how adults and teens connect: only through a code the other person chose to share. |
 | `POST /irl/loops/share {loop, thumbs[3]}` | Base64 `.irl` file and three JPEG stills. Returns `{id, status: visible\|held\|removed, message, supportResources}`. |
 | `GET /irl/feed` | Visible loops from the last 30 days from friends and yourself, newest first, with signed `loopUrl` and `posterUrl`. Ends with `caughtUp: true`. |
 | `GET /irl/loops/mine` | Your loops, including ones held for a person to check. |

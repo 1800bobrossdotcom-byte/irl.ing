@@ -152,6 +152,15 @@ try {
   assert.deepEqual(await star.api("/irl/friends/request", { handle: handles.sun }), nobody);
   const sunInvite = (await sun.api("/irl/invites", {})).body;
   assert.equal((await star.api("/irl/invites/accept", { code: sunInvite.code })).status, 404);
+  assert.deepEqual((await sun.api("/irl/blocks")).body.blocked.map((b) => b.handle), [handles.star], "you can see who you blocked");
+  assert.deepEqual((await star.api("/irl/blocks")).body.blocked, [], "and only you");
+  await sun.api("/irl/unblock", { handle: handles.star });
+  assert.deepEqual((await sun.api("/irl/blocks")).body.blocked, []);
+  await sun.api("/irl/block", { handle: handles.star }); // blocked again for the rest of the run
+  // An invite used by someone who's already a friend keeps its uses.
+  await moon.api("/irl/invites/accept", { code: sunInvite.code });
+  await moon.api("/irl/invites/accept", { code: sunInvite.code });
+  assert.equal((await db.query(`select "uses" from irl_invite where "code" = $1`, [sunInvite.code])).rows[0].uses, 0, "already friends: no use counted");
 
   // ---- sharing: only complete, sealed, six-second loops with stills ----------
   const first = await makeLoop(1);

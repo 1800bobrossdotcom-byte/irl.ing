@@ -468,7 +468,10 @@ try {
   await snap(ana.page, "22-feed-caught-up");
   await ana.page.locator('.tabs a[href="#friends"]').click();
   await ana.page.locator("#friends-panel .row", { hasText: `@${handles.cy}` }).waitFor();
-  assert.equal(await ana.page.locator("#friends-panel .row", { hasText: `@${handles.ben}` }).count(), 0);
+  const friendsSection = ana.page.locator('#friends-panel section[aria-labelledby="friends-title"]');
+  assert.equal(await friendsSection.locator(".row", { hasText: `@${handles.ben}` }).count(), 0, "a blocked person leaves your friends");
+  const blockedRow = ana.page.locator('#friends-panel section[aria-labelledby="blocked-title"] .row', { hasText: `@${handles.ben}` });
+  await blockedRow.getByRole("button", { name: "Unblock" }).waitFor(); // and is listed under Blocked, with Unblock
   await openFriends(ben.page);
   assert.deepEqual(await feedIds(ben.page), [L2]);
 

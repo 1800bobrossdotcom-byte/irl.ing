@@ -9,6 +9,7 @@ import { choose, confirmAction } from "./sheet.js";
 export function friendsView({ panel, onChanged }) {
   const requests = h("div");
   const list = h("div");
+  const blocked = h("div");
 
   // ---- add by @name ----------------------------------------------------------
   const input = h("input", { id: "add-handle", name: "handle", autocomplete: "off", autocapitalize: "none", spellcheck: "false", maxlength: "21", required: true, "aria-describedby": "add-note" });
@@ -152,16 +153,45 @@ export function friendsView({ panel, onChanged }) {
     );
   }
 
+  function renderBlocked(people) {
+    blocked.replaceChildren(
+      people.length
+        ? h(
+            "section",
+            { class: "block", "aria-labelledby": "blocked-title" },
+            h("h2", { class: "label", id: "blocked-title" }, "Blocked"),
+            h(
+              "ul",
+              { class: "rows", role: "list" },
+              people.map((p) => {
+                const unblock = h("button", { class: "btn ghost", type: "button" }, "Unblock");
+                unblock.addEventListener("click", () =>
+                  busy(unblock, async () => {
+                    const res = await api("/irl/unblock", { handle: p.handle });
+                    if (!res.ok) return toast(res.message);
+                    toast(`Unblocked ${at(p.handle)}.`);
+                    await load("unblocked");
+                  }),
+                );
+                return h("li", { class: "row" }, h("span", { class: "handle" }, at(p.handle)), unblock);
+              }),
+            ),
+          )
+        : "",
+    );
+  }
+
   async function load(what) {
-    const res = await api("/irl/friends");
+    const [res, blocks] = await Promise.all([api("/irl/friends"), api("/irl/blocks")]);
     if (!res.ok) {
       requests.replaceChildren(h("p", { class: "error", role: "alert" }, res.message));
       return;
     }
     render(res.body);
+    renderBlocked(blocks.ok ? blocks.body.blocked : []);
     onChanged?.(res.body.incoming.length, what);
   }
 
-  panel.replaceChildren(requests, add, invite, list);
+  panel.replaceChildren(requests, add, invite, list, blocked);
   return { load };
 }

@@ -1,5 +1,5 @@
-// Report reasons, in plain words. The keys are REPORT_REASONS in
-// src/server/social.js (tests/social-screens.test.js keeps the two in step).
+// Report reasons, in plain words. Shared by the screens and the server
+// (src/server/social.js accepts exactly these keys).
 
 export const REPORT_LABELS = {
   child_safety: "Child safety",
