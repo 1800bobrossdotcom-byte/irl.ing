@@ -51,6 +51,7 @@ createServer((req, res) => {
   }
   if (req.url.startsWith("/api/dev-storage/")) return devStorage(req, res).catch(() => res.writeHead(500).end());
   let path = normalize(decodeURIComponent(new URL(req.url, "http://x").pathname)).replace(/^(\.\.[/\\])+/, "");
+  if (/^\/i\/[A-Za-z0-9_-]+\/?$/.test(path)) path = "/i/"; // invite links, as vercel.json rewrites them
   let file = join(root, path);
   try {
     if (statSync(file).isDirectory()) file = join(file, "index.html");

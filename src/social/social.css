@@ -1,0 +1,622 @@
+/* The social screens: /friends/, /i/<code> and /review/. Built on the brand
+   tokens (src/brand/brand.css); one narrow column on every screen size. */
+
+@import "../brand/brand.css";
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html {
+  background: var(--bg);
+}
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 16px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+button,
+input {
+  font: inherit;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+button {
+  cursor: pointer;
+  border: 0;
+  background: none;
+  padding: 0;
+}
+button:disabled {
+  cursor: progress;
+  opacity: 0.5;
+}
+a {
+  color: inherit;
+}
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+h1,
+h2,
+p {
+  margin: 0;
+}
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+[hidden] {
+  display: none !important;
+}
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---- page chrome ----------------------------------------------------------- */
+
+.top,
+.page {
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
+}
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 64px;
+  padding-top: max(8px, env(safe-area-inset-top));
+  padding-bottom: 8px;
+}
+.wordmark svg {
+  height: 26px;
+}
+.page {
+  padding-bottom: calc(96px + env(safe-area-inset-bottom));
+}
+.me {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  color: var(--fg-2);
+  font-weight: 600;
+}
+.me span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rec-link {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+}
+.rec-link i {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--rec);
+}
+.label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  line-height: 1.35;
+  text-transform: uppercase;
+  color: var(--fg-2);
+}
+.muted,
+.note,
+.loading {
+  color: var(--fg-2);
+}
+.note,
+.error {
+  font-size: 15px;
+  min-height: 1.5em;
+}
+.note:empty,
+.error:empty {
+  min-height: 0;
+}
+.error {
+  color: var(--rec-text);
+}
+.loading {
+  padding: 24px 0;
+}
+.dot {
+  color: var(--rec);
+}
+
+/* ---- buttons ------------------------------------------------------------------ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 22px;
+  border-radius: 999px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn.small {
+  min-height: 40px;
+  padding: 0 16px;
+  font-size: 15px;
+}
+.btn.primary {
+  background: var(--fg);
+  color: var(--bg);
+}
+.btn.rec {
+  background: var(--rec);
+  color: var(--on-rec);
+}
+.btn.ghost {
+  background: var(--bg-2);
+  color: var(--fg);
+}
+.btn.danger {
+  color: var(--rec-text);
+}
+.more {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-right: -10px;
+  border-radius: 50%;
+  color: var(--fg);
+}
+.more svg {
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
+}
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ---- signed out, invites ------------------------------------------------------------- */
+
+.hello {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+  padding-top: clamp(40px, 12vh, 120px);
+}
+.hello h1 {
+  font-size: clamp(40px, 11vw, 64px);
+  font-weight: 840;
+  letter-spacing: -0.045em;
+  line-height: 0.98;
+  text-wrap: balance;
+}
+.hello h1:focus {
+  outline: none;
+}
+.hello > .error:empty {
+  margin-top: -20px; /* no gap for an empty alert line (it stays in the page to be announced) */
+}
+.stack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  width: 100%;
+  max-width: 340px;
+}
+.stack:empty {
+  display: none;
+}
+.switch {
+  color: var(--fg-2);
+}
+.switch a {
+  color: var(--fg);
+  font-weight: 700;
+}
+
+/* ---- tabs ------------------------------------------------------------------------- */
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin: 4px -8px 20px;
+}
+.tabs a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: 999px;
+  color: var(--fg-2);
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.tabs a[aria-current="page"] {
+  background: var(--lime);
+  color: var(--ink);
+}
+.badge {
+  min-width: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--rec);
+  color: var(--on-rec);
+  font-size: 12px;
+  line-height: 20px;
+  text-align: center;
+}
+.notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 12px 12px 12px 16px;
+  border-radius: 18px;
+  background: var(--bg-2);
+  font-weight: 600;
+}
+
+/* ---- loops -------------------------------------------------------------------------- */
+
+.loops {
+  display: grid;
+  gap: 28px;
+}
+.loop-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 44px;
+  margin-bottom: 4px;
+}
+.handle {
+  font-weight: 700;
+  min-width: 0;
+}
+.frame {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 20px;
+  background: var(--bg-2);
+}
+.frame img,
+.frame canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.frame:focus-visible {
+  outline-offset: 4px;
+}
+/* A small play mark on the poster; gone while the loop plays. */
+.frame::after {
+  content: "";
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--night) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M16 12.5v15l12-7.5z' fill='%23f4f4f0'/%3E%3C/svg%3E") center / 100% no-repeat;
+}
+.frame[data-state="playing"]::after {
+  display: none;
+}
+.frame[data-state="loading"]::after {
+  animation: rec-blink 1s infinite;
+}
+.frame[data-state="loading"] canvas {
+  opacity: 0;
+}
+.end {
+  margin: 48px 0 8px;
+  font-size: clamp(34px, 9.5vw, 48px);
+  font-weight: 840;
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+.empty {
+  color: var(--fg-2);
+}
+.empty a {
+  color: var(--fg);
+  font-weight: 700;
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 12px;
+}
+.tile .frame {
+  border-radius: 16px;
+}
+.tile .frame::after {
+  left: 10px;
+  bottom: 10px;
+  width: 32px;
+  height: 32px;
+}
+.tile.held .frame img {
+  opacity: 0.45;
+}
+.tile-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  min-height: 44px;
+}
+.tile .state {
+  font-size: 14px;
+  line-height: 1.3;
+  color: var(--fg-2);
+}
+
+/* ---- friends ------------------------------------------------------------------------- */
+
+.block {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  margin-bottom: 32px;
+}
+.block > .btn {
+  justify-self: start;
+}
+.rows .row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 56px;
+  border-bottom: 1px solid var(--line);
+}
+.rows .row:first-child {
+  border-top: 1px solid var(--line);
+}
+.handle-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 4px 4px 16px;
+  border-radius: 999px;
+  background: var(--bg-2);
+}
+.handle-field .btn {
+  flex: none;
+  min-height: 44px;
+}
+.handle-field > span {
+  color: var(--fg-2);
+  font-weight: 700;
+}
+.handle-field input {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  border: 0;
+  background: none;
+  font-size: 17px;
+  outline: none;
+}
+.handle-field:focus-within {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+.invite-card {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+}
+.invite-url {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--bg);
+  font-size: 15px;
+}
+.qr {
+  display: block;
+  width: 184px;
+  height: 184px;
+  border-radius: 12px;
+}
+
+/* ---- review -------------------------------------------------------------------------- */
+
+.cases {
+  display: grid;
+  gap: 20px;
+}
+.case {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+}
+.case-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+}
+.stills {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+.stills img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 10px;
+  background: var(--bg-2);
+}
+.ai,
+.reports {
+  display: grid;
+  gap: 4px;
+}
+.flags li,
+.reports li {
+  padding-left: 14px;
+  position: relative;
+}
+.flags li::before,
+.reports li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0.62em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.escalation {
+  font-weight: 700;
+  color: var(--rec-text);
+}
+
+/* ---- the sheet (menus and confirmations) --------------------------------------- */
+
+.sheet {
+  width: 100%;
+  max-width: 560px;
+  max-height: 85dvh;
+  margin: auto auto 0;
+  padding: 20px max(16px, env(safe-area-inset-left)) calc(16px + env(safe-area-inset-bottom));
+  border: 0;
+  border-radius: 24px 24px 0 0;
+  background: var(--bg);
+  color: var(--fg);
+}
+.sheet::backdrop {
+  background: rgb(17 17 16 / 0.5);
+}
+.sheet h2 {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+.sheet-note {
+  margin-top: 6px;
+  color: var(--fg-2);
+}
+.sheet-options {
+  display: grid;
+  margin-top: 12px;
+}
+.sheet-options button {
+  min-height: 52px;
+  border-bottom: 1px solid var(--line);
+  font-weight: 650;
+  text-align: left;
+}
+.sheet-options button.danger {
+  color: var(--rec-text);
+}
+.sheet-cancel {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 12px;
+  border-radius: 999px;
+  background: var(--bg-2);
+  font-weight: 700;
+}
+@media (prefers-color-scheme: dark) {
+  .sheet {
+    border: 1px solid var(--line);
+    border-bottom: 0;
+  }
+  .sheet::backdrop {
+    background: rgb(0 0 0 / 0.6);
+  }
+}
+@media (min-width: 640px) {
+  .sheet {
+    max-width: 400px;
+    margin: auto;
+    border-radius: 24px;
+  }
+  @media (prefers-color-scheme: dark) {
+    .sheet {
+      border-bottom: 1px solid var(--line);
+    }
+  }
+}
+
+/* ---- status line ---------------------------------------------------------------------- */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 528px;
+  pointer-events: none;
+}
+.toast:not(:empty) {
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: var(--fg);
+  color: var(--bg);
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .frame[data-state="loading"]::after {
+    animation: none;
+  }
+}
